@@ -1,0 +1,115 @@
+warning: in the working copy of 'src/app/home/filter-card/filter-card.component.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/home/header/header.component.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/home/hero/hero.component.html', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/app/app.component.html b/src/app/app.component.html[m
+[1mindex 9bc9226..2574c58 100644[m
+[1m--- a/src/app/app.component.html[m
+[1m+++ b/src/app/app.component.html[m
+[36m@@ -6,7 +6,6 @@[m
+     <title>Document</title>[m
+ </head>[m
+ <body>[m
+[31m-    <app-home></app-home>[m
+[31m-[m
+[32m+[m[32m     <router-outlet></router-outlet>[m
+ </body>[m
+ </html>[m
+\ No newline at end of file[m
+[1mdiff --git a/src/app/app.component.ts b/src/app/app.component.ts[m
+[1mindex 9682ca3..64df3db 100644[m
+[1m--- a/src/app/app.component.ts[m
+[1m+++ b/src/app/app.component.ts[m
+[36m@@ -1,10 +1,9 @@[m
+ import { Component } from '@angular/core';[m
+ import { RouterOutlet } from '@angular/router';[m
+[31m-import { HomeComponent } from './home/home.component';[m
+[31m-[m
+[32m+[m[41m [m
+ @Component({[m
+   selector: 'app-root',[m
+[31m-  imports: [RouterOutlet,HomeComponent],[m
+[32m+[m[32m  imports: [RouterOutlet],[m
+   templateUrl: './app.component.html',[m
+   styleUrl: './app.component.css'[m
+ })[m
+[1mdiff --git a/src/app/app.routes.ts b/src/app/app.routes.ts[m
+[1mindex dc39edb..0263aae 100644[m
+[1m--- a/src/app/app.routes.ts[m
+[1m+++ b/src/app/app.routes.ts[m
+[36m@@ -1,3 +1,12 @@[m
+ import { Routes } from '@angular/router';[m
+[32m+[m[32mimport { HomeComponent } from './home/home.component';[m
+[32m+[m[32mimport { EventsMainComponent } from './Events/events-main/events-main.component';[m
+[32m+[m[32mimport { ExperienceComponent } from './experiences/experience/experience.component';[m
+[32m+[m[32mimport { RecomendationsComponent } from './recomendations/recomendations/recomendations.component';[m
+ [m
+[31m-export const routes: Routes = [];[m
+[32m+[m[32mexport const routes: Routes = [[m
+[32m+[m[32m    {path:'',component:HomeComponent},[m
+[32m+[m[32m    {path:'events',component:EventsMainComponent},[m
+[32m+[m[32m    {path:'experience',component:ExperienceComponent},[m
+[32m+[m[32m    {path:'recomendation',component:RecomendationsComponent}[m
+[32m+[m[32m];[m
+[1mdiff --git a/src/app/home/filter-card/filter-card.component.html b/src/app/home/filter-card/filter-card.component.html[m
+[1mindex b88a672..8cc7bf7 100644[m
+[1m--- a/src/app/home/filter-card/filter-card.component.html[m
+[1m+++ b/src/app/home/filter-card/filter-card.component.html[m
+[36m@@ -1,174 +1,228 @@[m
+[31m-<div class="container font-kadwa">[m
+[31m-<div  class="pt-12">[m
+[31m-    <ul class="flex justify-around items-center text-[#00000099] px-10">[m
+[31m-        <li><button>ადგილის ძებნა</button></li>[m
+[31m-        <li><button>ღონისძიებები</button></li>[m
+[31m-        <li><button>გამოცდილებები</button></li>[m
+[31m-        <li><button>რეკომენდაციები</button></li>[m
+[31m-        <li><button>ტრადიცია</button></li>[m
+[31m-    </ul>[m
+[31m-</div>[m
+[31m-<div class="pt-11">[m
+[31m-    <ul class=" flex justify-start gap-6">[m
+[31m-        <li ><button  class="border border-[#00000038] px-4 py-2 rounded-2xl">ბუნება</button></li>[m
+[31m-        <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">დასვენება</button></li>[m
+[31m-        <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">კულტურა</button></li>[m
+[31m-        <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">კვება</button></li>[m
+[31m-     </ul>[m
+[31m-</div>[m
+[32m+[m[32m<div class="container font-kadwa px-4 md:px-0 overflow-x-hidden">[m
+[32m+[m[32m    <div class="pt-12 overflow-x-auto no-scrollbar">[m
+[32m+[m[32m        <ul class="flex justify-between md:justify-around items-center text-[#00000099] min-w-[500px] md:min-w-0">[m
+[32m+[m[32m            <li><button class="whitespace-nowrap">ადგილის ძებნა</button></li>[m
+[32m+[m[32m            <li><button class="whitespace-nowrap">ღონისძიებები</button></li>[m
+[32m+[m[32m            <li><button class="whitespace-nowrap">გამოცდილებები</button></li>[m
+[32m+[m[32m            <li><button class="whitespace-nowrap">რეკომენდაციები</button></li>[m
+[32m+[m[32m            <li><button class="whitespace-nowrap">ტრადიცია</button></li>[m
+[32m+[m[32m        </ul>[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="pt-11 overflow-x-auto no-scrollbar">[m
+[32m+[m[32m        <ul class="flex justify-start gap-4 md:gap-6 whitespace-nowrap">[m
+[32m+[m[32m            <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">ბუნება</button></li>[m
+[32m+[m[32m            <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">დასვენება</button></li>[m
+[32m+[m[32m            <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">კულტურა</button></li>[m
+[32m+[m[32m            <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">კვება</button></li>[m
+[32m+[m[32m        </ul>[m
+[32m+[m[32m    </div>[m
+ [m
+[31m-<div class="flex pt-12 gap-8">[m
+[31m-    <div class="flex-[1] ">[m
+[31m-        <div class="flex   flex-col items-center gap-2">[m
+[31m-            <div class="flex justify-center items-center gap-3">[m
+[31m-                <svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">[m
+[31m-                <path d="M8.66448 16.9877C8.28448 16.9877 7.9124 16.8977 7.56406 16.7177C6.8674 16.3502 6.44781 15.6827 6.44781 14.9327V10.9577C6.44781 10.5827 6.18656 10.0202 5.94115 9.73519L2.98031 6.7652C2.48156 6.2927 2.10156 5.4827 2.10156 4.8752V3.1502C2.10156 1.9502 3.05948 1.0127 4.27865 1.0127H14.7286C15.932 1.0127 16.9057 1.9352 16.9057 3.0752V4.7252C16.9057 5.5127 16.407 6.4052 15.9399 6.8477L12.512 9.7202C12.1795 9.9827 11.9182 10.5602 11.9182 11.0252V14.2502C11.9182 14.9177 11.4749 15.6902 10.9207 16.0052L9.82823 16.6727C9.47198 16.8827 9.06823 16.9877 8.66448 16.9877ZM4.27865 2.1377C3.72448 2.1377 3.28906 2.5802 3.28906 3.1502V4.8752C3.28906 5.1527 3.52656 5.6927 3.8274 5.9777L6.84365 8.98519C7.2474 9.45769 7.64323 10.2452 7.64323 10.9502V14.9252C7.64323 15.4127 7.99948 15.6527 8.1499 15.7277C8.4824 15.9002 8.88615 15.9002 9.1949 15.7202L10.2953 15.0527C10.517 14.9252 10.7386 14.5202 10.7386 14.2502V11.0252C10.7386 10.2227 11.1503 9.33769 11.7441 8.86519L15.1324 6.0227C15.4016 5.7677 15.7261 5.1602 15.7261 4.7177V3.0752C15.7261 2.5577 15.2828 2.1377 14.7366 2.1377H4.27865V2.1377Z" fill="black"/>[m
+[31m-                <path d="M4.75284 8.06245C4.642 8.06245 4.53909 8.03245 4.43617 7.97995C4.15909 7.81495 4.072 7.46245 4.24617 7.19995L8.14909 1.27495C8.32325 1.01245 8.68742 0.929953 8.9645 1.09495C9.24159 1.25995 9.32867 1.60495 9.1545 1.86745L5.25159 7.79245C5.14075 7.96495 4.95075 8.06245 4.75284 8.06245Z" fill="#292D32"/>[m
+[31m-                </svg>[m
+[31m-                <span>დამატებითი ფილტრაცია</span>[m
+[31m-            </div>[m
+[31m-<select[m
+[31m-  class="w-full rounded-2xl border border-gray-300 bg-[#00000030] px-8 py-3 mt-6 "[m
+[31m->[m
+[31m-  <option value="" disabled selected>აირჩიეთ ბუნება</option>[m
+[31m-  <option value="chanchkeri">ჩანჩქერი</option>[m
+[31m- </select>[m
+[31m-<select[m
+[31m-  class="w-full   border border-gray-300 bg-[#00000030]   py-3 mt-6 rounded-2xl px-8 " [m
+[31m->[m
+[31m-  <option value="" disabled selected>აირჩიეთ რეგიონი</option>[m
+[31m-  <opti

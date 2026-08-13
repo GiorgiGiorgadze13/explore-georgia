@@ -1,62 +1,75 @@
-<div class="container font-kadwa">
-<div  class="pt-12">
-    <ul class="flex justify-around items-center text-[#00000099] px-10">
-        <li><button>ადგილის ძებნა</button></li>
-        <li><button>ღონისძიებები</button></li>
-        <li><button>გამოცდილებები</button></li>
-        <li><button>რეკომენდაციები</button></li>
-        <li><button>ტრადიცია</button></li>
+<div class="container font-kadwa px-4 md:px-0 overflow-x-hidden">
+<div class="pt-8 md:pt-12">
+    <ul class="flex flex-wrap justify-center sm:justify-around items-center gap-3 sm:gap-6 text-[#00000099] text-xs sm:text-sm md:text-base font-bold">
+        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="">ადგილის ძებნა</button></li>
+        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/events">ღონისძიებები</button></li>
+        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/experience">გამოცდილებები</button></li>
+        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/recomendation">რეკომენდაციები</button></li>
+        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/">ტრადიცია</button></li>
     </ul>
 </div>
-<div class="pt-11">
-    <ul class=" flex justify-start gap-6">
-        <li ><button  class="border border-[#00000038] px-4 py-2 rounded-2xl">ბუნება</button></li>
-        <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">დასვენება</button></li>
-        <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">კულტურა</button></li>
-        <li><button class="border border-[#00000038] px-4 py-2 rounded-2xl">კვება</button></li>
+<div class="pt-6 md:pt-8">
+    <ul class="flex flex-wrap justify-center sm:justify-start gap-2.5 sm:gap-4 md:gap-6 text-xs sm:text-sm">
+        <li><button class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">ბუნება</button></li>
+        <li><button class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">დასვენება</button></li>
+        <li><button class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">კულტურა</button></li>
+        <li><button class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">კვება</button></li>
      </ul>
 </div>
 
-<div class="flex pt-12 gap-8">
-    <div class="flex-[1] ">
-        <div class="flex   flex-col items-center gap-2">
-            <div class="flex justify-center items-center gap-3">
+<div class="flex flex-col md:flex-row pt-12 gap-8">
+    <div class="flex-[1] relative">
+        <div class="flex flex-col items-center md:items-start gap-2">
+            <button 
+                type="button" 
+                (click)="toggleFilters()"
+                class="flex justify-center items-center gap-3 cursor-pointer py-3 px-6 border rounded-2xl border-[#00000038] bg-white hover:bg-gray-50 transition-colors w-full md:w-auto"
+            >
                 <svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8.66448 16.9877C8.28448 16.9877 7.9124 16.8977 7.56406 16.7177C6.8674 16.3502 6.44781 15.6827 6.44781 14.9327V10.9577C6.44781 10.5827 6.18656 10.0202 5.94115 9.73519L2.98031 6.7652C2.48156 6.2927 2.10156 5.4827 2.10156 4.8752V3.1502C2.10156 1.9502 3.05948 1.0127 4.27865 1.0127H14.7286C15.932 1.0127 16.9057 1.9352 16.9057 3.0752V4.7252C16.9057 5.5127 16.407 6.4052 15.9399 6.8477L12.512 9.7202C12.1795 9.9827 11.9182 10.5602 11.9182 11.0252V14.2502C11.9182 14.9177 11.4749 15.6902 10.9207 16.0052L9.82823 16.6727C9.47198 16.8827 9.06823 16.9877 8.66448 16.9877ZM4.27865 2.1377C3.72448 2.1377 3.28906 2.5802 3.28906 3.1502V4.8752C3.28906 5.1527 3.52656 5.6927 3.8274 5.9777L6.84365 8.98519C7.2474 9.45769 7.64323 10.2452 7.64323 10.9502V14.9252C7.64323 15.4127 7.99948 15.6527 8.1499 15.7277C8.4824 15.9002 8.88615 15.9002 9.1949 15.7202L10.2953 15.0527C10.517 14.9252 10.7386 14.5202 10.7386 14.2502V11.0252C10.7386 10.2227 11.1503 9.33769 11.7441 8.86519L15.1324 6.0227C15.4016 5.7677 15.7261 5.1602 15.7261 4.7177V3.0752C15.7261 2.5577 15.2828 2.1377 14.7366 2.1377H4.27865V2.1377Z" fill="black"/>
-                <path d="M4.75284 8.06245C4.642 8.06245 4.53909 8.03245 4.43617 7.97995C4.15909 7.81495 4.072 7.46245 4.24617 7.19995L8.14909 1.27495C8.32325 1.01245 8.68742 0.929953 8.9645 1.09495C9.24159 1.25995 9.32867 1.60495 9.1545 1.86745L5.25159 7.79245C5.14075 7.96495 4.95075 8.06245 4.75284 8.06245Z" fill="#292D32"/>
+                    <path d="M8.66448 16.9877C8.28448 16.9877 7.9124 16.8977 7.56406 16.7177C6.8674 16.3502 6.44781 15.6827 6.44781 14.9327V10.9577C6.44781 10.5827 6.18656 10.0202 5.94115 9.73519L2.98031 6.7652C2.48156 6.2927 2.10156 5.4827 2.10156 4.8752V3.1502C2.10156 1.9502 3.05948 1.0127 4.27865 1.0127H14.7286C15.932 1.0127 16.9057 1.9352 16.9057 3.0752V4.7252C16.9057 5.5127 16.407 6.4052 15.9399 6.8477L12.512 9.7202C12.1795 9.9827 11.9182 10.5602 11.9182 11.0252V14.2502C11.9182 14.9177 11.4749 15.6902 10.9207 16.0052L9.82823 16.6727C9.47198 16.8827 9.06823 16.9877 8.66448 16.9877ZM4.27865 2.1377C3.72448 2.1377 3.28906 2.5802 3.28906 3.1502V4.8752C3.28906 5.1527 3.52656 5.6927 3.8274 5.9777L6.84365 8.98519C7.2474 9.45769 7.64323 10.2452 7.64323 10.9502V14.9252C7.64323 15.4127 7.99948 15.6527 8.1499 15.7277C8.4824 15.9002 8.88615 15.9002 9.1949 15.7202L10.2953 15.0527C10.517 14.9252 10.7386 14.5202 10.7386 14.2502V11.0252C10.7386 10.2227 11.1503 9.33769 11.7441 8.86519L15.1324 6.0227C15.4016 5.7677 15.7261 5.1602 15.7261 4.7177V3.0752C15.7261 2.5577 15.2828 2.1377 14.7366 2.1377H4.27865V2.1377Z" fill="black"/>
+                    <path d="M4.75284 8.06245C4.642 8.06245 4.53909 8.03245 4.43617 7.97995C4.15909 7.81495 4.072 7.46245 4.24617 7.19995L8.14909 1.27495C8.32325 1.01245 8.68742 0.929953 8.9645 1.09495C9.24159 1.25995 9.32867 1.60495 9.1545 1.86745L5.25159 7.79245C5.14075 7.96495 4.95075 8.06245 4.75284 8.06245Z" fill="#292D32"/>
                 </svg>
-                <span>დამატებითი ფილტრაცია</span>
-            </div>
-<select
-  class="w-full rounded-2xl border border-gray-300 bg-[#00000030] px-8 py-3 mt-6 "
->
-  <option value="" disabled selected>აირჩიეთ ბუნება</option>
-  <option value="chanchkeri">ჩანჩქერი</option>
- </select>
-<select
-  class="w-full   border border-gray-300 bg-[#00000030]   py-3 mt-6 rounded-2xl px-8 " 
->
-  <option value="" disabled selected>აირჩიეთ რეგიონი</option>
-  <option value="გურია">გურია</option>
-  <option value="აჭარა">აჭარა</option>
-</select>
-</div>
-<label class="mt-7 flex items-center gap-4 cursor-pointer">
-  <input type="checkbox" class="sr-only peer" />
-  
-  <div class="relative peer-checked:[&_rect]:fill-[#274C3B] peer-checked:[&_circle]:translate-x-[30px]">
-    <svg width="57" height="27" viewBox="0 0 57 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="57" height="27" rx="13.5" class="fill-[#D9D9D9] transition-colors duration-300" />
-      <circle cx="12" cy="13.5" r="12" fill="white" class="transition-transform duration-300" />
-    </svg>
-  </div>
+                <span class="font-bold text-sm">დამატებითი ფილტრაცია</span>
+                <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="showFilters" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
 
-  <span class="text-xs text-[#000000]">ეტლით მისასვლელი</span>
-</label>
-    <div class="flex justify-center"><button class="px-14 py-3 mt-6  border border-[#757575A8] rounded-2xl">გასუფთავება</button></div>
+            @if (showFilters) {
+                <div class="w-full bg-white border border-[#00000020] p-4 rounded-2xl shadow-md mt-2 flex flex-col gap-4">
+                    <select class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm">
+                        <option value="" disabled selected>აირჩიეთ ბუნება</option>
+                        <option value="chanchkeri">ჩანჩქერი</option>
+                    </select>
+
+                    <select class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm">
+                        <option value="" disabled selected>აირჩიეთ რეგიონი</option>
+                        <option value="გურია">გურია</option>
+                        <option value="აჭარა">აჭარა</option>
+                    </select>
+
+                    <label class="flex items-center gap-4 cursor-pointer pt-2">
+                        <input type="checkbox" class="sr-only peer" />
+                        <div class="relative peer-checked:[&_rect]:fill-[#274C3B] peer-checked:[&_circle]:translate-x-[30px]">
+                            <svg width="57" height="27" viewBox="0 0 57 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="57" height="27" rx="13.5" class="fill-[#D9D9D9] transition-colors duration-300" />
+                                <circle cx="12" cy="13.5" r="12" fill="white" class="transition-transform duration-300" />
+                            </svg>
+                        </div>
+                        <span class="text-xs text-[#000000]">ეტლით მისასვლელი</span>
+                    </label>
+
+                    <div class="flex justify-center pt-2">
+                        <button class="w-full px-6 py-2.5 border border-[#757575A8] rounded-2xl text-xs font-bold hover:bg-[#0000000A] transition-colors">
+                            გასუფთავება
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
     
-    <div class="flex  flex-[3] flex-wrap gap-6">
+    <div class="flex flex-[3] flex-wrap justify-center md:justify-start gap-6">
          <div class="flex flex-col w-[280px] bg-[#0000001A] rounded-b-lg">
             <img src="/Rectangle1.png" alt="rectangle"  >
             <div class="    flex justify-evenly mt-4">
@@ -167,8 +180,5 @@
     <button class="border border-[#00000029] px-6 py-2 rounded-2xl">3</button>
     <button class="border border-[#00000029] px-6 py-2 rounded-2xl">4</button>
 </div>
-<div class="mt-12">
-    <span class="font-bold text-2xl text-[#1F3D2B]">რუკით ძიება</span>
-    <img src="/Frame 1992.jpg" alt="map" class="mt-4 mb-12">
-</div>
+ 
 </div>
