@@ -27,9 +27,8 @@
       <div>
         <!-- Header -->
         <div class="text-center mb-6">
-          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">ავტორიზაცია</h3>
-          <span class="block text-[#0000005C] text-sm sm:text-base">გთხოვთ შეიყვანოთ თქვენი მონაცემები</span>
-        </div>
+          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">პაროლის აღდგენა</h3>
+         </div>
 
         <!-- Form Inputs -->
         <div class="mt-6 flex flex-col gap-4">
@@ -38,16 +37,13 @@
             <input type="text" placeholder="g@gmail.com" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
           </div>
 
-          <div>
-            <label class="block text-sm sm:text-base font-medium mb-1">პაროლი</label>
-            <input type="password" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
-          </div>
+          
         </div>
 
-        <!-- Submit Button -->
+       <button class="mt-4 text-[#000000]">კოდის გაგზავნა </button>
         <div class="mt-8 flex justify-center">
-          <button class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium">
-            <span>ავტორიზაცია</span> 
+          <button routerLink="/recoverCode" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium">
+            <span>დადასტურება</span> 
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
             </svg>
@@ -55,11 +51,7 @@
         </div>
       </div>
 
-      <!-- Links -->
-      <div class="flex flex-col items-center gap-2 mt-6">
-        <button class="text-[#00000099] hover:underline text-sm sm:text-base" routerLink="/createAcc">ანგარიშის შექმნა</button>
-        <button class="text-[#00000099] hover:underline text-sm sm:text-base" routerLink="/recover">პაროლის აღდგენა</button>
-      </div>
+     
     </div>
 
   </div>

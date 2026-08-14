@@ -4,12 +4,12 @@ import { FooterComponent } from '../../home/footer/footer.component';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-auth',
+  selector: 'app-recover-code',
   imports: [HeaderComponent,FooterComponent,RouterLink],
   standalone:true,
-  templateUrl: './auth.component.html',
-  styleUrl: './auth.component.css'
+  templateUrl: './recover-code.component.html',
+  styleUrl: './recover-code.component.css'
 })
-export class AuthComponent {
+export class RecoverCodeComponent {
 
 }

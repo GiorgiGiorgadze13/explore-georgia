@@ -8,6 +8,10 @@ import { FavoritesComponent } from './favorites/favorites.component';
 import { AddPlaceComponent } from './add-place/add-place.component';
  import { CardDetailsComponent } from './card-details/card-details.component';
 import { AuthComponent } from './RegistrationForms/auth/auth.component';
+import { RegisterComponent } from './RegistrationForms/register/register.component';
+import { RecoverComponent } from './RegistrationForms/recover/recover.component';
+import { RecoverCodeComponent } from './RegistrationForms/recover-code/recover-code.component';
+import { RetypePasswordComponent } from './RegistrationForms/retype-password/retype-password.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -19,5 +23,9 @@ export const routes: Routes = [
   { path: 'addplace', component: AddPlaceComponent },
   {path:'details', component:CardDetailsComponent},
     {path:'auth', component:AuthComponent},
+ {path:'createAcc', component:RegisterComponent},
+  {path:'recover', component:RecoverComponent},
+  {path:'recoverCode', component:RecoverCodeComponent},
+  {path:'retypePassword', component:RetypePasswordComponent},
 
 ];

@@ -4,12 +4,12 @@ import { FooterComponent } from '../../home/footer/footer.component';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-auth',
-  imports: [HeaderComponent,FooterComponent,RouterLink],
+  selector: 'app-retype-password',
+ imports: [HeaderComponent,FooterComponent,RouterLink],
   standalone:true,
-  templateUrl: './auth.component.html',
-  styleUrl: './auth.component.css'
+  templateUrl: './retype-password.component.html',
+  styleUrl: './retype-password.component.css'
 })
-export class AuthComponent {
+export class RetypePasswordComponent {
 
 }
