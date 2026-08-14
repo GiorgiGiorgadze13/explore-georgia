@@ -12,6 +12,8 @@ import { RegisterComponent } from './RegistrationForms/register/register.compone
 import { RecoverComponent } from './RegistrationForms/recover/recover.component';
 import { RecoverCodeComponent } from './RegistrationForms/recover-code/recover-code.component';
 import { RetypePasswordComponent } from './RegistrationForms/retype-password/retype-password.component';
+import { CreditCardDetailsComponent } from './card-detailscomp/credit-card-details/credit-card-details.component';
+import { CardDetailsConfirmationComponent } from './card-detailscomp/card-details-confirmation/card-details-confirmation.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -27,5 +29,7 @@ export const routes: Routes = [
   {path:'recover', component:RecoverComponent},
   {path:'recoverCode', component:RecoverCodeComponent},
   {path:'retypePassword', component:RetypePasswordComponent},
+  {path:'book', component:CreditCardDetailsComponent},
+  {path:'cc-confirm', component:CardDetailsConfirmationComponent},
 
 ];
