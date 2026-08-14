@@ -32,5 +32,11 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-
- 
+.active {
+  color: #A74826;
+  font-weight: bold;
+}
+ html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

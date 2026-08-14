@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import { HeroComponent } from '../hero/hero.component';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, RouterModule],
+  imports: [RouterLink],
   standalone: true,
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'

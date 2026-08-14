@@ -3,10 +3,21 @@ import { HomeComponent } from './home/home.component';
 import { EventsMainComponent } from './Events/events-main/events-main.component';
 import { ExperienceComponent } from './experiences/experience/experience.component';
 import { RecomendationsComponent } from './recomendations/recomendations/recomendations.component';
+import { TraditionsComponent } from './traditions/traditions.component';
+import { FavoritesComponent } from './favorites/favorites.component';
+import { AddPlaceComponent } from './add-place/add-place.component';
+ import { CardDetailsComponent } from './card-details/card-details.component';
+import { AuthComponent } from './RegistrationForms/auth/auth.component';
 
 export const routes: Routes = [
-    {path:'',component:HomeComponent},
-    {path:'events',component:EventsMainComponent},
-    {path:'experience',component:ExperienceComponent},
-    {path:'recomendation',component:RecomendationsComponent}
+  { path: '', component: HomeComponent },
+  { path: 'events', component: EventsMainComponent },
+  { path: 'experience', component: ExperienceComponent },
+  { path: 'recomendation', component: RecomendationsComponent },
+  { path: 'tradition', component: TraditionsComponent },
+  { path: 'favourite', component: FavoritesComponent },
+  { path: 'addplace', component: AddPlaceComponent },
+  {path:'details', component:CardDetailsComponent},
+    {path:'auth', component:AuthComponent},
+
 ];
