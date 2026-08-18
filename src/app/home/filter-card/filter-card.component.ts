@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-filter-card',
@@ -16,4 +17,6 @@ toggleFilters(event: Event) {
   event.stopPropagation();
   this.showFilters = !this.showFilters;
 }
+ 
+
 }
