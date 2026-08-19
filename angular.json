@@ -20,17 +20,17 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/leaflet/dist/images",
-                "output": "assets/leaflet"
-              }
-            ],
+      "assets": [
+  {
+    "glob": "**/*",
+    "input": "public"
+  },
+  {
+    "glob": "**/*",
+    "input": "src/assets",
+    "output": "assets"
+  }
+],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"

@@ -17,19 +17,39 @@
     
                 @if (showFilters) {
                     <div class="w-full bg-white border border-[#00000020] p-4 rounded-2xl shadow-md mt-2 flex flex-col gap-4">
-                        <select class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm">
+                        <select #natureRef (change)="selectNature(natureRef.value)" class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
                             <option value="" disabled selected>აირჩიეთ ბუნება</option>
-                            <option value="chanchkeri">ჩანჩქერი</option>
+                            <option value="waterfall">ჩანჩქერი</option>
+                            <option value="canyon">კანიონი</option>
+                            <option value="cave">მღვიმე</option>
+                            <option value="lake">ტბა</option>
+                            <option value="river">მდინარე</option>
+                            <option value="mountain">მთა</option>
+                            <option value="forest">ტყე</option>
+                            <option value="national-park">ეროვნული პარკი</option>
+                            <option value="protected-area">დაცული ტერიტორია</option>
+                            <option value="valley">ხეობა</option>
+                            <option value="coast">ზღვის სანაპირო</option>
+                            <option value="spring">ბუნებრივი წყარო</option>
                         </select>
-    
-                        <select class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm">
+
+                        <select #regionRef (change)="selectRegion(regionRef.value)" class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
                             <option value="" disabled selected>აირჩიეთ რეგიონი</option>
-                            <option value="გურია">გურია</option>
                             <option value="აჭარა">აჭარა</option>
+                            <option value="გურია">გურია</option>
+                            <option value="იმერეთი">იმერეთი</option>
+                            <option value="კახეთი">კახეთი</option>
+                            <option value="მცხეთა-მთიანეთი">მცხეთა-მთიანეთი</option>
+                            <option value="რაჭა-ლეჩხუმი და ქვემო სვანეთი">რაჭა-ლეჩხუმი და ქვემო სვანეთი</option>
+                            <option value="სამეგრელო-ზემო სვანეთი">სამეგრელო-ზემო სვანეთი</option>
+                            <option value="სამცხე-ჯავახეთი">სამცხე-ჯავახეთი</option>
+                            <option value="ქვემო ქართლი">ქვემო ქართლი</option>
+                            <option value="შიდა ქართლი">შიდა ქართლი</option>
+                            <option value="თბილისი">თბილისი</option>
                         </select>
-    
+
                         <label class="flex items-center gap-4 cursor-pointer pt-2">
-                            <input type="checkbox" class="sr-only peer" />
+                            <input #wheelchairRef type="checkbox" class="sr-only peer" (change)="selectWheelchair(wheelchairRef.checked)" />
                             <div class="relative peer-checked:[&_rect]:fill-[#274C3B] peer-checked:[&_circle]:translate-x-[30px]">
                                 <svg width="57" height="27" viewBox="0 0 57 27" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect width="57" height="27" rx="13.5" class="fill-[#D9D9D9] transition-colors duration-300" />
@@ -38,9 +58,9 @@
                             </div>
                             <span class="text-xs text-[#000000]">ეტლით მისასვლელი</span>
                         </label>
-    
+
                         <div class="flex justify-center pt-2">
-                            <button class="w-full px-6 py-2.5 border border-[#757575A8] rounded-2xl text-xs font-bold hover:bg-[#0000000A] transition-colors">
+                            <button type="button" (click)="clearFilters()" class="w-full px-6 py-2.5 border border-[#757575A8] rounded-2xl text-xs font-bold hover:bg-[#0000000A] transition-colors">
                                 გასუფთავება
                             </button>
                         </div>

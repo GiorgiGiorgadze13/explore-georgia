@@ -51,11 +51,11 @@
           <span class="text-[#00000099] text-xs font-bold">AI</span>
         </div>
 
-        <input type="text" placeholder="მოძებნე ადგილი, ქალაქი, ტერიტორია..."
+        <input type="text" [placeholder]="langService.isGeo() ? 'მოძებნე ადგილი, ქალაქი, ტერიტორია...' : 'Search place, city, region...'"
           class="text-sm py-4 pl-16 pr-20 w-full border rounded-2xl border-[#274C3B33] focus:outline-none focus:border-[#274C3B]">
 
         <button class="absolute right-3 top-2.5 px-5 py-1.5 bg-[#D8C7A84D] border rounded-lg text-xs hover:bg-[#D8C7A880] transition-colors">
-          ძიება
+          {{ langService.isGeo() ? 'ძიება' : 'Search' }}
         </button>
       </div>
 
@@ -64,18 +64,18 @@
         <ul class="flex justify-center items-center gap-6">
           <li>
             <a routerLink="/" class="text-[#000000] font-bold text-sm cursor-pointer">
-              მთავარი
+              {{ langService.isGeo() ? 'მთავარი' : 'Home' }}
             </a>
           </li>
           <li>
             <a routerLink="/recomendation" class="text-[#000000] font-bold text-sm cursor-pointer">
-              აღმოაჩინე
+              {{ langService.isGeo() ? 'აღმოაჩინე' : 'Discover' }}
             </a>
           </li>
         </ul>
 
         <button class="bg-[#A74826B5] p-4 border rounded-2xl text-[#FFFFFF] text-xs hover:bg-[#A74826] transition-colors cursor-pointer" routerLink="/addplace">
-          ადგილის დამატება +
+          {{ langService.isGeo() ? 'ადგილის დამატება +' : 'Add Place +' }}
         </button>
       </div>
 
@@ -106,8 +106,8 @@
           </li>
 
           <li>
-            <button class="bg-[#274C3B33] py-2 px-5 border rounded-lg uppercase text-xs font-bold">
-              geo
+            <button (click)="toggleLanguage()" class="bg-[#274C3B33] py-2 px-5 border rounded-lg uppercase text-xs font-bold hover:bg-[#274C3B55] transition-colors cursor-pointer">
+              {{ langService.currentLang() }}
             </button>
           </li>
 
@@ -123,17 +123,17 @@
 
         <!-- Home -->
         <a routerLink="/" (click)="menuOpen = false" class="text-[#000000] font-bold text-sm cursor-pointer">
-          მთავარი
+          {{ langService.isGeo() ? 'მთავარი' : 'Home' }}
         </a>
 
         <!-- Discover -->
-        <a routerLink="/discover" (click)="menuOpen = false" class="text-[#000000] font-bold text-sm cursor-pointer">
-          აღმოაჩინე
+        <a routerLink="/recomendation" (click)="menuOpen = false" class="text-[#000000] font-bold text-sm cursor-pointer">
+          {{ langService.isGeo() ? 'აღმოაჩინე' : 'Discover' }}
         </a>
 
         <!-- Mobile Add Place Button -->
         <button routerLink="/addplace" (click)="menuOpen = false" class="w-full bg-[#A74826B5] p-4 rounded-2xl text-white text-xs font-bold hover:bg-[#A74826] transition-colors">
-          ადგილის დამატება +
+          {{ langService.isGeo() ? 'ადგილის დამატება +' : 'Add Place +' }}
         </button>
 
         <!-- Mobile Search Input -->
@@ -146,11 +146,11 @@
             <span class="text-[#00000099] text-xs font-bold">AI</span>
           </div>
 
-          <input type="text" placeholder="მოძებნე ადგილი, ქალაქი, ტერიტორია..."
+          <input type="text" [placeholder]="langService.isGeo() ? 'მოძებნე ადგილი, ქალაქი, ტერიტორია...' : 'Search place, city, region...'"
             class="text-sm py-4 pl-16 pr-20 w-full border rounded-2xl border-[#274C3B33] focus:outline-none focus:border-[#274C3B]" />
 
           <button class="absolute right-2 top-2 px-4 py-2 bg-[#D8C7A84D] rounded-lg text-xs hover:bg-[#D8C7A880] transition-colors">
-            ძიება
+            {{ langService.isGeo() ? 'ძიება' : 'Search' }}
           </button>
         </div>
 
@@ -162,12 +162,12 @@
           </svg>
 
           <span class="text-sm font-bold">
-            ფავორიტები
+            {{ langService.isGeo() ? 'ფავორიტები' : 'Favorites' }}
           </span>
         </a>
 
         <!-- Mobile Profile Link -->
-        <a routerLink="/profile" (click)="menuOpen = false" class="flex items-center gap-4 text-left cursor-pointer">
+        <a routerLink="/auth" (click)="menuOpen = false" class="flex items-center gap-4 text-left cursor-pointer">
           <svg class="pointer-events-none" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16.1606 18.04C16.134 18.04 16.094 18.04 16.0673 18.04C16.0273 18.04 15.974 18.04 15.934 18.04C12.9073 17.9466 10.6406 15.5866 10.6406 12.68C10.6406 9.71997 13.054 7.30664 16.014 7.30664C18.974 7.30664 21.3873 9.71997 21.3873 12.68C21.374 15.6 19.094 17.9466 16.2006 18.04C16.174 18.04 16.174 18.04 16.1606 18.04ZM16.0006 9.29331C14.134 9.29331 12.6273 10.8133 12.6273 12.6666C12.6273 14.4933 14.054 15.9733 15.8673 16.04C15.9073 16.0266 16.0406 16.0266 16.174 16.04C17.9606 15.9466 19.3606 14.48 19.374 12.6666C19.374 10.8133 17.8673 9.29331 16.0006 9.29331Z" fill="#999494" />
             <path d="M15.9985 30.3337C12.4118 30.3337 8.98515 29.0004 6.33181 26.5737C6.09181 26.3604 5.98515 26.0404 6.01181 25.7337C6.18515 24.1471 7.17181 22.6671 8.81181 21.5737C12.7851 18.9338 19.2251 18.9338 23.1851 21.5737C24.8251 22.6804 25.8118 24.1471 25.9851 25.7337C26.0251 26.0537 25.9051 26.3604 25.6651 26.5737C23.0118 29.0004 19.5851 30.3337 15.9985 30.3337ZM8.10515 25.4671C10.3185 27.3204 13.1051 28.3337 15.9985 28.3337C18.8918 28.3337 21.6785 27.3204 23.8918 25.4671C23.6518 24.6537 23.0118 23.8671 22.0651 23.2271C18.7851 21.0404 13.2251 21.0404 9.91848 23.2271C8.97181 23.8671 8.34515 24.6537 8.10515 25.4671Z" fill="#999494" />
@@ -175,12 +175,12 @@
           </svg>
 
           <span class="text-sm font-bold">
-            პროფილი
+            {{ langService.isGeo() ? 'პროფილი' : 'Profile' }}
           </span>
         </a>
 
-        <button class="bg-[#274C3B33] py-2 px-5 border rounded-lg self-start uppercase text-xs font-bold">
-          geo
+        <button (click)="toggleLanguage()" class="bg-[#274C3B33] py-2 px-5 border rounded-lg self-start uppercase text-xs font-bold hover:bg-[#274C3B55] transition-colors cursor-pointer">
+          {{ langService.currentLang() }}
         </button>
 
       </div>
