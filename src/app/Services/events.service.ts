@@ -1,37 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map } from 'rxjs';
 
-export interface CsvPlace {
+export interface CsvEvent {
   id: string;
-  name: string;
-  region: string;
-  group_key: string;
-  category: string;
-  lat: number;
-  lng: number;
+  title: string;
+  type: string;
+  place: string;
+  date: string;
   description: string;
-  tags?: string[];
-  rating?: number;
-  is_local?: boolean;
-  hidden?: boolean;
+  free: boolean;
+  created_at?: string;
+  image?: string;
 }
-
-export type Place = CsvPlace;
 
 @Injectable({
   providedIn: 'root'
 })
-export class PlacesService {
-  private apiUrl = 'https://explore-georgia-azg5e7gxbhbqd9g5.spaincentral-01.azurewebsites.net/api/Places';
-  private csvUrl = 'assets/data/places-export-2026-08-19_03-35-20.csv';
+export class EventsService {
+  private apiUrl = 'https://explore-georgia-azg5e7gxbhbqd9g5.spaincentral-01.azurewebsites.net/api/Events';
+  private csvUrl = 'assets/data/events-export-2026-08-19_19-32-23.csv';
 
   constructor(private http: HttpClient) {}
 
-  getPlaces(): Observable<CsvPlace[]> {
-    return this.http.get<CsvPlace[]>(this.apiUrl).pipe(
+  getEvents(): Observable<CsvEvent[]> {
+    return this.http.get<CsvEvent[]>(this.apiUrl).pipe(
       catchError(() => {
-        // Fallback to local CSV asset if backend API is not running
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
           map((csvText: string) => this.parseCsv(csvText))
         );
@@ -39,12 +33,12 @@ export class PlacesService {
     );
   }
 
-  private parseCsv(csvText: string): CsvPlace[] {
+  private parseCsv(csvText: string): CsvEvent[] {
     const lines = csvText.split('\n').filter((line) => line.trim().length > 0);
     if (lines.length < 2) return [];
 
     const headers = lines[0].split(';').map((h) => h.trim().replace(/^"|"$/g, ''));
-    const places: CsvPlace[] = [];
+    const events: CsvEvent[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       const values = this.splitCsvLine(lines[i]);
@@ -55,24 +49,19 @@ export class PlacesService {
         row[header] = values[index];
       });
 
-      const lat = parseFloat(row['lat']);
-      const lng = parseFloat(row['lng']);
-      if (isNaN(lat) || isNaN(lng)) continue;
-
-      places.push({
-        id: row['id'] || `place-${i}`,
-        name: row['name'] || 'Unnamed Spot',
-        region: row['region'] || 'Georgia',
-        group_key: row['group_key'] || 'other',
-        category: row['category'] || 'General',
-        lat: lat,
-        lng: lng,
+      events.push({
+        id: row['id'] || `event-${i}`,
+        title: row['title'] || 'Unnamed Event',
+        type: row['type'] || 'ღონისძიება',
+        place: row['place'] || 'საქართველო',
+        date: row['date'] || '',
         description: row['description'] || '',
-        rating: parseFloat(row['rating']) || 0
+        free: row['free']?.toLowerCase() === 'true',
+        created_at: row['created_at'] || ''
       });
     }
 
-    return places;
+    return events;
   }
 
   private splitCsvLine(line: string): string[] {

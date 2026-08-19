@@ -41,25 +41,41 @@
     <div class="pt-6 md:pt-8">
         <ul class="flex flex-wrap justify-center sm:justify-start gap-2.5 sm:gap-4 md:gap-6 text-xs sm:text-sm">
             <li>
-                <button type="button"
+                <button type="button" (click)="selectNature('')"
+                    [class.bg-[#1F3D2B]]="!filter.selectedNature()"
+                    [class.text-white]="!filter.selectedNature()"
+                    class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
+                    ყველა
+                </button>
+            </li>
+            <li>
+                <button type="button" (click)="selectNature('nature')"
+                    [class.bg-[#1F3D2B]]="filter.selectedNature() === 'nature'"
+                    [class.text-white]="filter.selectedNature() === 'nature'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
                     ბუნება
                 </button>
             </li>
             <li>
-                <button type="button"
+                <button type="button" (click)="selectNature('leisure')"
+                    [class.bg-[#1F3D2B]]="filter.selectedNature() === 'leisure'"
+                    [class.text-white]="filter.selectedNature() === 'leisure'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
                     დასვენება
                 </button>
             </li>
             <li>
-                <button type="button"
+                <button type="button" (click)="selectNature('culture')"
+                    [class.bg-[#1F3D2B]]="filter.selectedNature() === 'culture'"
+                    [class.text-white]="filter.selectedNature() === 'culture'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
                     კულტურა
                 </button>
             </li>
             <li>
-                <button type="button"
+                <button type="button" (click)="selectNature('food')"
+                    [class.bg-[#1F3D2B]]="filter.selectedNature() === 'food'"
+                    [class.text-white]="filter.selectedNature() === 'food'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
                     კვება
                 </button>
@@ -95,7 +111,7 @@
                     class="w-full bg-white border border-[#00000020] p-4 rounded-2xl shadow-md mt-2 flex flex-col gap-4">
                     <select #natureRef (change)="selectNature(natureRef.value)"
                         class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
-                        <option value="" disabled selected>აირჩიეთ ბუნება</option>
+                        <option value="" selected>ყველა ბუნება (All Nature)</option>
                         <option value="waterfall">ჩანჩქერი</option>
                         <option value="canyon">კანიონი</option>
                         <option value="cave">მღვიმე</option>
@@ -112,7 +128,7 @@
 
                     <select #regionRef (change)="selectRegion(regionRef.value)"
                         class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
-                        <option value="" disabled selected>აირჩიეთ რეგიონი</option>
+                        <option value="" selected>ყველა რეგიონი (All Regions)</option>
                         <option value="აჭარა">აჭარა</option>
                         <option value="გურია">გურია</option>
                         <option value="იმერეთი">იმერეთი</option>
@@ -156,56 +172,58 @@
         <!-- Cards Container -->
         <div class="flex flex-[3] flex-wrap justify-center md:justify-start gap-6">
 
-            @for (card of [1, 2, 3]; track card) {
+            @for (card of paginatedCards(); track card.id) {
             <div class="flex flex-col w-[280px] relative cursor-pointer hover:shadow-xl transition-all duration-300 group rounded-2xl overflow-hidden"
-                routerLink="/details">
+                (click)="openDetails(card)">
 
                 <div class="relative">
-                    <img src="/Rectangle1.png" alt="ღვინის ტური კახეთში"
-                        class="w-full h-auto object-cover rounded-t-2xl">
+                    <img [src]="card.image || '/Rectangle1.png'" [alt]="card.title"
+                        class="w-full h-48 object-cover rounded-t-2xl">
                     <span
                         class="absolute left-4 top-4 px-4 py-2 rounded-2xl text-white bg-[#1F3D2B80] text-xs font-semibold backdrop-blur-sm">
-                        ფესტივალი
+                        {{ card.badge }}
                     </span>
                 </div>
 
                 <div class="bg-[#0000001A] rounded-b-2xl py-4 pb-6 flex flex-col flex-1">
-                    <div class="flex justify-evenly my-3">
+                    @if (card.tags && card.tags.length > 0) {
+                    <div class="flex justify-evenly my-3 flex-wrap gap-1 px-2">
+                        @for (tag of card.tags.slice(0, 2); track tag) {
                         <button type="button"
-                            class="bg-[#CA4C1F1A] px-7 py-3 rounded-xl text-[#CA4C1FE5] text-xs font-medium">ქვევრი</button>
-                        <button type="button"
-                            class="bg-[#CA4C1F1A] px-7 py-3 rounded-xl text-[#CA4C1FE5] text-xs font-medium">ღვინო</button>
+                            class="bg-[#CA4C1F1A] px-3 py-1 rounded-xl text-[#CA4C1FE5] text-xs font-medium">{{ tag }}</button>
+                        }
                     </div>
+                    } @else if (card.dateOrPrice) {
+                    <div class="flex justify-center my-3">
+                        <button type="button"
+                            class="bg-[#CA4C1F1A] px-6 py-2 rounded-xl text-[#CA4C1FE5] text-xs font-semibold">
+                            {{ card.dateOrPrice }}
+                        </button>
+                    </div>
+                    }
 
-                    <h2 class="text-[#1F3D2B] text-center font-bold text-lg px-2 mt-1">ღვინის ტური კახეთში</h2>
-                    <p class="text-[#00000099] text-xs text-center px-6 mt-3 leading-relaxed">
-                        5 ოჯახური მარნის ვიზიტი - ამბორების, ჭარხლის ღვინო, სახლის სამზარეულო
+                    <h2 class="text-[#1F3D2B] text-center font-bold text-lg px-2 mt-1 line-clamp-1">{{ card.title }}</h2>
+                    <p class="text-[#00000099] text-xs text-center px-6 mt-3 leading-relaxed line-clamp-3 flex-1">
+                        {{ card.description }}
                     </p>
 
-                    <div class="flex justify-between px-8 my-5">
-                        <div class="flex items-center gap-2">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M8.0026 15.1668C4.04927 15.1668 0.835938 11.9535 0.835938 8.00016C0.835938 4.04683 4.04927 0.833496 8.0026 0.833496C11.9559 0.833496 15.1693 4.04683 15.1693 8.00016C15.1693 11.9535 11.9559 15.1668 8.0026 15.1668ZM8.0026 1.8335C4.6026 1.8335 1.83594 4.60016 1.83594 8.00016C1.83594 11.4002 4.6026 14.1668 8.0026 14.1668C11.4026 14.1668 14.1693 11.4002 14.1693 8.00016C14.1693 4.60016 11.4026 1.8335 8.0026 1.8335Z"
-                                    fill="black" fill-opacity="0.6" />
-                                <path
-                                    d="M10.4711 10.6202C10.3845 10.6202 10.2978 10.6002 10.2178 10.5468L8.15115 9.3135C7.63781 9.00684 7.25781 8.3335 7.25781 7.74017V5.00684C7.25781 4.7335 7.48448 4.50684 7.75781 4.50684C8.03115 4.50684 8.25781 4.7335 8.25781 5.00684V7.74017C8.25781 7.98017 8.45781 8.3335 8.66448 8.4535L10.7311 9.68684C10.9711 9.82684 11.0445 10.1335 10.9045 10.3735C10.8045 10.5335 10.6378 10.6202 10.4711 10.6202Z"
-                                    fill="black" fill-opacity="0.6" />
-                            </svg>
-                            <span class="text-[#00000099] text-xs font-medium">1 დღე</span>
+                    <div class="flex justify-between px-6 my-4">
+                        @if (card.metaBadge) {
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[#00000099] text-xs font-medium">{{ card.metaBadge }}</span>
                         </div>
-                        <div class="flex items-center gap-2">
+                        }
+                        <div class="flex items-center gap-1.5 ml-auto">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
-                                    d="M8.00187 9.44679C6.58187 9.44679 5.42188 8.29346 5.42188 6.86679C5.42188 5.44012 6.58187 4.29346 8.00187 4.29346C9.42188 4.29346 10.5819 5.44679 10.5819 6.87346C10.5819 8.30012 9.42188 9.44679 8.00187 9.44679ZM8.00187 5.29346C7.13521 5.29346 6.42188 6.00012 6.42188 6.87346C6.42188 7.74679 7.12854 8.45346 8.00187 8.45346C8.87521 8.45346 9.58187 7.74679 9.58187 6.87346C9.58187 6.00012 8.86854 5.29346 8.00187 5.29346Z"
+                                    d="M8.00187 9.44679C6.58187 9.44679 5.42188 8.29346 5.42188 6.86679C5.42188 5.44012 6.58187 4.29346 8.00187 4.29346C9.42188 4.29346 10.5819 5.44679 10.5819 6.87346C10.5819 8.30012 9.42188 9.44679 8.00187 9.44679Z"
                                     fill="black" fill-opacity="0.6" />
                                 <path
                                     d="M8.00109 15.1735C7.01443 15.1735 6.02109 14.8002 5.24776 14.0602C3.28109 12.1668 1.10776 9.14683 1.92776 5.5535C2.66776 2.2935 5.51443 0.833496 8.00109 0.833496C8.00109 0.833496 8.00109 0.833496 8.00776 0.833496C10.4944 0.833496 13.3411 2.2935 14.0811 5.56016C14.8944 9.1535 12.7211 12.1668 10.7544 14.0602C9.98109 14.8002 8.98776 15.1735 8.00109 15.1735ZM8.00109 1.8335C6.06109 1.8335 3.56776 2.86683 2.90776 5.7735C2.18776 8.9135 4.16109 11.6202 5.94776 13.3335C7.10109 14.4468 8.90776 1.8335 8.00109 1.8335Z"
                                     fill="black" fill-opacity="0.6" />
                             </svg>
-                            <span class="text-[#00000099] text-xs font-medium">მარტვილი</span>
+                            <span class="text-[#00000099] text-xs font-medium">{{ card.location }}</span>
                         </div>
                     </div>
 
@@ -226,21 +244,43 @@
                 </div>
 
             </div>
+            } @empty {
+            <div class="w-full text-center py-12 text-gray-500 font-medium">
+                მონაცემები ვერ მოიძებნა
+            </div>
             }
 
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex justify-center items-center gap-4 my-12">
-        <button type="button"
-            class="border border-[#00000029] px-6 py-2 rounded-2xl hover:bg-gray-100 transition-colors">1</button>
-        <button type="button"
-            class="border border-[#00000029] px-6 py-2 rounded-2xl hover:bg-gray-100 transition-colors">2</button>
-        <button type="button"
-            class="border border-[#00000029] px-6 py-2 rounded-2xl hover:bg-gray-100 transition-colors">3</button>
-        <button type="button"
-            class="border border-[#00000029] px-6 py-2 rounded-2xl hover:bg-gray-100 transition-colors">4</button>
+    <!-- Dynamic Pagination (1-10 + Next) -->
+    @if (totalPages() > 1) {
+    <div class="flex justify-center items-center gap-3 my-12 flex-wrap">
+        @if (currentPage() > 1) {
+        <button type="button" (click)="prevPage()"
+            class="border border-[#00000029] px-5 py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors font-semibold text-sm">
+            &lt;
+        </button>
+        }
+
+        @for (p of totalPagesArray(); track p) {
+        <button type="button" (click)="setPage(p)"
+            [class.bg-[#1F3D2B]]="currentPage() === p"
+            [class.text-white]="currentPage() === p"
+            [class.border-[#1F3D2B]]="currentPage() === p"
+            class="border border-[#00000029] px-5 py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors font-semibold text-sm">
+            {{ p }}
+        </button>
+        }
+
+        @if (currentPage() < totalPages()) {
+        <button type="button" (click)="nextPage()"
+            class="border border-[#00000029] px-5 py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors font-semibold text-sm">
+            Next &gt;
+        </button>
+        }
     </div>
+    }
+
 
 </div>

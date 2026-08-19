@@ -1,12 +1,52 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { PlacesService, CsvPlace } from '../../../../Services/places.service';
+import { CardImageService } from '../../../../Services/card-image.service';
+
+export interface RecommendationCard extends CsvPlace {
+  image?: string;
+}
 
 @Component({
   selector: 'app-cards',
-  imports: [],
-  standalone:true,
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './cards.component.html',
   styleUrl: './cards.component.css'
 })
-export class CardsComponent {
+export class CardsComponent implements OnInit {
+  private placesService = inject(PlacesService);
+  public imageService = inject(CardImageService);
+  private router = inject(Router);
+  recommendations = signal<RecommendationCard[]>([]);
 
+  ngOnInit(): void {
+    this.placesService.getPlaces().subscribe({
+      next: (places) => {
+        const recs = places.filter(p => p.is_local || (p.rating && p.rating >= 4.4)).slice(0, 6);
+        const list = recs.length > 0 ? recs : places.slice(0, 6);
+        this.recommendations.set(list.map(p => ({
+          ...p,
+          image: this.imageService.getImageForItem(p.id, p.name, p.category, p.region)
+        })));
+      }
+    });
+  }
+
+  openDetails(card: RecommendationCard): void {
+    const img = card.image || this.imageService.getImageForItem(card.id, card.name, card.category, card.region);
+    this.router.navigate(['/details'], {
+      queryParams: {
+        id: card.id,
+        title: card.name,
+        location: card.region,
+        badge: card.category || 'რეკომენდაცია',
+        image: img,
+        description: card.description,
+        rating: card.rating ? `${card.rating} (50 შეფასება)` : '4.9 (50 შეფასება)'
+      },
+      state: { card: { ...card, image: img } }
+    });
+  }
 }

@@ -4,7 +4,7 @@
 
   <!-- Hero image -->
   <div class="mt-4 relative w-full h-[320px] sm:h-[400px] md:h-[450px] lg:h-[520px] rounded-2xl overflow-hidden">
-    <img src="/kakheti.png" alt="kakheti" class="w-full h-full object-cover block">
+    <img [src]="cardData().image || '/kakheti.png'" [alt]="cardData().title" class="w-full h-full object-cover block">
     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
 
     <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 md:bottom-10 md:left-10 flex flex-col items-start gap-2 sm:gap-3 z-10">
@@ -12,30 +12,27 @@
         <svg width="11" height="14" viewBox="0 0 11 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M5.33333 6.66667C5.7 6.66667 6.01389 6.53611 6.275 6.275C6.53611 6.01389 6.66667 5.7 6.66667 5.33333C6.66667 4.96667 6.53611 4.65278 6.275 4.39167C6.01389 4.13056 5.7 4 5.33333 4C4.96667 4 4.65278 4.13056 4.39167 4.39167C4.13056 4.65278 4 4.96667 4 5.33333C4 5.7 4.13056 6.01389 4.39167 6.275C4.65278 6.53611 4.96667 6.66667 5.33333 6.66667ZM5.33333 11.5667C6.68889 10.3222 7.69444 9.19167 8.35 8.175C9.00556 7.15833 9.33333 6.25556 9.33333 5.46667C9.33333 4.25556 8.94722 3.26389 8.175 2.49167C7.40278 1.71944 6.45556 1.33333 5.33333 1.33333C4.21111 1.33333 3.26389 1.71944 2.49167 2.49167C1.71944 3.26389 1.33333 4.25556 1.33333 5.46667C1.33333 6.25556 1.66111 7.15833 2.31667 8.175C2.97222 9.19167 3.97778 10.3222 5.33333 11.5667ZM5.33333 13.3333C3.54444 11.8111 2.20833 10.3972 1.325 9.09167C0.441667 7.78611 0 6.57778 0 5.46667C0 3.8 0.536111 2.47222 1.60833 1.48333C2.68056 0.494444 3.92222 0 5.33333 0C6.74444 0 7.98611 0.494444 9.05833 1.48333C10.1306 2.47222 10.6667 3.8 10.6667 5.46667C10.6667 6.57778 10.225 7.78611 9.34167 9.09167C8.45833 10.3972 7.12222 11.8111 5.33333 13.3333Z" fill="white"/>
         </svg>
-        კახეთი, საქართველო
+        {{ cardData().location }}
       </span>
 
       <h2 class="text-white font-semibold text-xl sm:text-2xl md:text-4xl lg:text-5xl leading-tight max-w-[90%]">
-        ღვინისა და კულტურის ტური კახეთში
+        {{ cardData().title }}
       </h2>
 
       <span class="text-white flex gap-2 items-center text-xs sm:text-sm md:text-base">
         <svg width="20" height="19" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3.825 19L5.45 11.975L0 7.25L7.2 6.625L10 0L12.8 6.625L20 7.25L14.55 11.975L16.175 19L10 15.275L3.825 19Z" fill="#FFB781"/>
         </svg>
-        4.9 (124 შეფასება)
+        {{ cardData().rating }}
       </span>
     </div>
   </div>
 
   <!-- About -->
   <div class="ml-0 sm:ml-5 mt-6">
-    <h3 class="text-[#012D1D] text-xl sm:text-2xl">ტურის შესახებ</h3>
-    <p class="text-[#414844] max-w-full sm:max-w-[800px] text-sm sm:text-base mt-2">
-      აღმოაჩინეთ ქართული მეღვინეობის 8000-წლიანი ტრადიცია კახეთის გულში. ეს სრულდღიანი
-      ტური აერთიანებს პრემიუმ კლასის ღვინის დეგუსტაციას, ისტორიულ ძეგლებსა და ავთენტურ
-      კულინარიულ გამოცდილებას. ეწვევით როგორც თანამედროვე, ინოვაციურ შატოებს, ისე
-      ტრადიციულ საოჯახო მარნებს, სადაც ქვევრის ღვინის დაყენების საიდუმლოს გაეცნობით.
+    <h3 class="text-[#012D1D] text-xl sm:text-2xl">ობიექტის შესახებ</h3>
+    <p class="text-[#414844] max-w-full sm:max-w-[800px] text-sm sm:text-base mt-2 whitespace-pre-line">
+      {{ cardData().description }}
     </p>
   </div>
 
@@ -132,7 +129,7 @@
 
       <div class="flex justify-start flex-col items-start px-4 sm:px-8 py-3 text-start my-4 border-b border-b-[#E4E2E1]">
         <span class="text-[#414844] text-sm sm:text-base">ფასი ერთ პერსონაზე</span>
-        <p class="text-[#012D1D] text-xl sm:text-2xl">{{ pricePerPerson }} ₾</p>
+        <p class="text-[#012D1D] text-xl sm:text-2xl">{{ pricePerPerson() }} ₾</p>
       </div>
 
       <div class="flex flex-col gap-4 px-2 sm:px-0">

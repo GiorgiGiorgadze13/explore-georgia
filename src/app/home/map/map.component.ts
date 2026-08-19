@@ -414,11 +414,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
    * STRICT COMBINED "AND" EVALUATION
    */
   private isLandmarkMatch(landmark: Landmark, filters: FilterState): boolean {
-    if (!this.matchesRegion(landmark, filters.region)) return false;
-    if (!this.matchesCategory(landmark, filters.category)) return false;
-    if (!this.matchesGroup(landmark, filters.group)) return false;
-    if (!this.matchesSearch(landmark, filters.search)) return false;
-    return true;
+    const regionMatch = this.filter.matchesRegion(landmark.region, landmark.name, filters.region);
+    const categoryMatch = this.filter.matchesNature(
+      landmark.category,
+      landmark.name,
+      landmark.description,
+      landmark.category,
+      filters.category
+    );
+    const groupMatch = this.matchesGroup(landmark, filters.group);
+    const searchMatch = this.matchesSearch(landmark, filters.search);
+
+    return regionMatch && categoryMatch && groupMatch && searchMatch;
   }
 
   private filterMarkers(filters: FilterState): void {

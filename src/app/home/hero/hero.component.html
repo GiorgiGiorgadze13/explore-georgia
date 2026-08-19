@@ -9,7 +9,7 @@
     >
 
       <img
-        src="/imgg.png"
+        src="/hero.jpg"
         alt="Georgia"
         class="absolute inset-0 w-full h-full object-cover bg-[#1F3D2B]"
       >
@@ -22,18 +22,20 @@
         <div class="flex flex-col md:flex-row items-center gap-2 md:gap-10">
 
           <span class="text-white font-bold text-3xl md:text-5xl tracking-wider">
-            აღმოაჩინე
+            {{ langService.t('აღმოაჩინე', 'Discover') }}
           </span>
 
           <span class="text-white font-bold text-3xl md:text-5xl tracking-wider">
-            საქართველო
+            {{ langService.t('საქართველო', 'Georgia') }}
           </span>
 
         </div>
 
-        <p class="text-white text-center max-w-[550px] text-sm md:text-base">
-          ადგილობრივი ლოკაციები, ღონისძიებები, გამოცდილებები და ის ადგილები,
-          რომლებიც სხვა პლატფორმებზე თითქმის არ ჩანს.
+        <p class="text-white text-center max-w-[550px] text-lg font-semibold md:text-base">
+          {{ langService.t(
+            'ადგილობრივი ლოკაციები, ღონისძიებები, გამოცდილებები და ის ადგილები, რომლებიც სხვა პლატფორმებზე თითქმის არ ჩანს.',
+            'Local spots, events, experiences, and hidden gems rarely found on other platforms.'
+          ) }}
         </p>
 
       </div>
@@ -63,7 +65,7 @@
           </span>
 
           <span class="text-white text-lg md:text-xl">
-            ლოკაცია
+            {{ langService.t('ლოკაცია', 'Locations') }}
           </span>
         </div>
 
@@ -83,7 +85,7 @@
           </span>
 
           <span class="text-white text-lg md:text-xl">
-            ღონისძიება
+            {{ langService.t('ღონისძიება', 'Events') }}
           </span>
         </div>
 
@@ -103,7 +105,7 @@
           </span>
 
           <span class="text-white text-lg md:text-xl text-center">
-            ადგილობრივის რჩევა
+            {{ langService.t('ადგილობრივის რჩევა', 'Local Advice') }}
           </span>
         </div>
 
