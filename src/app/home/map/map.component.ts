@@ -199,14 +199,15 @@ export class MapComponent implements OnInit, OnDestroy {
       minZoom: 6,
       maxZoom: 15,
       maxBounds: this.georgiaBounds.pad(0.15),
-      maxBoundsViscosity: 1,
+      maxBoundsViscosity: 0.8,
       zoomAnimation: true,
-      fadeAnimation: true,
+      fadeAnimation: false,
       markerZoomAnimation: true,
       zoomSnap: 0.5,
       zoomDelta: 0.5,
       wheelPxPerZoomLevel: 120,
       tapHold: false,
+      bounceAtZoomLimits: false,
       touchZoom: 'center'
     });
 
@@ -218,9 +219,9 @@ export class MapComponent implements OnInit, OnDestroy {
         maxZoom: 15,
         subdomains: 'abcd',
         attribution: '&copy; OpenStreetMap contributors & CartoDB',
-        keepBuffer: 4,
-        updateWhenIdle: false,
-        updateWhenZooming: true
+        keepBuffer: 3,
+        updateWhenIdle: true,
+        updateWhenZooming: false
       }
     ).addTo(this.map);
   }

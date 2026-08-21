@@ -17,7 +17,7 @@ export interface CsvPlace {
   hidden?: boolean;
 }
 
-export type Place = CsvPlace;
+const PLACES_CACHE_KEY = 'explore_georgia_places_cache';
 
 @Injectable({
   providedIn: 'root'
@@ -29,27 +29,61 @@ export class PlacesService {
 
   constructor(private http: HttpClient) {}
 
+  private getStoredPlaces(): CsvPlace[] | null {
+    try {
+      const stored = localStorage.getItem(PLACES_CACHE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ [PlacesService] LocalStorage read error:', e);
+    }
+    return null;
+  }
+
+  private saveStoredPlaces(data: CsvPlace[]): void {
+    try {
+      if (Array.isArray(data) && data.length > 0) {
+        localStorage.setItem(PLACES_CACHE_KEY, JSON.stringify(data));
+      }
+    } catch (e) {
+      console.warn('⚠️ [PlacesService] LocalStorage write error:', e);
+    }
+  }
+
   getPlaces(): Observable<CsvPlace[]> {
+    const cached = this.getStoredPlaces();
+
     if (this.places$) {
       return this.places$;
     }
 
-    this.places$ = this.http.get<CsvPlace[]>(this.apiUrl).pipe(
+    const fetch$ = this.http.get<CsvPlace[]>(this.apiUrl).pipe(
       timeout(3000),
       catchError(() => {
-        // Fallback to local CSV asset if backend API is not running or timing out
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
           timeout(3000),
           map((csvText: string) => this.parseCsv(csvText)),
           catchError((csvErr) => {
             console.warn('⚠️ [PlacesService] CSV fallback error:', csvErr);
-            return of([]);
+            return cached ? of(cached) : of([]);
           })
         );
+      }),
+      map((data) => {
+        if (data && data.length > 0) {
+          this.saveStoredPlaces(data);
+          return data;
+        }
+        return cached || [];
       }),
       shareReplay(1)
     );
 
+    this.places$ = cached && cached.length > 0 ? of(cached).pipe(shareReplay(1)) : fetch$;
     return this.places$;
   }
 

@@ -4,21 +4,25 @@
 }
 
 #map {
-  touch-action: pan-y !important;
-  -webkit-overflow-scrolling: touch;
+  touch-action: none !important;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .leaflet-container {
-  touch-action: pan-y !important;
+  touch-action: none !important;
   background-color: #f8fafc !important;
   font-family: inherit;
+  outline: none;
 }
 
 .custom-map-marker-pin {
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  contain: layout style paint;
+  transition: transform 0.15s ease-out;
 }
 
 .custom-map-marker-pin:hover {

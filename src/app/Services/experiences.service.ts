@@ -14,6 +14,8 @@ export interface CsvExperience {
   image?: string;
 }
 
+const EXPERIENCES_CACHE_KEY = 'explore_georgia_experiences_cache';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,12 +26,39 @@ export class ExperiencesService {
 
   constructor(private http: HttpClient) {}
 
+  private getStoredExperiences(): CsvExperience[] | null {
+    try {
+      const stored = localStorage.getItem(EXPERIENCES_CACHE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ [ExperiencesService] LocalStorage read error:', e);
+    }
+    return null;
+  }
+
+  private saveStoredExperiences(data: CsvExperience[]): void {
+    try {
+      if (Array.isArray(data) && data.length > 0) {
+        localStorage.setItem(EXPERIENCES_CACHE_KEY, JSON.stringify(data));
+      }
+    } catch (e) {
+      console.warn('⚠️ [ExperiencesService] LocalStorage write error:', e);
+    }
+  }
+
   getExperiences(): Observable<CsvExperience[]> {
+    const cached = this.getStoredExperiences();
+
     if (this.experiences$) {
       return this.experiences$;
     }
 
-    this.experiences$ = this.http.get<CsvExperience[]>(this.apiUrl).pipe(
+    const fetch$ = this.http.get<CsvExperience[]>(this.apiUrl).pipe(
       timeout(3000),
       catchError(() => {
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
@@ -37,13 +66,21 @@ export class ExperiencesService {
           map((csvText: string) => this.parseCsv(csvText)),
           catchError((csvErr) => {
             console.warn('⚠️ [ExperiencesService] CSV fallback error:', csvErr);
-            return of([]);
+            return cached ? of(cached) : of([]);
           })
         );
+      }),
+      map((data) => {
+        if (data && data.length > 0) {
+          this.saveStoredExperiences(data);
+          return data;
+        }
+        return cached || [];
       }),
       shareReplay(1)
     );
 
+    this.experiences$ = cached && cached.length > 0 ? of(cached).pipe(shareReplay(1)) : fetch$;
     return this.experiences$;
   }
 

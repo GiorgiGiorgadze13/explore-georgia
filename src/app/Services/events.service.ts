@@ -14,6 +14,8 @@ export interface CsvEvent {
   image?: string;
 }
 
+const EVENTS_CACHE_KEY = 'explore_georgia_events_cache';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,12 +26,39 @@ export class EventsService {
 
   constructor(private http: HttpClient) {}
 
+  private getStoredEvents(): CsvEvent[] | null {
+    try {
+      const stored = localStorage.getItem(EVENTS_CACHE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ [EventsService] LocalStorage read error:', e);
+    }
+    return null;
+  }
+
+  private saveStoredEvents(data: CsvEvent[]): void {
+    try {
+      if (Array.isArray(data) && data.length > 0) {
+        localStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify(data));
+      }
+    } catch (e) {
+      console.warn('⚠️ [EventsService] LocalStorage write error:', e);
+    }
+  }
+
   getEvents(): Observable<CsvEvent[]> {
+    const cached = this.getStoredEvents();
+
     if (this.events$) {
       return this.events$;
     }
 
-    this.events$ = this.http.get<CsvEvent[]>(this.apiUrl).pipe(
+    const fetch$ = this.http.get<CsvEvent[]>(this.apiUrl).pipe(
       timeout(3000),
       catchError(() => {
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
@@ -37,13 +66,21 @@ export class EventsService {
           map((csvText: string) => this.parseCsv(csvText)),
           catchError((csvErr) => {
             console.warn('⚠️ [EventsService] CSV fallback error:', csvErr);
-            return of([]);
+            return cached ? of(cached) : of([]);
           })
         );
+      }),
+      map((data) => {
+        if (data && data.length > 0) {
+          this.saveStoredEvents(data);
+          return data;
+        }
+        return cached || [];
       }),
       shareReplay(1)
     );
 
+    this.events$ = cached && cached.length > 0 ? of(cached).pipe(shareReplay(1)) : fetch$;
     return this.events$;
   }
 
