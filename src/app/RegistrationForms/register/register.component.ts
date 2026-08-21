@@ -24,9 +24,25 @@ form = new FormGroup({
     terms: new FormControl(false, [Validators.requiredTrue]),
   });
 
-  onSubmit() {
-    if (this.form.valid) {
-      console.log(this.form.value);
-    }
+onSubmit() {
+  if (this.form.invalid) return;
+
+  const formValues = this.form.value;
+
+   const payload = {
+    firstName: formValues.firstName,
+    lastName: formValues.lastName,
+    email: formValues.email,
+    password: formValues.password,
+    phoneNumber: formValues.phone,   
+    dateOfBirth: formValues.birthDate, // Mapped
+    citizenship: formValues.country, // Mapped
+    city: 'Tbilisi',  
+    address: formValues.address,
+    isDisabledPerson: false, // Add missing field (or add a checkbox)
+    roleId: 1 // Add default role ID expected by your backend
+  };
+
+  // this.http.post('https://localhost:7037/api/auth/register', payload).subscribe(...)
 }
 }

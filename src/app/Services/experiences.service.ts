@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay, timeout } from 'rxjs';
 
 export interface CsvExperience {
   id: string;
@@ -20,17 +20,31 @@ export interface CsvExperience {
 export class ExperiencesService {
   private apiUrl = 'https://explore-georgia-azg5e7gxbhbqd9g5.spaincentral-01.azurewebsites.net/api/Experiences';
   private csvUrl = 'assets/data/experiences-export-2026-08-19_19-31-49.csv';
+  private experiences$?: Observable<CsvExperience[]>;
 
   constructor(private http: HttpClient) {}
 
   getExperiences(): Observable<CsvExperience[]> {
-    return this.http.get<CsvExperience[]>(this.apiUrl).pipe(
+    if (this.experiences$) {
+      return this.experiences$;
+    }
+
+    this.experiences$ = this.http.get<CsvExperience[]>(this.apiUrl).pipe(
+      timeout(3000),
       catchError(() => {
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
-          map((csvText: string) => this.parseCsv(csvText))
+          timeout(3000),
+          map((csvText: string) => this.parseCsv(csvText)),
+          catchError((csvErr) => {
+            console.warn('⚠️ [ExperiencesService] CSV fallback error:', csvErr);
+            return of([]);
+          })
         );
-      })
+      }),
+      shareReplay(1)
     );
+
+    return this.experiences$;
   }
 
   private parseCsv(csvText: string): CsvExperience[] {

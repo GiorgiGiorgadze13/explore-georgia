@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
- 
+import { SeoService } from './Services/seo.service';
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
@@ -8,5 +9,6 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+  private seoService = inject(SeoService);
   title = 'explore-georgia';
 }

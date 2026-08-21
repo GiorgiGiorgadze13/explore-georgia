@@ -1,4 +1,39 @@
-#map {
-  height: 500px;
+:host {
+  display: block;
   width: 100%;
+}
+
+#map {
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.leaflet-container {
+  touch-action: pan-y !important;
+  background-color: #f8fafc !important;
+  font-family: inherit;
+}
+
+.custom-map-marker-pin {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-map-marker-pin:hover {
+  transform: scale(1.2) translateZ(0) !important;
+  z-index: 1000 !important;
+}
+
+/* Leaflet Popup Styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
 }

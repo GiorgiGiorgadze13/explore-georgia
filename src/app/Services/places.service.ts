@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay, timeout } from 'rxjs';
 
 export interface CsvPlace {
   id: string;
@@ -25,18 +25,32 @@ export type Place = CsvPlace;
 export class PlacesService {
   private apiUrl = 'https://explore-georgia-azg5e7gxbhbqd9g5.spaincentral-01.azurewebsites.net/api/Places';
   private csvUrl = 'assets/data/places-export-2026-08-19_03-35-20.csv';
+  private places$?: Observable<CsvPlace[]>;
 
   constructor(private http: HttpClient) {}
 
   getPlaces(): Observable<CsvPlace[]> {
-    return this.http.get<CsvPlace[]>(this.apiUrl).pipe(
+    if (this.places$) {
+      return this.places$;
+    }
+
+    this.places$ = this.http.get<CsvPlace[]>(this.apiUrl).pipe(
+      timeout(3000),
       catchError(() => {
-        // Fallback to local CSV asset if backend API is not running
+        // Fallback to local CSV asset if backend API is not running or timing out
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
-          map((csvText: string) => this.parseCsv(csvText))
+          timeout(3000),
+          map((csvText: string) => this.parseCsv(csvText)),
+          catchError((csvErr) => {
+            console.warn('⚠️ [PlacesService] CSV fallback error:', csvErr);
+            return of([]);
+          })
         );
-      })
+      }),
+      shareReplay(1)
     );
+
+    return this.places$;
   }
 
   private parseCsv(csvText: string): CsvPlace[] {

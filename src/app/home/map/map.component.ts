@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   computed,
   effect,
@@ -7,7 +6,9 @@ import {
   input,
   OnDestroy,
   OnInit,
-  Signal
+  Signal,
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
@@ -34,49 +35,12 @@ export interface FilterState {
   search: string;
 }
 
-// 1. Region dictionary (Maps cities & region names in both English and Georgian)
-const REGION_MAP: Record<string, string[]> = {
-  adjara: ['adjara', 'აჭარა', 'batumi', 'ბათუმი', 'kobuleti', 'ქობულეთი', 'keda', 'ქედა', 'shuakhevi', 'შუახევი', 'khulo', 'ხულო'],
-  svaneti: ['svaneti', 'samegrelo-zemo svaneti', 'სვანეთი', 'სამეგრელო-ზემო სვანეთი', 'samegrelo', 'zugdidi', 'ზუგდიდი', 'mestia', 'მესტია'],
-  guria: ['guria', 'გურია', 'ozurgeti', 'ოზურგეთი', 'lanchkhuti', 'ლანჩხუთი', 'chokhatauri', 'ჩოხატაური'],
-  kazbegi: ['kazbegi', 'mtskheta-mtianeti', 'ყაზბეგი', 'მცხეთა-მთიანეთი', 'stepantsminda', 'სტეფანწმინდა'],
-  tbilisi: ['tbilisi', 'თბილისი'],
-  mtskheta: ['mtskheta', 'მცხეთა'],
-  samtskhe: ['samtskhe-javakheti', 'akhaltsikhe', 'სამცხე-ჯავახეთი', 'ახალციხე', 'javakheti', 'borjomi', 'ბორჯომი'],
-  kakheti: ['kakheti', 'კახეთი', 'telavi', 'თელავი', 'sighnaghi', 'სიღნაღი'],
-  imereti: ['imereti', 'იმერეთი', 'kutaisi', 'ქუთაისი'],
-  racha: ['racha', 'racha-lechkhumi', 'რაჭა', 'რაჭა-ლეჩხუმი', 'ambrolauri', 'ამბროლაური'],
-  kartli: ['shida kartli', 'kvemo kartli', 'შიდა ქართლი', 'ქვემო ქართლი', 'gori', 'გორი', 'rustavi', 'რუსთავი']
-};
-
-// 2. High-level Group dictionary
+// High-level Group dictionary (still used by matchesGroup)
 const GROUP_MAP: Record<string, string[]> = {
   nature: ['nature', 'ბუნება', 'natural', 'ეკოლოგია'],
   leisure: ['leisure', 'დასვენება', 'გართობა', 'recreation'],
   culture: ['culture', 'კულტურა', 'ისტორია', 'heritage', 'history'],
   food: ['food', 'საკვები', 'გასტრონომია', 'ღვინო', 'wine', 'gastronomy']
-};
-
-// 3. Category dictionary (matches values from your select dropdown options)
-const CATEGORY_MAP: Record<string, string[]> = {
-  lake: ['lake', 'lakes', 'ტბა', 'ტბები', 'tba', 'tbebi', 'tbas'],
-  river: ['river', 'rivers', 'მდინარე', 'მდინარეები', 'mdinare', 'mdinareebi'],
-  waterfall: ['waterfall', 'waterfalls', 'ჩანჩქერი', 'ჩანჩქერები', 'chanchkeri', 'chanckeri', 'chanchkeris', 'chanckeris', 'chanchkerebi'],
-  canyon: ['canyon', 'canyons', 'კანიონი', 'კანიონები', 'kanioni', 'kanionebi'],
-  mountain: ['mountain', 'mountains', 'მთა', 'მთები', 'mta', 'mtebi'],
-  cave: ['cave', 'caves', 'მღვიამე', 'მღვიამეები', 'მღვიმე', 'მღვიმეები', 'mghvime', 'mgvime', 'mghvimeebi'],
-  forest: ['forest', 'ტყე', 'ტყეები', 'tye', 'tyeebi'],
-  'national-park': ['national park', 'ეროვნული პარკი', 'erovnuli parki'],
-  'protected-area': ['protected area', 'დაცული ტერიტორია', 'dachuli teritoria'],
-  valley: ['valley', 'ხეობა', 'xeoba'],
-  coast: ['coast', 'sea coast', 'ზღვის სანაპირო', 'zgvis sanapiro'],
-  spring: ['spring', 'natural spring', 'ბუნებრივი წყარო', 'bunebrivi tsqaro'],
-  park: ['park', 'პარკი', 'parki'],
-  church: ['church', 'monastery', 'ტაძარი', 'ეკლესია', 'მონასტერი'],
-  fortress: ['fortress', 'castle', 'ციხე', 'ციხესიმაგრე'],
-  winery: ['winery', 'wine', 'მარანი', 'ღვინო'],
-  museum: ['museum', 'მუზეუმი'],
-  bridge: ['bridge', 'ხიდი']
 };
 
 @Component({
@@ -86,21 +50,45 @@ const CATEGORY_MAP: Record<string, string[]> = {
   templateUrl: './map.component.html',
   styleUrl: './map.component.css'
 })
-export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MapComponent implements OnInit, OnDestroy {
   public filter = inject(FilterCardService);
   private placesService = inject(PlacesService);
 
   selectedRegionInput = input<string>('', { alias: 'selectedRegion' });
   public landmarks: Landmark[] = [];
+  public isDataReady = false;
 
   private map?: L.Map;
   private markers = new Map<string | number, L.Marker>();
   private georgiaBounds = L.latLngBounds([40.9, 39.8], [43.65, 46.8]);
 
+  public resetMapView(): void {
+    if (this.map) {
+      this.map.fitBounds(this.georgiaBounds);
+    }
+  }
+
   /**
-   * Computed Signal collecting active filter criteria safely,
-   * ignoring empty placeholders like '' or Georgian prompt headers.
+   * ViewChild Setter: Angular guarantees this runs the exact millisecond
+   * #mapContainer is created and rendered in the DOM by the @if block.
    */
+  @ViewChild('mapContainer') set mapContainerSetter(element: ElementRef<HTMLElement> | undefined) {
+    if (element && !this.map) {
+      this.initMap(); // this already calls fitBounds(georgiaBounds) once
+      this.addLandmarkMarkers();
+
+      // Only re-run filterMarkers here if a filter is ALREADY active
+      // (e.g. user navigated in with a query param). Otherwise skip —
+      // initMap() already framed the full country view, no need to
+      // fitBounds a second time.
+      const filters = this.activeFilters();
+      const hasActiveFilter = !!(filters.region || filters.category || filters.group || filters.search);
+      if (hasActiveFilter) {
+        this.filterMarkers(filters);
+      }
+    }
+  }
+
   private activeFilters: Signal<FilterState> = computed(() => {
     const fAny = this.filter as any;
 
@@ -115,7 +103,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (val !== null && val !== undefined) {
           const strVal = String(val).trim();
-          // Ignore placeholder text or empty values from dropdowns
           if (
             strVal !== '' &&
             strVal !== 'აირჩიეთ ბუნება' &&
@@ -129,65 +116,68 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       return '';
     };
 
-    // 1. Region
     const region = readValue(fAny?.selectedRegion, this.selectedRegionInput);
-
-    // 2. Category / Nature (Mapped from selectedNature)
     const category = readValue(fAny?.selectedNature, fAny?.selectedCategory, fAny?.category);
-
-    // 3. Group
     const group = readValue(fAny?.selectedGroup, fAny?.group);
-
-    // 4. Free text Search
     const search = readValue(fAny?.searchTerm, fAny?.search, fAny?.filter);
 
     const filterState: FilterState = { region, category, group, search };
-    console.log('🔍 [Computed Signal] Active Filter State Values:', JSON.stringify(filterState));
     return filterState;
   });
+
+  private isFirstEffectRun = true;
 
   constructor() {
     effect(() => {
       const filters = this.activeFilters();
- 
+
+      // Skip the effect's very first automatic run — the ViewChild
+      // setter above already handles the initial filter state once
+      // the map exists. Without this guard, the effect can fire
+      // again right after init and trigger a second fitBounds.
+      if (this.isFirstEffectRun) {
+        this.isFirstEffectRun = false;
+        return;
+      }
+
       if (!this.map) {
-         return;
+        return;
       }
       this.filterMarkers(filters);
     });
   }
 
   ngOnInit(): void {
-     this.placesService.getPlaces().subscribe({
+    // 1. Fetch backend data first
+    this.placesService.getPlaces().subscribe({
       next: (places: CsvPlace[]) => {
-         this.landmarks = places.map((p) => this.mapCsvToLandmark(p));
-
-        if (this.map) {
-          this.addLandmarkMarkers();
-          this.filterMarkers(this.activeFilters());
-        }
+        this.landmarks = places.map((p) => this.mapCsvToLandmark(p));
+        // 2. Flip flag to true -> triggers @if block in HTML template
+        this.isDataReady = true;
       },
       error: (err) => console.error('❌ [ngOnInit] Failed to load places CSV:', err)
     });
   }
 
-  ngAfterViewInit(): void {
-     this.initMap();
-
-    if (this.landmarks.length > 0) {
-      this.addLandmarkMarkers();
-      this.filterMarkers(this.activeFilters());
-    }
-  }
-
   private initMap(): void {
+    if (this.map) return;
+
     this.map = L.map('map', {
+      preferCanvas: true,
       center: [42.0, 43.6],
       zoom: 7,
       minZoom: 6,
       maxZoom: 15,
       maxBounds: this.georgiaBounds.pad(0.15),
-      maxBoundsViscosity: 1
+      maxBoundsViscosity: 1,
+      zoomAnimation: true,
+      fadeAnimation: true,
+      markerZoomAnimation: true,
+      zoomSnap: 0.5,
+      zoomDelta: 0.5,
+      wheelPxPerZoomLevel: 120,
+      tapHold: false,
+      touchZoom: 'center'
     });
 
     this.map.fitBounds(this.georgiaBounds);
@@ -196,7 +186,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       {
         maxZoom: 15,
-        attribution: '&copy; OpenStreetMap contributors & CartoDB'
+        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap contributors & CartoDB',
+        keepBuffer: 4,
+        updateWhenIdle: false,
+        updateWhenZooming: true
       }
     ).addTo(this.map);
   }
@@ -216,7 +210,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
-  private createMarkerIcon(landmark: Landmark, size = 28): L.DivIcon {
+  private createMarkerIcon(landmark: Landmark, size = 30): L.DivIcon {
     return L.divIcon({
       className: 'custom-map-marker-pin',
       html: `
@@ -230,8 +224,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           border-radius: 9999px;
           background: ${landmark.color};
           border: 2px solid #ffffff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          box-shadow: 0 3px 8px rgba(0,0,0,0.25);
           cursor: pointer;
+          will-change: transform;
+          transform: translateZ(0);
+          contain: layout style;
         ">
           ${landmark.emoji}
         </span>
@@ -252,120 +249,24 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const marker = L.marker(landmark.coordinates, { icon });
 
       marker.bindPopup(`
-        <div style="font-family: sans-serif; max-width: 200px;">
-          <h4 style="margin: 0 0 4px 0; font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 4px;">
-            ${landmark.emoji} ${landmark.name}
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 220px; padding: 2px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 18px;">${landmark.emoji}</span> ${landmark.name}
           </h4>
-          <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 6px;">
+          <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #15803d; background-color: #f0fdf4; padding: 2px 8px; border-radius: 9999px; margin-bottom: 8px;">
             📍 ${landmark.region} · ${landmark.category}
           </span>
-          <p style="margin: 0; font-size: 12px; color: #475569; line-height: 1.4;">
-            ${landmark.description || 'No description available.'}
+          <p style="margin: 0; font-size: 12px; color: #475569; line-height: 1.45;">
+            ${landmark.description || 'ინფორმაცია არ არის მითითებული.'}
           </p>
         </div>
       `);
 
       this.markers.set(landmark.id, marker);
-      marker.addTo(this.map!);
+      if (this.map && !this.map.hasLayer(marker)) {
+        marker.addTo(this.map);
+      }
     });
-
-   }
-
-  private latinToGeorgian(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/chanch|chanc/g, 'ჩანჩ')
-      .replace(/ch/g, 'ჩ')
-      .replace(/sh/g, 'შ')
-      .replace(/ts/g, 'ც')
-      .replace(/dz/g, 'ძ')
-      .replace(/kh/g, 'ხ')
-      .replace(/gh/g, 'ღ')
-      .replace(/ph/g, 'ფ')
-      .replace(/th/g, 'თ')
-      .replace(/mdinare/g, 'მდინარე')
-      .replace(/a/g, 'ა')
-      .replace(/b/g, 'ბ')
-      .replace(/g/g, 'გ')
-      .replace(/d/g, 'დ')
-      .replace(/e/g, 'ე')
-      .replace(/v/g, 'ვ')
-      .replace(/z/g, 'ზ')
-      .replace(/t/g, 'ტ')
-      .replace(/i/g, 'ი')
-      .replace(/k/g, 'კ')
-      .replace(/l/g, 'ლ')
-      .replace(/m/g, 'მ')
-      .replace(/n/g, 'ნ')
-      .replace(/o/g, 'ო')
-      .replace(/p/g, 'პ')
-      .replace(/r/g, 'რ')
-      .replace(/s/g, 'ს')
-      .replace(/u/g, 'უ');
-  }
-
-  // -----------------------------------------------------------------
-  // INDIVIDUAL FILTER MATCHERS
-  // -----------------------------------------------------------------
-
-  private matchesRegion(landmark: Landmark, regionQuery: string): boolean {
-    if (!regionQuery) return true;
-
-    const search = regionQuery.trim().toLowerCase();
-    const searchSingular = search.replace(/(is|es|s)$/i, '');
-    const enRegion = (landmark.region || '').trim().toLowerCase();
-    const name = (landmark.name || '').trim().toLowerCase();
-
-    for (const aliases of Object.values(REGION_MAP)) {
-      const isSearchInAlias = aliases.some(
-        (a) => a.toLowerCase() === search || a.toLowerCase() === searchSingular
-      );
-
-      if (isSearchInAlias) {
-        return aliases.some(
-          (a) => a.toLowerCase() === enRegion || name.includes(a.toLowerCase())
-        );
-      }
-    }
-
-    return enRegion.includes(search) || enRegion.includes(searchSingular);
-  }
-
-  private matchesCategory(landmark: Landmark, categoryQuery: string): boolean {
-    if (!categoryQuery) return true;
-
-    const search = categoryQuery.trim().toLowerCase();
-    const searchSingular = search.replace(/(is|es|s)$/i, '');
-    const searchGeorgian = this.latinToGeorgian(searchSingular);
-
-    const category = (landmark.category || '').trim().toLowerCase();
-    const landmarkName = (landmark.name || '').trim().toLowerCase();
-
-    // Check mapping dictionary using dropdown option values (e.g., 'waterfall', 'lake', etc.)
-    for (const [key, aliases] of Object.entries(CATEGORY_MAP)) {
-      const isMatchingKey = key === search || aliases.some((a) => a.toLowerCase() === search || a.toLowerCase() === searchSingular);
-      if (isMatchingKey) {
-        const allTargets = [key, ...aliases];
-        return allTargets.some((target) => {
-          const t = target.toLowerCase();
-          return category.includes(t) || landmarkName.includes(t);
-        });
-      }
-    }
-
-    if (category && category.length > 1) {
-      if (
-        category.includes(search) ||
-        category.includes(searchSingular) ||
-        (searchGeorgian && category.includes(searchGeorgian)) ||
-        landmarkName.includes(search) ||
-        (searchGeorgian && landmarkName.includes(searchGeorgian))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   private matchesGroup(landmark: Landmark, groupQuery: string): boolean {
@@ -393,26 +294,19 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!searchQuery) return true;
 
     const search = searchQuery.trim().toLowerCase();
-    const searchSingular = search.replace(/(is|es|s)$/i, '');
-    const searchGeorgian = this.latinToGeorgian(searchSingular);
 
     const landmarkName = (landmark.name || '').trim().toLowerCase();
     const description = (landmark.description || '').trim().toLowerCase();
 
     const nameWords = landmarkName.split(/[\s,.\-()"/]+/);
-    const isWordMatch = nameWords.some(
-      (w) => w === search || (searchGeorgian && w === searchGeorgian)
-    );
+    const isWordMatch = nameWords.some((w) => w === search);
 
     if (isWordMatch) return true;
-    if (description.includes(search) || (searchGeorgian && description.includes(searchGeorgian))) return true;
+    if (description.includes(search)) return true;
 
     return false;
   }
 
-  /**
-   * STRICT COMBINED "AND" EVALUATION
-   */
   private isLandmarkMatch(landmark: Landmark, filters: FilterState): boolean {
     const regionMatch = this.filter.matchesRegion(landmark.region, landmark.name, filters.region);
     const categoryMatch = this.filter.matchesNature(
@@ -429,18 +323,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private filterMarkers(filters: FilterState): void {
-    if (!this.map) {
-      console.warn('⚠️ [filterMarkers] Map not available.');
-      return;
-    }
+    if (!this.map) return;
 
     const hasActiveFilter = !!(filters.region || filters.category || filters.group || filters.search);
 
     if (!hasActiveFilter) {
-      console.log('🔄 [filterMarkers] No filters applied. Showing all markers.');
       this.landmarks.forEach((landmark) => {
         const marker = this.markers.get(landmark.id);
-        if (marker) marker.addTo(this.map!);
+        if (marker && this.map && !this.map.hasLayer(marker)) {
+          marker.addTo(this.map);
+        }
       });
 
       this.map.fitBounds(this.georgiaBounds);
@@ -457,15 +349,17 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const isMatched = this.isLandmarkMatch(landmark, filters);
 
       if (isMatched) {
-        marker.addTo(this.map!);
+        if (this.map && !this.map.hasLayer(marker)) {
+          marker.addTo(this.map);
+        }
         visibleCoords.push(landmark.coordinates);
         matchCount++;
       } else {
-        marker.removeFrom(this.map!);
+        if (this.map && this.map.hasLayer(marker)) {
+          marker.removeFrom(this.map);
+        }
       }
     });
-
-    console.log(`🎯 [filterMarkers] Matches found: ${matchCount} / ${this.landmarks.length}`);
 
     if (visibleCoords.length === 1) {
       this.map.setView(visibleCoords[0], 11, { animate: true });
@@ -473,7 +367,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const bounds = L.latLngBounds(visibleCoords);
       this.map.fitBounds(bounds.pad(0.25), { maxZoom: 11, animate: true });
     } else {
-      console.warn('⚠️ [filterMarkers] No landmarks matched the selected filter criteria.');
       this.map.fitBounds(this.georgiaBounds);
     }
   }

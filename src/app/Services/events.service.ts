@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay, timeout } from 'rxjs';
 
 export interface CsvEvent {
   id: string;
@@ -20,17 +20,31 @@ export interface CsvEvent {
 export class EventsService {
   private apiUrl = 'https://explore-georgia-azg5e7gxbhbqd9g5.spaincentral-01.azurewebsites.net/api/Events';
   private csvUrl = 'assets/data/events-export-2026-08-19_19-32-23.csv';
+  private events$?: Observable<CsvEvent[]>;
 
   constructor(private http: HttpClient) {}
 
   getEvents(): Observable<CsvEvent[]> {
-    return this.http.get<CsvEvent[]>(this.apiUrl).pipe(
+    if (this.events$) {
+      return this.events$;
+    }
+
+    this.events$ = this.http.get<CsvEvent[]>(this.apiUrl).pipe(
+      timeout(3000),
       catchError(() => {
         return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
-          map((csvText: string) => this.parseCsv(csvText))
+          timeout(3000),
+          map((csvText: string) => this.parseCsv(csvText)),
+          catchError((csvErr) => {
+            console.warn('⚠️ [EventsService] CSV fallback error:', csvErr);
+            return of([]);
+          })
         );
-      })
+      }),
+      shareReplay(1)
     );
+
+    return this.events$;
   }
 
   private parseCsv(csvText: string): CsvEvent[] {

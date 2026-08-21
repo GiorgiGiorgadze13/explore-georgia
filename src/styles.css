@@ -36,7 +36,10 @@ body {
   color: #A74826;
   font-weight: bold;
 }
- html, body {
+html, body {
   overflow-x: hidden;
   max-width: 100vw;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+  scroll-behavior: smooth;
 }

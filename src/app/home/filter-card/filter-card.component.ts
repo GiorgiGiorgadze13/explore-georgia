@@ -20,6 +20,7 @@ export interface DisplayCard {
   image?: string;
   tags?: string[];
   type: 'place' | 'event' | 'experience';
+  hasError?: boolean;
 }
 
 @Component({
@@ -48,8 +49,7 @@ export class FilterCardComponent implements OnInit {
   cards = signal<DisplayCard[]>([]);
   currentPage = signal<number>(1);
   pageSize = 6;
-
-  ngOnInit(): void {
+   ngOnInit(): void {
     const url = this.router.url;
 
     if (url.includes('/events')) {
