@@ -15,6 +15,10 @@ import * as L from 'leaflet';
 import { FilterCardService } from '../../Services/filter-card.service';
 import { PlacesService, CsvPlace } from '../../Services/places.service';
 
+import { Router } from '@angular/router';
+import { LanguageService } from '../../Services/language.service';
+import { CardImageService } from '../../Services/card-image.service';
+
 export interface Landmark {
   id: string | number;
   name: string;
@@ -52,7 +56,10 @@ const GROUP_MAP: Record<string, string[]> = {
 })
 export class MapComponent implements OnInit, OnDestroy {
   public filter = inject(FilterCardService);
+  public langService = inject(LanguageService);
   private placesService = inject(PlacesService);
+  private imageService = inject(CardImageService);
+  private router = inject(Router);
 
   selectedRegionInput = input<string>('', { alias: 'selectedRegion' });
   public landmarks: Landmark[] = [];
@@ -68,6 +75,37 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   }
 
+  public openDetails(landmark: Landmark): void {
+    const img = this.imageService.getImageForItem(
+      String(landmark.id),
+      landmark.name,
+      landmark.category,
+      landmark.region
+    );
+
+    this.router.navigate(['/details'], {
+      queryParams: {
+        id: landmark.id,
+        title: landmark.name,
+        location: landmark.region,
+        badge: landmark.category || 'ადგილი',
+        image: img,
+        description: landmark.description,
+        rating: '4.8 (50 შეფასება)'
+      },
+      state: {
+        card: {
+          id: landmark.id,
+          title: landmark.name,
+          location: landmark.region,
+          badge: landmark.category,
+          image: img,
+          description: landmark.description
+        }
+      }
+    });
+  }
+
   /**
    * ViewChild Setter: Angular guarantees this runs the exact millisecond
    * #mapContainer is created and rendered in the DOM by the @if block.
@@ -77,10 +115,6 @@ export class MapComponent implements OnInit, OnDestroy {
       this.initMap(); // this already calls fitBounds(georgiaBounds) once
       this.addLandmarkMarkers();
 
-      // Only re-run filterMarkers here if a filter is ALREADY active
-      // (e.g. user navigated in with a query param). Otherwise skip —
-      // initMap() already framed the full country view, no need to
-      // fitBounds a second time.
       const filters = this.activeFilters();
       const hasActiveFilter = !!(filters.region || filters.category || filters.group || filters.search);
       if (hasActiveFilter) {
@@ -131,10 +165,6 @@ export class MapComponent implements OnInit, OnDestroy {
     effect(() => {
       const filters = this.activeFilters();
 
-      // Skip the effect's very first automatic run — the ViewChild
-      // setter above already handles the initial filter state once
-      // the map exists. Without this guard, the effect can fire
-      // again right after init and trigger a second fitBounds.
       if (this.isFirstEffectRun) {
         this.isFirstEffectRun = false;
         return;
@@ -248,19 +278,52 @@ export class MapComponent implements OnInit, OnDestroy {
       const icon = this.createMarkerIcon(landmark);
       const marker = L.marker(landmark.coordinates, { icon });
 
+      const safeId = String(landmark.id).replace(/[^a-zA-Z0-9-_]/g, '_');
+      const btnId = `map-btn-${safeId}`;
+
       marker.bindPopup(`
-        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 220px; padding: 2px;">
+        <div style="font-family: system-ui, -apple-system, sans-serif; width: 220px; padding: 2px;">
           <h4 style="margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 18px;">${landmark.emoji}</span> ${landmark.name}
+            <span style="font-size: 18px;">${landmark.emoji}</span> ${this.langService.translate(landmark.name)}
           </h4>
           <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #15803d; background-color: #f0fdf4; padding: 2px 8px; border-radius: 9999px; margin-bottom: 8px;">
-            📍 ${landmark.region} · ${landmark.category}
+            📍 ${this.langService.translate(landmark.region)} · ${this.langService.translate(landmark.category)}
           </span>
-          <p style="margin: 0; font-size: 12px; color: #475569; line-height: 1.45;">
-            ${landmark.description || 'ინფორმაცია არ არის მითითებული.'}
+          <p style="margin: 0 0 10px 0; font-size: 12px; color: #475569; line-height: 1.45;">
+            ${this.langService.translate(landmark.description) || 'ინფორმაცია არ არის მითითებული.'}
           </p>
+          <button id="${btnId}" style="
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: #1F3D2B;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+          ">
+            ${this.langService.t('ნახე დეტალები', 'Check Details')} →
+          </button>
         </div>
       `);
+
+      marker.on('popupopen', () => {
+        setTimeout(() => {
+          const btn = document.getElementById(btnId);
+          if (btn) {
+            btn.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.openDetails(landmark);
+            };
+          }
+        }, 50);
+      });
 
       this.markers.set(landmark.id, marker);
       if (this.map && !this.map.hasLayer(marker)) {
