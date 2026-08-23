@@ -153,12 +153,17 @@ export class MapComponent implements OnInit, OnDestroy {
     const region = readValue(fAny?.selectedRegion, this.selectedRegionInput);
     const category = readValue(fAny?.selectedNature, fAny?.selectedCategory, fAny?.category);
     const group = readValue(fAny?.selectedGroup, fAny?.group);
-    const search = readValue(fAny?.searchTerm, fAny?.search, fAny?.filter);
+    
+    // Read from the searchInput signal you defined in the service:
+    const search = readValue(this.filter.searchInput, fAny?.searchTerm, fAny?.search, fAny?.filter);
 
     const filterState: FilterState = { region, category, group, search };
     return filterState;
   });
 
+  public search(query: string): void {
+    this.filter.searchInput();
+  }
   private isFirstEffectRun = true;
 
   constructor() {
@@ -355,20 +360,12 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   private matchesSearch(landmark: Landmark, searchQuery: string): boolean {
-    if (!searchQuery) return true;
-
-    const search = searchQuery.trim().toLowerCase();
-
-    const landmarkName = (landmark.name || '').trim().toLowerCase();
-    const description = (landmark.description || '').trim().toLowerCase();
-
-    const nameWords = landmarkName.split(/[\s,.\-()"/]+/);
-    const isWordMatch = nameWords.some((w) => w === search);
-
-    if (isWordMatch) return true;
-    if (description.includes(search)) return true;
-
-    return false;
+    return this.filter.matchesSearch({
+      name: landmark.name,
+      region: landmark.region,
+      category: landmark.category,
+      description: landmark.description
+    }, searchQuery);
   }
 
   private isLandmarkMatch(landmark: Landmark, filters: FilterState): boolean {
@@ -404,7 +401,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     const visibleCoords: [number, number][] = [];
-    let matchCount = 0;
+    let matchedLandmark: Landmark | undefined;
 
     this.landmarks.forEach((landmark) => {
       const marker = this.markers.get(landmark.id);
@@ -417,7 +414,7 @@ export class MapComponent implements OnInit, OnDestroy {
           marker.addTo(this.map);
         }
         visibleCoords.push(landmark.coordinates);
-        matchCount++;
+        matchedLandmark = landmark;
       } else {
         if (this.map && this.map.hasLayer(marker)) {
           marker.removeFrom(this.map);
@@ -425,11 +422,15 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     });
 
-    if (visibleCoords.length === 1) {
-      this.map.setView(visibleCoords[0], 11, { animate: true });
+    if (visibleCoords.length === 1 && matchedLandmark) {
+      this.map.setView(visibleCoords[0], 12, { animate: true });
+      const m = this.markers.get(matchedLandmark.id);
+      if (m) {
+        setTimeout(() => m.openPopup(), 150);
+      }
     } else if (visibleCoords.length > 1) {
       const bounds = L.latLngBounds(visibleCoords);
-      this.map.fitBounds(bounds.pad(0.25), { maxZoom: 11, animate: true });
+      this.map.fitBounds(bounds.pad(0.25), { maxZoom: 12, animate: true });
     } else {
       this.map.fitBounds(this.georgiaBounds);
     }
@@ -461,7 +462,7 @@ export class MapComponent implements OnInit, OnDestroy {
     if (combined.includes('დაცული ტერიტორია') || combined.includes('ნაკრძალი')) return '🛡️';
     if (combined.includes('ხეობა') || combined.includes('valley')) return '⛰️';
     if (combined.includes('სანაპირო') || combined.includes('coast') || combined.includes('ზღვა')) return '🏖️';
-    if (combined.includes('წყარო') || combined.includes('spring') || combined.includes('აბანო')) return '♨️';
+    if (combined.includes('წყარო') || combined.includes('spring') || combined.includes('აბანო')) return '💦';
     if (combined.includes('პარკი') || combined.includes('park') || combined.includes('ბაღი')) return '🌳';
     if (combined.includes('ტაძარი') || combined.includes('ეკლესია') || combined.includes('მონასტერი') || combined.includes('church') || combined.includes('ჯვარი') || combined.includes('ნიში')) return '⛪';
     if (combined.includes('ციხე') || combined.includes('fortress') || combined.includes('კოშკი') || combined.includes('castle')) return '🏰';

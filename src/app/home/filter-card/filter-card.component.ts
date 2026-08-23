@@ -123,12 +123,22 @@ export class FilterCardComponent implements OnInit {
     let list = this.cards();
     const region = this.filter.selectedRegion();
     const nature = this.filter.selectedNature();
+    const search = this.filter.searchInput();
 
     if (region) {
       list = list.filter(c => this.filter.matchesRegion(c.location, c.title, region));
     }
     if (nature) {
       list = list.filter(c => this.filter.matchesNature(c.badge, c.title, c.description, c.tags, nature));
+    }
+    if (search) {
+      list = list.filter(c => this.filter.matchesSearch({
+        title: c.title,
+        location: c.location,
+        badge: c.badge,
+        description: c.description,
+        tags: c.tags
+      }, search));
     }
     return list;
   });
@@ -155,7 +165,8 @@ export class FilterCardComponent implements OnInit {
   });
 
   paginatedCards = computed(() => {
-    const page = this.currentPage();
+    const total = this.totalPages();
+    const page = Math.min(Math.max(1, this.currentPage()), total);
     const start = (page - 1) * this.pageSize;
     return this.filteredCards().slice(start, start + this.pageSize);
   });
@@ -201,6 +212,7 @@ export class FilterCardComponent implements OnInit {
   clearFilters(): void {
     this.filter.selectedRegion.set('');
     this.filter.selectedNature.set('');
+    this.filter.searchInput.set('');
     this.filter.wheelchairAccessible.set(false);
     this.currentPage.set(1);
   }
