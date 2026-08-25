@@ -4,29 +4,44 @@
 }
 
 #map {
-  touch-action: none !important;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 
 .leaflet-container {
-  touch-action: none !important;
+  touch-action: manipulation;
   background-color: #f8fafc !important;
   font-family: inherit;
   outline: none;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+}
+
+.leaflet-tile {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.leaflet-marker-pane {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 
 .custom-map-marker-pin {
-  will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   contain: layout style paint;
   transition: transform 0.15s ease-out;
 }
 
 .custom-map-marker-pin:hover {
-  transform: scale(1.2) translateZ(0) !important;
+  transform: scale(1.15) translate3d(0, 0, 0) !important;
+  -webkit-transform: scale(1.15) translate3d(0, 0, 0) !important;
   z-index: 1000 !important;
 }
 
@@ -36,6 +51,8 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
   padding: 4px !important;
   border: 1px solid rgba(226, 232, 240, 0.8);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 
 .leaflet-popup-tip {

@@ -39,7 +39,6 @@ export interface FilterState {
   search: string;
 }
 
-// High-level Group dictionary (still used by matchesGroup)
 const GROUP_MAP: Record<string, string[]> = {
   nature: ['nature', 'ბუნება', 'natural', 'ეკოლოგია'],
   leisure: ['leisure', 'დასვენება', 'გართობა', 'recreation'],
@@ -71,7 +70,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   public resetMapView(): void {
     if (this.map) {
-      this.map.fitBounds(this.georgiaBounds);
+      this.map.fitBounds(this.georgiaBounds, { animate: true });
     }
   }
 
@@ -106,13 +105,9 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * ViewChild Setter: Angular guarantees this runs the exact millisecond
-   * #mapContainer is created and rendered in the DOM by the @if block.
-   */
   @ViewChild('mapContainer') set mapContainerSetter(element: ElementRef<HTMLElement> | undefined) {
     if (element && !this.map) {
-      this.initMap(); // this already calls fitBounds(georgiaBounds) once
+      this.initMap();
       this.addLandmarkMarkers();
 
       const filters = this.activeFilters();
@@ -153,17 +148,11 @@ export class MapComponent implements OnInit, OnDestroy {
     const region = readValue(fAny?.selectedRegion, this.selectedRegionInput);
     const category = readValue(fAny?.selectedNature, fAny?.selectedCategory, fAny?.category);
     const group = readValue(fAny?.selectedGroup, fAny?.group);
-    
-    // Read from the searchInput signal you defined in the service:
     const search = readValue(this.filter.searchInput, fAny?.searchTerm, fAny?.search, fAny?.filter);
 
-    const filterState: FilterState = { region, category, group, search };
-    return filterState;
+    return { region, category, group, search };
   });
 
-  public search(query: string): void {
-    this.filter.searchInput();
-  }
   private isFirstEffectRun = true;
 
   constructor() {
@@ -183,11 +172,9 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // 1. Fetch backend data first
     this.placesService.getPlaces().subscribe({
       next: (places: CsvPlace[]) => {
         this.landmarks = places.map((p) => this.mapCsvToLandmark(p));
-        // 2. Flip flag to true -> triggers @if block in HTML template
         this.isDataReady = true;
       },
       error: (err) => console.error('❌ [ngOnInit] Failed to load places CSV:', err)
@@ -197,7 +184,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private initMap(): void {
     if (this.map) return;
 
-    this.map = L.map('map', {
+    const mapOptions: L.MapOptions = {
       preferCanvas: true,
       center: [42.0, 43.6],
       zoom: 7,
@@ -206,15 +193,17 @@ export class MapComponent implements OnInit, OnDestroy {
       maxBounds: this.georgiaBounds.pad(0.15),
       maxBoundsViscosity: 0.8,
       zoomAnimation: true,
-      fadeAnimation: false,
+      fadeAnimation: true,
       markerZoomAnimation: true,
       zoomSnap: 0.5,
       zoomDelta: 0.5,
-      wheelPxPerZoomLevel: 120,
-      tapHold: false,
       bounceAtZoomLimits: false,
-      touchZoom: 'center'
-    });
+      scrollWheelZoom: true,
+      touchZoom: true
+    };
+    (mapOptions as any).tap = false;
+
+    this.map = L.map('map', mapOptions);
 
     this.map.fitBounds(this.georgiaBounds);
 
@@ -224,7 +213,7 @@ export class MapComponent implements OnInit, OnDestroy {
         maxZoom: 15,
         subdomains: 'abcd',
         attribution: '&copy; OpenStreetMap contributors & CartoDB',
-        keepBuffer: 3,
+        keepBuffer: 1, // Optimized memory buffer for iOS WebKit
         updateWhenIdle: true,
         updateWhenZooming: false
       }
@@ -262,8 +251,10 @@ export class MapComponent implements OnInit, OnDestroy {
           border: 2px solid #ffffff;
           box-shadow: 0 3px 8px rgba(0,0,0,0.25);
           cursor: pointer;
-          will-change: transform;
-          transform: translateZ(0);
+          transform: translate3d(0,0,0);
+          -webkit-transform: translate3d(0,0,0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
           contain: layout style;
         ">
           ${landmark.emoji}
@@ -396,7 +387,7 @@ export class MapComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.map.fitBounds(this.georgiaBounds);
+      this.map.fitBounds(this.georgiaBounds, { animate: true });
       return;
     }
 
@@ -432,7 +423,7 @@ export class MapComponent implements OnInit, OnDestroy {
       const bounds = L.latLngBounds(visibleCoords);
       this.map.fitBounds(bounds.pad(0.25), { maxZoom: 12, animate: true });
     } else {
-      this.map.fitBounds(this.georgiaBounds);
+      this.map.fitBounds(this.georgiaBounds, { animate: true });
     }
   }
 
