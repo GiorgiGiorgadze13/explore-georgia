@@ -5,6 +5,8 @@ import { LanguageService } from '../../Services/language.service';
 import { FilterCardService, toSimpleLatin } from '../../Services/filter-card.service';
 import { PlacesService } from '../../Services/places.service';
 import { CardImageService } from '../../Services/card-image.service';
+import { FavoritesService } from '../../Services/favorites.service';
+import { AuthService } from '../../Services/auth.service';
 
 export interface SearchResultItem {
   id: string;
@@ -29,6 +31,8 @@ export class HeaderComponent implements OnInit {
   public filterService = inject(FilterCardService);
   private placesService = inject(PlacesService);
   private imageService = inject(CardImageService);
+  public favService = inject(FavoritesService);
+  public authService = inject(AuthService);
   private router = inject(Router);
   private eRef = inject(ElementRef);
 
@@ -189,6 +193,11 @@ export class HeaderComponent implements OnInit {
 
   toggleLanguage() {
     this.langService.toggleLanguage();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 
   @HostListener('document:click', ['$event'])

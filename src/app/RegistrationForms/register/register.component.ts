@@ -1,18 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../../home/header/header.component';
 import { FooterComponent } from '../../home/footer/footer.component';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '../../Services/auth.service';
+import { LanguageService } from '../../Services/language.service';
 
 @Component({
   selector: 'app-register',
-  imports: [HeaderComponent,FooterComponent,ReactiveFormsModule],
-  standalone:true,
+  standalone: true,
+  imports: [CommonModule, HeaderComponent, FooterComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
 export class RegisterComponent {
-form = new FormGroup({
+  private authService = inject(AuthService);
+  public langService = inject(LanguageService);
+  private router = inject(Router);
+
+  errorMessage = '';
+
+  form = new FormGroup({
     firstName: new FormControl('', [Validators.required]),
     lastName: new FormControl('', [Validators.required]),
     birthDate: new FormControl('', [Validators.required]),
@@ -20,29 +29,34 @@ form = new FormGroup({
     address: new FormControl('', [Validators.required]),
     phone: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(4)]),
     terms: new FormControl(false, [Validators.requiredTrue]),
   });
 
-onSubmit() {
-  if (this.form.invalid) return;
+  onSubmit(): void {
+    if (this.form.invalid) {
+      this.errorMessage = this.langService.isGeo() 
+        ? 'გთხოვთ შეავსოთ ყველა სავალდებულო ველი და დაეთანხმოთ წესებს' 
+        : 'Please complete all required fields and accept terms.';
+      return;
+    }
 
-  const formValues = this.form.value;
+    const values = this.form.value;
+    const res = this.authService.register({
+      firstName: values.firstName!,
+      lastName: values.lastName!,
+      email: values.email!,
+      password: values.password!,
+      phone: values.phone || undefined,
+      birthDate: values.birthDate || undefined,
+      country: values.country || undefined,
+      address: values.address || undefined
+    });
 
-   const payload = {
-    firstName: formValues.firstName,
-    lastName: formValues.lastName,
-    email: formValues.email,
-    password: formValues.password,
-    phoneNumber: formValues.phone,   
-    dateOfBirth: formValues.birthDate, // Mapped
-    citizenship: formValues.country, // Mapped
-    city: 'Tbilisi',  
-    address: formValues.address,
-    isDisabledPerson: false, // Add missing field (or add a checkbox)
-    roleId: 1 // Add default role ID expected by your backend
-  };
-
-  // this.http.post('https://localhost:7037/api/auth/register', payload).subscribe(...)
-}
+    if (res.success) {
+      this.router.navigate(['/']);
+    } else {
+      this.errorMessage = res.message || (this.langService.isGeo() ? 'რეგისტრაციის შეცდომა' : 'Registration failed');
+    }
+  }
 }

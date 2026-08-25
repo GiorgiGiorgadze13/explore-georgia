@@ -1,22 +1,94 @@
- <div class="container font-kadwa">
+<div class="container font-kadwa">
+    <!-- Category Navigation Tabs -->
     <div class="pt-8 md:pt-12">
-    <ul class="flex flex-wrap justify-center sm:justify-around items-center gap-3 sm:gap-6 text-[#00000099] text-xs sm:text-sm md:text-base font-bold">
-        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="">ადგილის ძებნა</button></li>
-        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/events">ღონისძიებები</button></li>
-        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/experience">გამოცდილებები</button></li>
-        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/recomendation">რეკომენდაციები</button></li>
-        <li><button class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/">ტრადიცია</button></li>
-    </ul>
-</div>
-     <div class="flex flex-col md:flex-row pt-12 gap-8">
+        <ul class="flex flex-wrap justify-center sm:justify-around items-center gap-3 sm:gap-6 text-[#00000099] text-xs sm:text-sm md:text-base font-bold">
+            <li>
+                <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/"
+                    routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+                    {{ langService.isGeo() ? 'ადგილის ძებნა' : 'Find Place' }}
+                </button>
+            </li>
+            <li>
+                <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/events"
+                    routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+                    {{ langService.isGeo() ? 'ღონისძიებები' : 'Events' }}
+                </button>
+            </li>
+            <li>
+                <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/experience"
+                    routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+                    {{ langService.isGeo() ? 'გამოცდილებები' : 'Experiences' }}
+                </button>
+            </li>
+            <li>
+                <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/recomendation"
+                    routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+                    {{ langService.isGeo() ? 'რეკომენდაციები' : 'Recommendations' }}
+                </button>
+            </li>
+            <li>
+                <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/tradition"
+                    routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+                    {{ langService.isGeo() ? 'ტრადიცია' : 'Traditions' }}
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Category Quick Filters (ყველა, ბუნება, დასვენება, კულტურა, კვება) -->
+    <div class="pt-6 md:pt-8">
+        <ul class="flex flex-wrap justify-center sm:justify-start gap-2.5 sm:gap-4 md:gap-6 text-xs sm:text-sm">
+            <li>
+                <button type="button" (click)="selectNature('')"
+                    [class.bg-[#1F3D2B]]="!filterService.selectedNature()"
+                    [class.text-white]="!filterService.selectedNature()"
+                    class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
+                    {{ langService.t('ყველა', 'All') }}
+                </button>
+            </li>
+            <li>
+                <button type="button" (click)="selectNature('nature')"
+                    [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'nature'"
+                    [class.text-white]="filterService.selectedNature() === 'nature'"
+                    class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
+                    {{ langService.t('ბუნება', 'Nature') }}
+                </button>
+            </li>
+            <li>
+                <button type="button" (click)="selectNature('leisure')"
+                    [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'leisure'"
+                    [class.text-white]="filterService.selectedNature() === 'leisure'"
+                    class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
+                    {{ langService.t('დასვენება', 'Leisure') }}
+                </button>
+            </li>
+            <li>
+                <button type="button" (click)="selectNature('culture')"
+                    [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'culture'"
+                    [class.text-white]="filterService.selectedNature() === 'culture'"
+                    class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
+                    {{ langService.t('კულტურა', 'Culture') }}
+                </button>
+            </li>
+            <li>
+                <button type="button" (click)="selectNature('food')"
+                    [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'food'"
+                    [class.text-white]="filterService.selectedNature() === 'food'"
+                    class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
+                    {{ langService.t('კვება', 'Food') }}
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="flex flex-col md:flex-row pt-12 gap-8">
         <div class="flex-[1] relative">
             <app-filters></app-filters>
         </div>
-     
+
         <div class="flex flex-[3] flex-wrap justify-center md:justify-start gap-6">
-             <app-cards></app-cards>
-     
-     
+            <app-cards></app-cards>
         </div>
-     </div>
- </div>
+    </div>
+</div>

@@ -11,13 +11,15 @@
       <!-- Gradient Overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-[#012D1D]/90 via-[#012D1D]/30 to-transparent"></div>
 
-      <!-- Content Stack (Clean positioning without rigid fixed coordinates) -->
+      <!-- Content Stack -->
       <div class="relative z-10 flex flex-col gap-3">
         <h2 class="text-[#FCF9F8] text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
           Discover Georgia
         </h2>
         <p class="text-[#FFFFFFE5] text-sm sm:text-base lg:text-lg max-w-lg">
-          დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.
+          {{ langService.isGeo() 
+            ? 'დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.' 
+            : 'Start your journey. Discover unique places, culture, and traditions.' }}
         </p>
       </div>
     </div>
@@ -27,31 +29,46 @@
       <div>
         <!-- Header -->
         <div class="text-center mb-6">
-          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">პაროლის აღდგენა</h3>
-         </div>
+          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">
+            {{ langService.isGeo() ? 'პაროლის აღდგენა' : 'Password Recovery' }}
+          </h3>
+          <p class="text-[#0000005C] text-sm">
+            {{ langService.isGeo() ? 'შეიყვანეთ თქვენი ელფოსტა აღდგენის კოდის მისაღებად' : 'Enter your email to receive recovery code' }}
+          </p>
+        </div>
+
+        @if (errorMessage) {
+          <div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 text-xs sm:text-sm rounded-xl text-center font-semibold">
+            {{ langService.translate(errorMessage) }}
+          </div>
+        }
 
         <!-- Form Inputs -->
-        <div class="mt-6 flex flex-col gap-4">
+        <form (ngSubmit)="onSubmit()" class="mt-4 flex flex-col gap-4">
           <div>
-            <label class="block text-sm sm:text-base font-medium mb-1">ელფოსტა / მობილური</label>
-            <input type="text" placeholder="g@gmail.com" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
+            <label class="block text-sm sm:text-base font-medium mb-1">
+              {{ langService.isGeo() ? 'ელფოსტა' : 'Email Address' }}
+            </label>
+            <input type="email" [(ngModel)]="email" name="email" placeholder="g@gmail.com"
+                class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
           </div>
 
-          
-        </div>
-
-       <button class="mt-4 text-[#000000]">კოდის გაგზავნა </button>
-        <div class="mt-8 flex justify-center">
-          <button routerLink="/recoverCode" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium">
-            <span>დადასტურება</span> 
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
-            </svg>
-          </button>
-        </div>
+          <div class="mt-6 flex justify-center">
+            <button type="submit" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium cursor-pointer">
+              <span>{{ langService.isGeo() ? 'კოდის გაგზავნა' : 'Send Code' }}</span> 
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
+              </svg>
+            </button>
+          </div>
+        </form>
       </div>
 
-     
+      <div class="flex justify-center mt-6">
+        <a routerLink="/auth" class="text-xs sm:text-sm text-[#00000099] hover:underline cursor-pointer">
+          {{ langService.isGeo() ? 'ავტორიზაციაზე დაბრუნება' : 'Back to Sign In' }}
+        </a>
+      </div>
     </div>
 
   </div>

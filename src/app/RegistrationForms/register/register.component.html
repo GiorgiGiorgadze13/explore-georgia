@@ -17,7 +17,9 @@
           Discover Georgia
         </h2>
         <p class="text-[#FFFFFFE5] text-sm sm:text-base lg:text-lg max-w-lg">
-          დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.
+          {{ langService.isGeo() 
+            ? 'დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.' 
+            : 'Start your journey. Discover unique places, culture, and traditions.' }}
         </p>
       </div>
     </div>
@@ -27,19 +29,27 @@
       <div>
         <!-- Header -->
         <div class="text-center mb-6">
-          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">რეგისტრაცია</h3>
+          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">
+            {{ langService.isGeo() ? 'რეგისტრაცია' : 'Register' }}
+          </h3>
         </div>
 
-        <form [formGroup]="form" class="space-y-4">
+        @if (errorMessage) {
+          <div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 text-xs sm:text-sm rounded-xl text-center font-semibold">
+            {{ langService.translate(errorMessage) }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
           
           <!-- First Name & Last Name -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm sm:text-base font-medium mb-1">სახელი *</label>
+              <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'სახელი *' : 'First Name *' }}</label>
               <input type="text" formControlName="firstName" placeholder="მარი" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
             </div>
             <div>
-              <label class="block text-sm sm:text-base font-medium mb-1">გვარი *</label>
+              <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'გვარი *' : 'Last Name *' }}</label>
               <input type="text" formControlName="lastName" placeholder="ბერიანიძე" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
             </div>
           </div>
@@ -47,39 +57,38 @@
           <!-- Birth Date & Country -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm sm:text-base font-medium mb-1">დაბადების თარიღი *</label>
+              <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'დაბადების თარიღი *' : 'Date of Birth *' }}</label>
               <input type="date" formControlName="birthDate" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
             </div>
             <div>
-              <label class="block text-sm sm:text-base font-medium mb-1">ქვეყანა *</label>
+              <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'ქვეყანა *' : 'Country *' }}</label>
               <select formControlName="country" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332] bg-white">
-                <option value="" disabled selected>აირჩიეთ ქვეყანა</option>
-                <option value="საქართველო">საქართველო</option>
+                <option value="საქართველო">საქართველო (Georgia)</option>
               </select>
             </div>
           </div>
 
           <!-- Full Address -->
           <div>
-            <label class="block text-sm sm:text-base font-medium mb-1">სრული მისამართი *</label>
+            <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'სრული მისამართი *' : 'Full Address *' }}</label>
             <input type="text" formControlName="address" placeholder="თბილისი, რუსთაველის გამზ. 1" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
           </div>
 
           <!-- Mobile Phone -->
           <div>
-            <label class="block text-sm sm:text-base font-medium mb-1">მობილური *</label>
+            <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'მობილური *' : 'Phone *' }}</label>
             <input type="tel" formControlName="phone" placeholder="+995576123456" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
           </div>
 
           <!-- Email -->
           <div>
-            <label class="block text-sm sm:text-base font-medium mb-1">ელფოსტა *</label>
+            <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'ელფოსტა *' : 'Email *' }}</label>
             <input type="email" formControlName="email" placeholder="berianidze2004@gmail.com" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
           </div>
 
           <!-- Password -->
           <div>
-            <label class="block text-sm sm:text-base font-medium mb-1">პაროლი *</label>
+            <label class="block text-sm sm:text-base font-medium mb-1">{{ langService.isGeo() ? 'პაროლი *' : 'Password *' }}</label>
             <input type="password" formControlName="password" placeholder="••••••••" class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
           </div>
 
@@ -87,18 +96,24 @@
           <div class="flex items-start gap-3 pt-2">
             <input type="checkbox" formControlName="terms" id="terms" class="mt-1 h-4 w-4 rounded accent-[#1B4332] cursor-pointer">
             <label for="terms" class="text-xs sm:text-sm text-[#000000B2] cursor-pointer leading-tight">
-              ვეთანხმები წესებსა და პირობებს და კონფიდენციალურობის პოლიტიკას
+              {{ langService.isGeo() ? 'ვეთანხმები წესებსა და პირობებს და კონფიდენციალურობის პოლიტიკას' : 'I agree to Terms & Conditions and Privacy Policy' }}
             </label>
           </div>
 
           <!-- Submit Button -->
           <div class="pt-4 flex justify-center">
-            <button type="submit" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium">
-              <span>რეგისტრაცია</span> 
+            <button type="submit" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium cursor-pointer">
+              <span>{{ langService.isGeo() ? 'რეგისტრაცია' : 'Register' }}</span> 
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
               </svg>
             </button>
+          </div>
+
+          <div class="text-center pt-2">
+            <a routerLink="/auth" class="text-xs sm:text-sm text-[#00000099] hover:underline cursor-pointer">
+              {{ langService.isGeo() ? 'უკვე გაქვთ ანგარიში? ავტორიზაცია' : 'Already have an account? Sign In' }}
+            </a>
           </div>
 
         </form>

@@ -18,6 +18,22 @@ export interface CsvPlace {
 }
 
 const PLACES_CACHE_KEY = 'explore_georgia_places_cache';
+const CUSTOM_PLACES_KEY = 'explore_georgia_custom_places';
+
+export interface AddPlaceDto {
+  name: string;
+  category: string;
+  region: string;
+  description: string;
+  image?: string;
+  lat?: number;
+  lng?: number;
+  wheelchair?: boolean;
+  parking?: boolean;
+  food?: boolean;
+  wifi?: boolean;
+  hiddenGem?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +44,19 @@ export class PlacesService {
   private places$?: Observable<CsvPlace[]>;
 
   constructor(private http: HttpClient) {}
+
+  public getCustomPlaces(): CsvPlace[] {
+    try {
+      const stored = localStorage.getItem(CUSTOM_PLACES_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('⚠️ [PlacesService] Custom places read error:', e);
+    }
+    return [];
+  }
 
   private getStoredPlaces(): CsvPlace[] | null {
     try {
@@ -54,6 +83,15 @@ export class PlacesService {
     }
   }
 
+  private mergeWithCustomPlaces(basePlaces: CsvPlace[]): CsvPlace[] {
+    const custom = this.getCustomPlaces();
+    if (!custom.length) return basePlaces;
+
+    const customIds = new Set(custom.map(c => c.id));
+    const filteredBase = basePlaces.filter(p => !customIds.has(p.id));
+    return [...custom, ...filteredBase];
+  }
+
   getPlaces(): Observable<CsvPlace[]> {
     const cached = this.getStoredPlaces();
 
@@ -74,17 +112,68 @@ export class PlacesService {
         );
       }),
       map((data) => {
-        if (data && data.length > 0) {
-          this.saveStoredPlaces(data);
-          return data;
+        const base = (data && data.length > 0) ? data : (cached || []);
+        if (base.length > 0) {
+          this.saveStoredPlaces(base);
         }
-        return cached || [];
+        return this.mergeWithCustomPlaces(base);
       }),
       shareReplay(1)
     );
 
-    this.places$ = cached && cached.length > 0 ? of(cached).pipe(shareReplay(1)) : fetch$;
+    const mergedCached = cached && cached.length > 0 ? this.mergeWithCustomPlaces(cached) : null;
+    this.places$ = mergedCached ? of(mergedCached).pipe(shareReplay(1)) : fetch$;
     return this.places$;
+  }
+
+  addPlace(dto: AddPlaceDto): CsvPlace {
+    const customPlaces = this.getCustomPlaces();
+    const newPlace: CsvPlace = {
+      id: `custom-place-${Date.now()}`,
+      name: dto.name,
+      region: dto.region,
+      category: dto.category,
+      group_key: this.inferGroupKey(dto.category),
+      lat: dto.lat || 41.7151,
+      lng: dto.lng || 44.8271,
+      description: dto.description,
+      rating: 5.0,
+      tags: [
+        dto.category,
+        dto.region,
+        dto.hiddenGem ? 'Hidden Gem' : '',
+        dto.wheelchair ? 'ეტლით მისადგომი' : '',
+        dto.parking ? 'პარკინგი' : '',
+        dto.food ? 'კვების ობიექტი' : '',
+        dto.wifi ? 'Wi-Fi' : ''
+      ].filter(Boolean),
+      is_local: true,
+      hidden: dto.hiddenGem
+    };
+
+    const updatedCustom = [newPlace, ...customPlaces.filter(p => p.id !== newPlace.id)];
+    localStorage.setItem(CUSTOM_PLACES_KEY, JSON.stringify(updatedCustom));
+
+    const cached = this.getStoredPlaces() || [];
+    const updatedAll = [newPlace, ...cached.filter(p => p.id !== newPlace.id)];
+    this.saveStoredPlaces(updatedAll);
+
+    this.places$ = of(this.mergeWithCustomPlaces(updatedAll)).pipe(shareReplay(1));
+    return newPlace;
+  }
+
+  private inferGroupKey(category: string): string {
+    const c = category.toLowerCase();
+    if (c.includes('ტბა') || c.includes('ჩანჩქერი') || c.includes('კანიონი') || c.includes('მთა') || c.includes('ტყე') || c.includes('მდინარე')) {
+      return 'nature';
+    }
+    if (c.includes('ტაძარი') || c.includes('ეკლესია') || c.includes('ციხე') || c.includes('მონასტერი') || c.includes('მუზეუმი')) {
+      return 'culture';
+    }
+    if (c.includes('კვება') || c.includes('ღვინო') || c.includes('მარანი') || c.includes('რესტორანი')) {
+      return 'food';
+    }
+    return 'leisure';
   }
 
   private parseCsv(csvText: string): CsvPlace[] {

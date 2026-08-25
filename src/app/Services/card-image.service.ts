@@ -178,9 +178,27 @@ const DIVERSE_GENERAL_POOL = [
 })
 export class CardImageService {
 
+  setCustomImage(id: string, imageSrc: string): void {
+    try {
+      const stored = JSON.parse(localStorage.getItem('explore_georgia_custom_images') || '{}');
+      stored[id.trim().toLowerCase()] = imageSrc;
+      localStorage.setItem('explore_georgia_custom_images', JSON.stringify(stored));
+    } catch (e) {
+      console.warn('⚠️ [CardImageService] Failed to save custom image:', e);
+    }
+  }
+
   getImageForItem(id: string, title = '', category = '', region = ''): string {
     const cleanId = (id || '').trim().toLowerCase();
     const cleanTitle = (title || '').trim().toLowerCase();
+
+    // 0. Custom user uploaded image check
+    try {
+      const customImages = JSON.parse(localStorage.getItem('explore_georgia_custom_images') || '{}');
+      if (cleanId && customImages[cleanId]) {
+        return customImages[cleanId];
+      }
+    } catch (e) {}
 
     // 1. Direct ID match
     if (cleanId && EXACT_PLACE_IMAGES[cleanId]) {

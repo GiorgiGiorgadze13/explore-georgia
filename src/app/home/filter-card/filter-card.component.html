@@ -24,7 +24,7 @@
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/recomendation"
-                    routerLinkActive="text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+                    routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
                     {{ langService.isGeo() ? 'რეკომენდაციები' : 'Recommendations' }}
                 </button>
             </li>
@@ -111,7 +111,7 @@
                     class="w-full bg-white border border-[#00000020] p-4 rounded-2xl shadow-md mt-2 flex flex-col gap-4">
                     <select #natureRef (change)="selectNature(natureRef.value)"
                         class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
-                        <option value="" selected>{{ langService.t('ყველა ბუნება (All Nature)', 'All Nature') }}</option>
+                        <option value="" selected>{{ langService.t('  ბუნება  ', 'All Nature') }}</option>
                         <option value="waterfall">{{ langService.t('ჩანჩქერი', 'Waterfall') }}</option>
                         <option value="canyon">{{ langService.t('კანიონი', 'Canyon') }}</option>
                         <option value="cave">{{ langService.t('მღვიმე', 'Cave') }}</option>
@@ -126,7 +126,7 @@
 
                     <select #regionRef (change)="selectRegion(regionRef.value)"
                         class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
-                        <option value="" selected>{{ langService.t('ყველა რეგიონი (All Regions)', 'All Regions') }}</option>
+                        <option value="" selected>{{ langService.t(' რეგიონები  ', 'All Regions') }}</option>
                         <option value="აჭარა">{{ langService.t('აჭარა', 'Adjara') }}</option>
                         <option value="გურია">{{ langService.t('გურია', 'Guria') }}</option>
                         <option value="იმერეთი">{{ langService.t('იმერეთი', 'Imereti') }}</option>
@@ -174,17 +174,11 @@
             <div class="flex flex-col w-[280px] relative cursor-pointer hover:shadow-xl transition-all duration-300 group rounded-2xl overflow-hidden"
                 (click)="openDetails(card)">
 <div class="relative">
-  @if (!card.hasError) {
-    <img 
-      [src]="card.image || '/Rectangle1.png'" 
-      [alt]="langService.translate(card.title)"
-      class="w-full h-48 object-cover rounded-t-2xl"
-      (error)="card.hasError = true">
-  } @else {
-    <div class="w-full h-48 bg-[#1F3D2B1A] rounded-t-2xl flex items-center justify-center">
-      <span class="text-[#1F3D2B99] text-xs">{{ langService.t('სურათი მიუწვდომელია', 'Image unavailable') }}</span>
-    </div>
-  }
+  <img 
+    [src]="card.image || '/Rectangle1.png'" 
+    [alt]="langService.translate(card.title)"
+    class="w-full h-48 object-cover rounded-t-2xl"
+    (error)="onImageError(card)">
 
   <span class="absolute left-4 top-4 px-4 py-2 rounded-2xl text-white bg-[#1F3D2B80] text-xs font-semibold backdrop-blur-sm">
     {{ langService.translate(card.badge) }}
@@ -240,9 +234,10 @@
                         </button>
                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
                             class="cursor-pointer hover:scale-110 transition-transform"
-                            (click)="$event.stopPropagation()">
+                            (click)="toggleFavorite(card, $event)">
                             <path
                                 d="M27.7842 6.14666C27.1032 5.46533 26.2946 4.92485 25.4047 4.5561C24.5147 4.18735 23.5609 3.99756 22.5976 3.99756C21.6342 3.99756 20.6804 4.18735 19.7904 4.5561C18.9005 4.92485 18.0919 5.46533 17.4109 6.14666L15.9976 7.55999L14.5842 6.14666C13.2086 4.77107 11.3429 3.99827 9.39755 3.99827C7.45218 3.99827 5.58648 4.77107 4.21089 6.14666C2.8353 7.52225 2.0625 9.38795 2.0625 11.3333C2.0625 13.2787 2.8353 15.1444 4.21089 16.52L15.9976 28.3067L27.7842 16.52C28.4655 15.839 29.006 15.0304 29.3748 14.1405C29.7435 13.2505 29.9333 12.2966 29.9333 11.3333C29.9333 10.37 29.7435 9.41613 29.3748 8.52619C29.006 7.63624 28.4655 6.82767 27.7842 6.14666Z"
+                                [attr.fill]="favService.isFavorite(card.id) ? '#A74826' : 'none'"
                                 stroke="#A74826" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>

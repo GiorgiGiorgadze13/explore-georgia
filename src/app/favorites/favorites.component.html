@@ -1,5 +1,144 @@
 <app-header></app-header>
- 
-        
-<app-filter-card></app-filter-card>
+
+<div class="container mx-auto font-kadwa px-4 md:px-0 py-8 min-h-[65vh]">
+
+  <!-- Header Banner -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-[#0000001F] mb-8">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-[#1F3D2B]">
+        {{ langService.isGeo() ? 'ჩემი ფავორიტები' : 'My Favorites' }}
+      </h1>
+      <p class="text-[#00000099] text-xs sm:text-sm mt-1">
+        {{ langService.isGeo() ? 'თქვენს მიერ შენახული ადგილები და ღონისძიებები' : 'Your saved places and events' }}
+      </p>
+    </div>
+
+    @if (favService.count() > 0) {
+      <div class="flex items-center gap-4">
+        <span class="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-[#1F3D2B1A] text-[#1F3D2B]">
+          {{ langService.isGeo() ? 'სულ: ' + favService.count() : 'Total: ' + favService.count() }}
+        </span>
+        <button type="button" (click)="clearAll()" class="text-xs text-red-600 hover:text-red-800 font-semibold underline cursor-pointer">
+          {{ langService.isGeo() ? 'ყველას წაშლა' : 'Clear All' }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Cards Grid or Empty State -->
+  @if (favService.count() > 0) {
+    <div class="flex flex-wrap justify-center md:justify-start gap-6">
+
+      @for (card of favService.favorites(); track card.id) {
+        <div class="flex flex-col w-[280px] relative cursor-pointer hover:shadow-xl transition-all duration-300 group rounded-2xl overflow-hidden bg-white border border-[#00000010]"
+            (click)="openDetails(card)">
+
+          <!-- Image & Badge -->
+          <div class="relative">
+            @if (!card.hasError) {
+              <img 
+                [src]="card.image || '/Rectangle1.png'" 
+                [alt]="langService.translate(card.title)"
+                class="w-full h-48 object-cover rounded-t-2xl"
+                (error)="card.hasError = true">
+            } @else {
+              <div class="w-full h-48 bg-[#1F3D2B1A] rounded-t-2xl flex items-center justify-center">
+                <span class="text-[#1F3D2B99] text-xs">{{ langService.t('სურათი მიუწვდომელია', 'Image unavailable') }}</span>
+              </div>
+            }
+
+            @if (card.badge) {
+              <span class="absolute left-4 top-4 px-4 py-2 rounded-2xl text-white bg-[#1F3D2B80] text-xs font-semibold backdrop-blur-sm">
+                {{ langService.translate(card.badge) }}
+              </span>
+            }
+          </div>
+
+          <!-- Body -->
+          <div class="bg-[#0000000A] rounded-b-2xl py-4 pb-6 flex flex-col flex-1">
+            @if (card.tags && card.tags.length > 0) {
+              <div class="flex justify-evenly my-3 flex-wrap gap-1 px-2">
+                @for (tag of card.tags.slice(0, 2); track tag) {
+                  <button type="button"
+                      class="bg-[#CA4C1F1A] px-3 py-1 rounded-xl text-[#CA4C1FE5] text-xs font-medium">{{ langService.translate(tag) }}</button>
+                }
+              </div>
+            } @else if (card.dateOrPrice) {
+              <div class="flex justify-center my-3">
+                <button type="button"
+                    class="bg-[#CA4C1F1A] px-6 py-2 rounded-xl text-[#CA4C1FE5] text-xs font-semibold">
+                    {{ langService.translate(card.dateOrPrice) }}
+                </button>
+              </div>
+            }
+
+            <h2 class="text-[#1F3D2B] text-center font-bold text-lg px-2 mt-1 line-clamp-1">{{ langService.translate(card.title) }}</h2>
+            @if (card.description) {
+              <p class="text-[#00000099] text-xs text-center px-6 mt-3 leading-relaxed line-clamp-3 flex-1">
+                {{ langService.translate(card.description) }}
+              </p>
+            }
+
+            @if (card.location) {
+              <div class="flex justify-between px-6 my-4">
+                @if (card.metaBadge) {
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[#00000099] text-xs font-medium">{{ langService.translate(card.metaBadge) }}</span>
+                  </div>
+                }
+                <div class="flex items-center gap-1.5 ml-auto">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00187 9.44679C6.58187 9.44679 5.42188 8.29346 5.42188 6.86679C5.42188 5.44012 6.58187 4.29346 8.00187 4.29346C9.42188 4.29346 10.5819 5.44679 10.5819 6.87346C10.5819 8.30012 9.42188 9.44679 8.00187 9.44679Z" fill="black" fill-opacity="0.6" />
+                    <path d="M8.00109 15.1735C7.01443 15.1735 6.02109 14.8002 5.24776 14.0602C3.28109 12.1668 1.10776 9.14683 1.92776 5.5535C2.66776 2.2935 5.51443 0.833496 8.00109 0.833496C8.00109 0.833496 8.00109 0.833496 8.00776 0.833496C10.4944 0.833496 13.3411 2.2935 14.0811 5.56016C14.8944 9.1535 12.7211 12.1668 10.7544 14.0602C9.98109 14.8002 8.98776 15.1735 8.00109 15.1735ZM8.00109 1.8335C6.06109 1.8335 3.56776 2.86683 2.90776 5.7735C2.18776 8.9135 4.16109 11.6202 5.94776 13.3335C7.10109 14.4468 8.90776 1.8335 8.00109 1.8335Z" fill="black" fill-opacity="0.6" />
+                  </svg>
+                  <span class="text-[#00000099] text-xs font-medium">{{ langService.translate(card.location) }}</span>
+                </div>
+              </div>
+            }
+
+            <div class="flex justify-center items-center gap-8 mt-auto pt-2">
+              <button type="button" routerLink="/book"
+                  class="cursor-pointer bg-[#A74826B5] hover:bg-[#A74826] transition-colors rounded-2xl px-10 py-3 text-white text-sm font-semibold shadow-sm"
+                  (click)="$event.stopPropagation()">
+                  {{ langService.t('დაჯავშნე', 'Book Now') }}
+              </button>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  class="cursor-pointer hover:scale-110 transition-transform"
+                  (click)="removeFavorite(card.id, $event)">
+                  <path
+                      d="M27.7842 6.14666C27.1032 5.46533 26.2946 4.92485 25.4047 4.5561C24.5147 4.18735 23.5609 3.99756 22.5976 3.99756C21.6342 3.99756 20.6804 4.18735 19.7904 4.5561C18.9005 4.92485 18.0919 5.46533 17.4109 6.14666L15.9976 7.55999L14.5842 6.14666C13.2086 4.77107 11.3429 3.99827 9.39755 3.99827C7.45218 3.99827 5.58648 4.77107 4.21089 6.14666C2.8353 7.52225 2.0625 9.38844 2.0625 11.3333C2.0625 13.2787 2.8353 15.1444 4.21089 16.52L15.9976 28.3067L27.7842 16.52C28.4655 15.839 29.006 15.0304 29.3748 14.1405C29.7435 13.2505 29.9333 12.2966 29.9333 11.3333C29.9333 10.37 29.7435 9.41613 29.3748 8.52619C29.006 7.63624 28.4655 6.82767 27.7842 6.14666Z"
+                      fill="#A74826"
+                      stroke="#A74826" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      }
+
+    </div>
+  } @else {
+    <!-- Empty State -->
+    <div class="flex flex-col items-center justify-center py-16 text-center max-w-md mx-auto">
+      <div class="w-20 h-20 bg-[#1F3D2B14] text-[#A74826] rounded-full flex items-center justify-center mb-6">
+        <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M27.7842 6.14666C27.1032 5.46533 26.2946 4.92485 25.4047 4.5561C24.5147 4.18735 23.5609 3.99756 22.5976 3.99756C21.6342 3.99756 20.6804 4.18735 19.7904 4.5561C18.9005 4.92485 18.0919 5.46533 17.4109 6.14666L15.9976 7.55999L14.5842 6.14666C13.2086 4.77107 11.3429 3.99827 9.39755 3.99827C7.45218 3.99827 5.58648 4.77107 4.21089 6.14666C2.8353 7.52225 2.0625 9.38844 2.0625 11.3333C2.0625 13.2787 2.8353 15.1444 4.21089 16.52L15.9976 28.3067L27.7842 16.52C28.4655 15.839 29.006 15.0304 29.3748 14.1405C29.7435 13.2505 29.9333 12.2966 29.9333 11.3333C29.9333 10.37 29.7435 9.41613 29.3748 8.52619C29.006 7.63624 28.4655 6.82767 27.7842 6.14666Z" stroke="#A74826" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <h3 class="text-xl font-bold text-[#1F3D2B] mb-2">
+        {{ langService.isGeo() ? 'ფავორიტები ცარიელია' : 'No Favorites Yet' }}
+      </h3>
+      <p class="text-[#00000099] text-sm mb-6 leading-relaxed">
+        {{ langService.isGeo() ? 'თქვენ ჯერ არ გაქვთ დამატებული ფავორიტი ადგილები. დააჭირეთ გულის იკონს ბარათებზე მათ შესანახად.' : 'You haven\'t added any favorite places yet. Click the heart icon on any card to save it here.' }}
+      </p>
+      
+      <a routerLink="/" class="px-8 py-3 bg-[#1F3D2B] text-white text-sm font-semibold rounded-2xl hover:bg-[#162c1f] transition-colors shadow-md">
+        {{ langService.isGeo() ? 'ადგილების დათვალიერება' : 'Explore Places' }}
+      </a>
+    </div>
+  }
+
+</div>
+
 <app-footer></app-footer>

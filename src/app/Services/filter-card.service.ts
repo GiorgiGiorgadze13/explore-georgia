@@ -1,6 +1,24 @@
 import { Injectable, signal } from '@angular/core';
 
 export const CATEGORY_MAP: Record<string, string[]> = {
+  nature: [
+    'nature', 'ბუნება', 'buneba', 'waterfall', 'waterfalls', 'canyon', 'canyons', 'cave', 'caves', 'lake', 'lakes',
+    'river', 'rivers', 'mountain', 'mountains', 'forest', 'national-park', 'protected-area', 'valley', 'coast', 'spring',
+    'ჩანჩქერი', 'ჩანჩქერები', 'კანიონი', 'კანიონები', 'მღვიმე', 'მღვიმეები', 'გამოქვაბული', 'ტბა', 'ტბები',
+    'მდინარე', 'მდინარეები', 'მთა', 'მთები', 'მწვერვალი', 'ტყე', 'ტყეები', 'ეროვნული პარკი', 'ნაკრძალი',
+    'დაცული ტერიტორია', 'ხეობა', 'სანაპირო', 'ზღვა', 'წყარო', 'ბუნებრივი წყარო'
+  ],
+  leisure: [
+    'leisure', 'დასვენება', 'dasveneba', 'park', 'coast', 'resort', 'hotel', 'relax', 'beach',
+    'პარკი', 'ბაღი', 'სანაპირო', 'ზღვის სანაპირო', 'კურორტი', 'სასტუმრო', 'დასვენება', 'გართობა', 'ატრაქციონი'
+  ],
+  culture: [
+    'culture', 'კულტურა', 'kultura', 'church', 'monastery', 'fortress', 'castle', 'winery', 'wine', 'museum', 'bridge', 'history', 'heritage',
+    'ტაძარი', 'ეკლესია', 'მონასტერი', 'ჯვარი', 'ნიში', 'ციხე', 'ციხესიმაგრე', 'კოშკი', 'მარანი', 'ღვინო', 'მუზეუმი', 'ხიდი', 'ისტორია', 'კულტურა'
+  ],
+  food: [
+    'food', 'კვება', 'kveba', 'საკვები', 'რესტორანი', 'კაფე', 'სწრაფი კვება', 'სტრიტ-ფუდი', 'დესერტი', 'მარანი', 'ღვინო', 'ჭამა', 'გასტრონომია'
+  ],
   waterfall: ['waterfall', 'waterfalls', 'ჩანჩქერი', 'ჩანჩქერები', 'chanchkeri', 'chanckeri'],
   canyon: ['canyon', 'canyons', 'კანიონი', 'კანიონები', 'kanioni'],
   cave: ['cave', 'caves', 'მღვიმე', 'მღვიამე', 'გამოქვაბული', 'მღვიმეები', 'mghvime', 'mgvime'],
@@ -18,8 +36,7 @@ export const CATEGORY_MAP: Record<string, string[]> = {
   fortress: ['fortress', 'castle', 'ციხე', 'ციხესიმაგრე', 'კოშკი'],
   winery: ['winery', 'wine', 'მარანი', 'ღვინო'],
   museum: ['museum', 'მუზეუმი'],
-  bridge: ['bridge', 'ხიდი'],
-  food: ['food', 'საკვები', 'რესტორანი', 'კაფე', 'სწრაფი კვება', 'სტრიტ-ფუდი', 'დესერტი']
+  bridge: ['bridge', 'ხიდი']
 };
 
 export const REGION_MAP: Record<string, string[]> = {

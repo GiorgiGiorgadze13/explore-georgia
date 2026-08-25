@@ -15,6 +15,8 @@ import { RetypePasswordComponent } from './RegistrationForms/retype-password/ret
 import { CreditCardDetailsComponent } from './card-detailscomp/credit-card-details/credit-card-details.component';
 import { CardDetailsConfirmationComponent } from './card-detailscomp/card-details-confirmation/card-details-confirmation.component';
 
+import { authGuard, guestGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
   {
     path: '',
@@ -67,6 +69,7 @@ export const routes: Routes = [
   {
     path: 'addplace',
     component: AddPlaceComponent,
+    canActivate: [authGuard],
     data: {
       title: 'ადგილის დამატება',
       description: 'დაამატეთ ახალი საინტერესო ადგილი ან ღირსშესანიშნაობა Explore Georgia-ს პლატფორმაზე.'
@@ -83,6 +86,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     component: AuthComponent,
+    canActivate: [guestGuard],
     data: {
       title: 'ავტორიზაცია',
       description: 'შესვლა Explore Georgia-ს სისტემაში.'
@@ -91,6 +95,7 @@ export const routes: Routes = [
   {
     path: 'createAcc',
     component: RegisterComponent,
+    canActivate: [guestGuard],
     data: {
       title: 'რეგისტრაცია',
       description: 'შექმენით ანგარიში Explore Georgia-ზე.'
@@ -99,6 +104,7 @@ export const routes: Routes = [
   {
     path: 'recover',
     component: RecoverComponent,
+    canActivate: [guestGuard],
     data: {
       title: 'პაროლის აღდგენა',
       description: 'პაროლის აღდგენის გვერდი.'
@@ -107,6 +113,7 @@ export const routes: Routes = [
   {
     path: 'recoverCode',
     component: RecoverCodeComponent,
+    canActivate: [guestGuard],
     data: {
       title: 'აღდგენის კოდი',
       description: 'შეიყვანეთ უსაფრთხოების კოდი.'
@@ -115,6 +122,7 @@ export const routes: Routes = [
   {
     path: 'retypePassword',
     component: RetypePasswordComponent,
+    canActivate: [guestGuard],
     data: {
       title: 'ახალი პაროლი',
       description: 'შეიყვანეთ ახალი პაროლი.'
@@ -123,6 +131,7 @@ export const routes: Routes = [
   {
     path: 'book',
     component: CreditCardDetailsComponent,
+    canActivate: [authGuard],
     data: {
       title: 'დაჯავშნა',
       description: 'დაჯავშნა და გადახდის დეტალები.'
@@ -131,6 +140,7 @@ export const routes: Routes = [
   {
     path: 'cc-confirm',
     component: CardDetailsConfirmationComponent,
+    canActivate: [authGuard],
     data: {
       title: 'დაჯავშნის დადასტურება',
       description: 'თქვენი ჯავშანი წარმატებით დადასტურდა.'

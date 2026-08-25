@@ -15,7 +15,7 @@
       >
 
       <!-- TEXT -->
-      <div
+      <!-- <div
         class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-4"
       >
 
@@ -32,6 +32,30 @@
         </div>
 
         <p class="text-white text-center max-w-[550px] text-lg font-semibold md:text-base">
+          {{ langService.t(
+            'ადგილობრივი ლოკაციები, ღონისძიებები, გამოცდილებები და ის ადგილები, რომლებიც სხვა პლატფორმებზე თითქმის არ ჩანს.',
+            'Local spots, events, experiences, and hidden gems rarely found on other platforms.'
+          ) }}
+        </p>
+
+      </div> -->
+      <div
+        class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-4"
+      >
+
+        <div class="flex flex-col md:flex-row items-center gap-2 md:gap-10">
+
+          <span class="text-amber-400 font-bold text-3xl md:text-5xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {{ langService.t('აღმოაჩინე', 'Discover') }}
+          </span>
+
+          <span class="text-amber-400 font-bold text-3xl md:text-5xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {{ langService.t('საქართველო', 'Georgia') }}
+          </span>
+
+        </div>
+
+        <p class="text-amber-100 text-center max-w-[550px] text-lg font-semibold md:text-base drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
           {{ langService.t(
             'ადგილობრივი ლოკაციები, ღონისძიებები, გამოცდილებები და ის ადგილები, რომლებიც სხვა პლატფორმებზე თითქმის არ ჩანს.',
             'Local spots, events, experiences, and hidden gems rarely found on other platforms.'

@@ -147,7 +147,28 @@ const TRANSLATION_MAP: Record<string, string> = {
   'მტკვრის სანაპიროზე გამავალი ველობილიკი.': 'Bike path along the Mtkvari riverbank.',
   'ოჯახური მარანი, სადაც ღვინოს დეგუსტაციასთან ერთად სუფრასაც გიშლიან.': 'Family cellar serving wine degustation with home-cooked Georgian meals.',
   'ვერცხლის ტბები 2650 მეტრზე — ტურისტები აქ თითქმის არ დადიან.': 'Silver lakes at 2650 meters — untouched wilderness.',
-  'მწვერვალი — ქვემო ქართლი.': 'Peak — Kvemo Kartli.'
+  'მწვერვალი — ქვემო ქართლი.': 'Peak — Kvemo Kartli.',
+
+  // Errors & Notifications
+  'მომხმარებელი ამ მონაცემებით ვერ მოიძებნა': 'User not found with these credentials',
+  'პაროლი არასწორია': 'Incorrect password',
+  'მომხმარებელი ამ ელფოსტით უკვე არსებობს': 'User with this email already exists',
+  'გთხოვთ შეავსოთ ყველა ველი': 'Please fill in all fields',
+  'გთხოვთ შეავსოთ ყველა აუცილებელი ველი': 'Please fill in all required fields',
+  'პაროლები არ ემთხვევა': 'Passwords do not match',
+  'პაროლი უნდა შეიცავდეს სულ მცირე 6 სიმბოლოს': 'Password must be at least 6 characters',
+  'ავტორიზაციის შეცდომა': 'Authentication error',
+  'რეგისტრაციის შეცდომა': 'Registration error',
+  'გთხოვთ მიუთითოთ ადგილის სახელწოდება': 'Please specify place name',
+  'გთხოვთ აირჩიოთ კატეგორია': 'Please select a category',
+  'გთხოვთ აირჩიოთ რეგიონი': 'Please select a region',
+  'გთხოვთ შეიყვანოთ ადგილის აღწერა / ისტორია': 'Please enter place description / history',
+  'ადგილი წარმატებით დაემატა!': 'Place added successfully!',
+  'ადგილის დამატებისას დაფიქსირდა შეცდომა': 'An error occurred while adding place',
+  'გთხოვთ შეიყვანოთ ელფოსტა': 'Please enter email',
+  'კოდი არასწორია': 'Code is incorrect',
+  'პაროლი წარმატებით შეიცვალა': 'Password changed successfully',
+  'გთხოვთ აირჩიოთ ვალიდური ფოტოს ფაილი (JPG, PNG)': 'Please select a valid image file (JPG, PNG)'
 };
 
 const GEO_TO_ENG_CHAR_MAP: Record<string, string> = {

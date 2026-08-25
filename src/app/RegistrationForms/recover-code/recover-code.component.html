@@ -5,19 +5,16 @@
     
     <!-- LEFT: Hero Image Banner -->
     <div class="relative overflow-hidden rounded-2xl w-full lg:w-1/2 min-h-[350px] sm:min-h-[420px] lg:min-h-full flex flex-col justify-end p-6 sm:p-10">
-      <!-- Background Image -->
       <img src="/hero-georgia.jpg" alt="landscape" class="absolute inset-0 w-full h-full object-cover">
-      
-      <!-- Gradient Overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-[#012D1D]/90 via-[#012D1D]/30 to-transparent"></div>
-
-      <!-- Content Stack (Clean positioning without rigid fixed coordinates) -->
       <div class="relative z-10 flex flex-col gap-3">
         <h2 class="text-[#FCF9F8] text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
           Discover Georgia
         </h2>
         <p class="text-[#FFFFFFE5] text-sm sm:text-base lg:text-lg max-w-lg">
-          დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.
+          {{ langService.isGeo() 
+            ? 'დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.' 
+            : 'Start your journey. Discover unique places, culture, and traditions.' }}
         </p>
       </div>
     </div>
@@ -25,63 +22,54 @@
     <!-- RIGHT: Auth Card -->
     <div class="w-full lg:w-1/2 max-w-md mx-auto lg:mx-0 bg-[#1B433205] border border-[#C1C8C24D] shadow-[0_4px_20px_0_#1B433205] px-5 py-6 sm:px-8 sm:py-8 rounded-2xl flex flex-col justify-between">
       <div>
-        <!-- Header -->
         <div class="text-center mb-6">
-          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">შეიყვანეთ კოდი</h3>
-            <p class="text-[#00000096] text-sm sm:text-base lg:text-lg max-w-lg">
-         ჩვენ ახლახანს გამოგიგზავნეთ 4 ნიშნა კოდი თქვენს ელფოსტაზე
-        </p>
-         </div>
-
- <div class="flex flex-col gap-2">
-  <!-- Label -->
-  <label class="text-[#00000099] text-sm font-normal">შეიყვანეთ კოდი</label>
-
-  <!-- OTP Inputs Container -->
-  <div class="flex items-center gap-3 sm:gap-4">
-    <input 
-      type="text" 
-      inputmode="numeric" 
-      maxlength="1" 
-      placeholder="—"
-      class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] placeholder-[#00000033] text-[#1B1C1C]"
-    >
-    <input 
-      type="text" 
-      inputmode="numeric" 
-      maxlength="1" 
-      placeholder="—"
-      class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] placeholder-[#00000033] text-[#1B1C1C]"
-    >
-    <input 
-      type="text" 
-      inputmode="numeric" 
-      maxlength="1" 
-      placeholder="—"
-      class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] placeholder-[#00000033] text-[#1B1C1C]"
-    >
-    <input 
-      type="text" 
-      inputmode="numeric" 
-      maxlength="1" 
-      placeholder="—"
-      class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] placeholder-[#00000033] text-[#1B1C1C]"
-    >
-  </div>
-</div>
-
-         <div class="mt-8 flex justify-center">
-          <button routerLink="/retypePassword" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium">
-            <span>დადასტურება</span> 
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
-            </svg>
-          </button>
+          <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">
+            {{ langService.isGeo() ? 'შეიყვანეთ კოდი' : 'Enter Code' }}
+          </h3>
+          <p class="text-[#00000096] text-sm sm:text-base max-w-lg">
+            {{ langService.isGeo() ? 'ჩვენ გამოგიგზავნეთ 4 ნიშნა კოდი თქვენს ელფოსტაზე' : 'We sent a 4-digit code to your email' }}
+          </p>
         </div>
-        <p class="text-center mt-4 text-[#000000FA]">კოდის ახლიდან გაგზვნა</p>
-      </div>
 
-     
+        @if (errorMessage) {
+          <div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 text-xs sm:text-sm rounded-xl text-center font-semibold">
+            {{ langService.translate(errorMessage) }}
+          </div>
+        }
+
+        <form (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+          <div class="flex flex-col gap-2">
+            <label class="text-[#00000099] text-sm font-normal">
+              {{ langService.isGeo() ? 'შეიყვანეთ კოდი' : 'Enter verification code' }}
+            </label>
+
+            <!-- OTP Inputs Container -->
+            <div class="flex items-center justify-center gap-3 sm:gap-4">
+              <input type="text" #digit1 [(ngModel)]="c1" name="c1" inputmode="numeric" maxlength="1" placeholder="—" (input)="onDigitInput($event, digit2)"
+                class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] text-[#1B1C1C]">
+              <input type="text" #digit2 [(ngModel)]="c2" name="c2" inputmode="numeric" maxlength="1" placeholder="—" (input)="onDigitInput($event, digit3)"
+                class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] text-[#1B1C1C]">
+              <input type="text" #digit3 [(ngModel)]="c3" name="c3" inputmode="numeric" maxlength="1" placeholder="—" (input)="onDigitInput($event, digit4)"
+                class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] text-[#1B1C1C]">
+              <input type="text" #digit4 [(ngModel)]="c4" name="c4" inputmode="numeric" maxlength="1" placeholder="—" (input)="onDigitInput($event)"
+                class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-medium border border-[#0000001F] rounded-xl focus:outline-none focus:border-[#1B4332] text-[#1B1C1C]">
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-center">
+            <button type="submit" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium cursor-pointer">
+              <span>{{ langService.isGeo() ? 'დადასტურება' : 'Confirm' }}</span> 
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        <p class="text-center mt-6 text-[#000000FA] text-xs sm:text-sm cursor-pointer hover:underline">
+          {{ langService.isGeo() ? 'კოდის ხელახლა გაგზავნა' : 'Resend Code' }}
+        </p>
+      </div>
     </div>
 
   </div>

@@ -8,6 +8,7 @@ import { PlacesService } from '../../Services/places.service';
 import { EventsService } from '../../Services/events.service';
 import { ExperiencesService } from '../../Services/experiences.service';
 import { CardImageService } from '../../Services/card-image.service';
+import { FavoritesService } from '../../Services/favorites.service';
 
 export interface DisplayCard {
   id: string;
@@ -43,6 +44,7 @@ export class FilterCardComponent implements OnInit {
   private eventsService = inject(EventsService);
   private experiencesService = inject(ExperiencesService);
   private imageService = inject(CardImageService);
+  public favService = inject(FavoritesService);
   private router = inject(Router);
 
   showFilters = false;
@@ -119,8 +121,13 @@ export class FilterCardComponent implements OnInit {
     return [];
   }
 
+  onImageError(card: DisplayCard): void {
+    card.hasError = true;
+    this.cards.update(list => [...list]);
+  }
+
   filteredCards = computed(() => {
-    let list = this.cards();
+    let list = this.cards().filter(c => !c.hasError);
     const region = this.filter.selectedRegion();
     const nature = this.filter.selectedNature();
     const search = this.filter.searchInput();
@@ -215,6 +222,22 @@ export class FilterCardComponent implements OnInit {
     this.filter.searchInput.set('');
     this.filter.wheelchairAccessible.set(false);
     this.currentPage.set(1);
+  }
+
+  toggleFavorite(card: DisplayCard, event: Event): void {
+    event.stopPropagation();
+    this.favService.toggleFavorite({
+      id: card.id,
+      title: card.title,
+      badge: card.badge,
+      description: card.description,
+      location: card.location,
+      metaBadge: card.metaBadge,
+      dateOrPrice: card.dateOrPrice,
+      image: card.image,
+      tags: card.tags,
+      type: card.type
+    });
   }
 
   openDetails(card: DisplayCard): void {
