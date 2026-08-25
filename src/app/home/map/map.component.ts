@@ -64,13 +64,52 @@ export class MapComponent implements OnInit, OnDestroy {
   public landmarks: Landmark[] = [];
   public isDataReady = false;
 
+  public isMobile = false;
+  public isMobileMapActive = false;
+
   private map?: L.Map;
-  private markers = new Map<string | number, L.Marker>();
+  private markers = new Map<string | number, L.CircleMarker | L.Marker>();
+  private canvasRenderer = L.canvas({ padding: 0.5 });
   private georgiaBounds = L.latLngBounds([40.9, 39.8], [43.65, 46.8]);
 
   public resetMapView(): void {
     if (this.map) {
       this.map.fitBounds(this.georgiaBounds, { animate: true });
+    }
+  }
+
+  public enableMobileMap(): void {
+    this.isMobileMapActive = true;
+    if (this.map) {
+      this.map.dragging.enable();
+      this.map.touchZoom.enable();
+      const container = this.map.getContainer();
+      if (container) {
+        container.classList.add('mobile-active');
+        container.style.touchAction = 'none';
+      }
+    }
+  }
+
+  public toggleMobileMap(): void {
+    this.isMobileMapActive = !this.isMobileMapActive;
+    if (this.map) {
+      const container = this.map.getContainer();
+      if (this.isMobileMapActive) {
+        this.map.dragging.enable();
+        this.map.touchZoom.enable();
+        if (container) {
+          container.classList.add('mobile-active');
+          container.style.touchAction = 'none';
+        }
+      } else {
+        this.map.dragging.disable();
+        this.map.touchZoom.disable();
+        if (container) {
+          container.classList.remove('mobile-active');
+          container.style.touchAction = 'pan-y';
+        }
+      }
     }
   }
 
@@ -172,6 +211,8 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || L.Browser.mobile);
+
     this.placesService.getPlaces().subscribe({
       next: (places: CsvPlace[]) => {
         this.landmarks = places.map((p) => this.mapCsvToLandmark(p));
@@ -198,13 +239,13 @@ export class MapComponent implements OnInit, OnDestroy {
       zoomSnap: 0.5,
       zoomDelta: 0.5,
       bounceAtZoomLimits: false,
-      scrollWheelZoom: true,
-      touchZoom: true
+      scrollWheelZoom: !this.isMobile,
+      dragging: !this.isMobile,
+      touchZoom: !this.isMobile
     };
     (mapOptions as any).tap = false;
 
     this.map = L.map('map', mapOptions);
-
     this.map.fitBounds(this.georgiaBounds);
 
     L.tileLayer(
@@ -213,7 +254,7 @@ export class MapComponent implements OnInit, OnDestroy {
         maxZoom: 15,
         subdomains: 'abcd',
         attribution: '&copy; OpenStreetMap contributors & CartoDB',
-        keepBuffer: 1, // Optimized memory buffer for iOS WebKit
+        keepBuffer: 1,
         updateWhenIdle: true,
         updateWhenZooming: false
       }
@@ -235,36 +276,6 @@ export class MapComponent implements OnInit, OnDestroy {
     };
   }
 
-  private createMarkerIcon(landmark: Landmark, size = 30): L.DivIcon {
-    return L.divIcon({
-      className: 'custom-map-marker-pin',
-      html: `
-        <span style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: ${size}px;
-          height: ${size}px;
-          font-size: ${size * 0.55}px;
-          border-radius: 9999px;
-          background: ${landmark.color};
-          border: 2px solid #ffffff;
-          box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-          cursor: pointer;
-          transform: translate3d(0,0,0);
-          -webkit-transform: translate3d(0,0,0);
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-          contain: layout style;
-        ">
-          ${landmark.emoji}
-        </span>
-      `,
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2]
-    });
-  }
-
   private addLandmarkMarkers(): void {
     if (!this.map) return;
 
@@ -272,8 +283,34 @@ export class MapComponent implements OnInit, OnDestroy {
     this.markers.clear();
 
     this.landmarks.forEach((landmark) => {
-      const icon = this.createMarkerIcon(landmark);
-      const marker = L.marker(landmark.coordinates, { icon });
+      const iconHtml = `
+        <div class="custom-map-marker-pin" style="
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background-color: ${landmark.color};
+          border: 2px solid #ffffff;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          cursor: pointer;
+          user-select: none;
+        ">
+          ${landmark.emoji}
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: iconHtml,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -16]
+      });
+
+      const marker = L.marker(landmark.coordinates, { icon: customIcon });
 
       const safeId = String(landmark.id).replace(/[^a-zA-Z0-9-_]/g, '_');
       const btnId = `map-btn-${safeId}`;
@@ -447,7 +484,7 @@ export class MapComponent implements OnInit, OnDestroy {
     if (combined.includes('კანიონი') || combined.includes('canyon')) return '🏜️';
     if (combined.includes('მდინარე') || combined.includes('river')) return '🌊';
     if (combined.includes('მთა') || combined.includes('mountain') || combined.includes('მწვერვალი')) return '🏔️';
-    if (combined.includes('მღვიმე') || combined.includes('მღვიამე') || combined.includes('cave') || combined.includes('გამოქვაბული')) return '🕳️';
+    if (combined.includes('მღვიამე') || combined.includes('მღვიმე') || combined.includes('cave') || combined.includes('გამოქვაბული')) return '🕳️';
     if (combined.includes('ტყე') || combined.includes('forest')) return '🌲';
     if (combined.includes('ეროვნული პარკი') || combined.includes('national park')) return '🏕️';
     if (combined.includes('დაცული ტერიტორია') || combined.includes('ნაკრძალი')) return '🛡️';

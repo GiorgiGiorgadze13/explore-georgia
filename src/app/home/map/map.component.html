@@ -3,15 +3,27 @@
     <div class="flex items-center gap-3">
       <span class="w-3 h-8 bg-[#1F3D2B] rounded-full inline-block"></span>
       <span class="font-bold text-2xl text-[#1F3D2B] block">
-        რუკით ძიება
+        {{ langService.t('რუკით ძიება', 'Search by Map') }}
       </span>
     </div>
     @if (isDataReady) {
-      <button 
-        (click)="resetMapView()" 
-        class="text-xs font-semibold text-[#1F3D2B] bg-[#1F3D2B]/10 hover:bg-[#1F3D2B]/20 transition px-3 py-1.5 rounded-lg flex items-center gap-1">
-        🔄 ხედვის გადატვირთვა
-      </button>
+      <div class="flex items-center gap-2">
+        @if (isMobile) {
+          <button 
+            type="button"
+            (click)="toggleMobileMap()" 
+            class="md:hidden text-xs font-bold px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm border border-transparent"
+            [ngClass]="isMobileMapActive ? 'bg-[#A74826] text-white' : 'bg-[#1F3D2B] text-white'">
+            {{ isMobileMapActive ? '🔒 ' + langService.t('გვერდის სქროლი', 'Lock Map') : '🔓 ' + langService.t('რუკის მართვა', 'Enable Map') }}
+          </button>
+        }
+        <button 
+          type="button"
+          (click)="resetMapView()" 
+          class="text-xs font-semibold text-[#1F3D2B] bg-[#1F3D2B]/10 hover:bg-[#1F3D2B]/20 transition px-3 py-1.5 rounded-xl flex items-center gap-1">
+          🔄 {{ langService.t('ხედვის გადატვირთვა', 'Reset View') }}
+        </button>
+      </div>
     }
   </div>
 
@@ -20,13 +32,31 @@
       <div
         #mapContainer
         id="map"
-        class="w-full h-[450px] md:h-[550px] max-w-full z-0">
+        class="w-full h-[400px] sm:h-[450px] md:h-[550px] max-w-full z-0">
       </div>
+
+      <!-- Mobile Scroll Overlay Helper -->
+      @if (isMobile && !isMobileMapActive) {
+        <div 
+          (click)="enableMobileMap()"
+          (touchstart)="enableMobileMap()"
+          class="md:hidden absolute inset-0 bg-black/30 z-10 flex flex-col items-center justify-center text-white cursor-pointer p-4 text-center transition-all touch-pan-y">
+          <div class="bg-[#1F3D2BE6] px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold border border-white/20">
+            <span>🖐️</span>
+            <span>{{ langService.t('დააჭირეთ რუკის სამართავად', 'Tap to control map') }}</span>
+          </div>
+          <p class="text-[11px] mt-2 text-white drop-shadow-md font-medium">
+            {{ langService.t('თითით ჩვეულებრივ ჩასქროლავთ გვერდზე', 'Swipe to scroll page normally') }}
+          </p>
+        </div>
+      }
     </div>
   } @else {
-    <div class="w-full h-[450px] md:h-[550px] max-w-full rounded-2xl overflow-hidden mb-12 flex flex-col items-center justify-center bg-gray-50 border border-gray-200 text-gray-500 gap-3 shadow-inner">
+    <div class="w-full h-[400px] sm:h-[450px] md:h-[550px] max-w-full rounded-2xl overflow-hidden mb-12 flex flex-col items-center justify-center bg-gray-50 border border-gray-200 text-gray-500 gap-3 shadow-inner">
       <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1F3D2B]"></div>
-      <p class="text-sm font-medium">რუკა და მონაცემები იტვირთება...</p>
+      <p class="text-sm font-medium">
+        {{ langService.t('რუკა და მონაცემები იტვირთება...', 'Loading map and landmarks...') }}
+      </p>
     </div>
   }
 </div>

@@ -107,7 +107,7 @@ export class FilterCardService {
   selectedRegion = signal<string>('');
   selectedNature = signal<string>('');
   wheelchairAccessible = signal<boolean>(false);
-  searchInput = signal<string>('');
+  searchInput = signal<string>('ჩანჩქერები, მთები');
 
   matchesRegion(itemRegion = '', itemName = '', queryRegion = ''): boolean {
     if (!queryRegion || queryRegion.trim() === '' || queryRegion === 'აირჩიეთ რეგიონი') {
@@ -269,10 +269,12 @@ export class FilterCardService {
       return true;
     }
 
-    // 5. Multi-term query matching
-    const terms = q.split(/\s+/).filter(Boolean);
+    // 5. Multi-term query matching (supports comma / "და" / "and" / spaces)
+    const rawTerms = q.split(/[,;\s]+/).map(t => t.trim()).filter(Boolean);
+    const terms = rawTerms.filter(t => t !== 'და' && t !== 'da' && t !== 'and' && t !== 'or');
+
     if (terms.length > 1) {
-      const allTermsMatch = terms.every(term => {
+      const matchTerm = (term: string) => {
         const sTerm = toSimpleLatin(term);
         return (
           title.includes(term) ||
@@ -290,8 +292,10 @@ export class FilterCardService {
           this.matchesRegion(location, title, term) ||
           this.matchesNature(badge, title, description, tagsStr, term)
         );
-      });
-      if (allTermsMatch) {
+      };
+
+      const anyTermsMatch = terms.some(matchTerm);
+      if (anyTermsMatch) {
         return true;
       }
     }

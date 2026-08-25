@@ -4,19 +4,24 @@
 }
 
 #map {
-  touch-action: manipulation;
+  touch-action: pan-y !important;
   -webkit-tap-highlight-color: transparent;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
 }
 
 .leaflet-container {
-  touch-action: manipulation;
+  touch-action: pan-y !important;
   background-color: #f8fafc !important;
   font-family: inherit;
   outline: none;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
+}
+
+#map.mobile-active,
+.leaflet-container.mobile-active {
+  touch-action: none !important;
 }
 
 .leaflet-tile {
