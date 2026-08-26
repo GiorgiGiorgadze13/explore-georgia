@@ -12,19 +12,29 @@
 
 html {
   width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
 body {
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
-  min-height: -webkit-fill-available;
+  min-height: 100dvh;
   overflow-x: hidden;
   position: relative;
   -webkit-overflow-scrolling: touch;
   background-color: #FAF7F0;
   color: #1F3D2B;
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .container {
