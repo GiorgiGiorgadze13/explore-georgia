@@ -14,8 +14,9 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
   -webkit-text-size-adjust: 100%;
-  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -24,6 +25,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
   -webkit-overflow-scrolling: touch;
   background-color: #FAF7F0;
@@ -35,6 +37,8 @@ app-root {
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .container {

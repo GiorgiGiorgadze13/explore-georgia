@@ -54,6 +54,12 @@ export class FilterCardComponent implements OnInit {
    ngOnInit(): void {
     const url = this.router.url;
 
+    const notifyScrollUpdate = () => {
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+      }
+    };
+
     if (url.includes('/events')) {
       this.eventsService.getEvents().subscribe({
         next: (events) => {
@@ -68,6 +74,7 @@ export class FilterCardComponent implements OnInit {
             image: this.imageService.getImageForItem(e.id, e.title, e.type, e.place),
             type: 'event'
           })));
+          notifyScrollUpdate();
         }
       });
     } else if (url.includes('/experience')) {
@@ -84,6 +91,7 @@ export class FilterCardComponent implements OnInit {
             image: this.imageService.getImageForItem(e.id, e.title, e.kind, e.region),
             type: 'experience'
           })));
+          notifyScrollUpdate();
         }
       });
     } else {
@@ -100,6 +108,7 @@ export class FilterCardComponent implements OnInit {
             tags: this.parseTags(p.tags),
             type: 'place'
           })));
+          notifyScrollUpdate();
         }
       });
     }
