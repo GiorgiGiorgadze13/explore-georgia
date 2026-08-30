@@ -249,11 +249,11 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.fitBounds(this.georgiaBounds);
 
     L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
-        maxZoom: 15,
-        subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap contributors & CartoDB',
+        maxZoom: 19,
+        maxNativeZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         keepBuffer: 1,
         updateWhenIdle: true,
         updateWhenZooming: false

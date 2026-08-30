@@ -26,7 +26,6 @@ body {
   background-color: #FAF7F0;
   color: #1F3D2B;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
 }
 
 app-root {
@@ -52,6 +51,7 @@ app-root {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
 .active {
   color: #A74826;
   font-weight: bold;
