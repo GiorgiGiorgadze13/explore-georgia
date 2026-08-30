@@ -10,18 +10,11 @@
   padding: 0;
 }
 
-html {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
+html, body {
   width: 100%;
   max-width: 100%;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: -webkit-fill-available; /* Accounts for dynamic iOS Safari toolbars */
   overflow-x: hidden;
   background-color: #FAF7F0;
   color: #1F3D2B;
@@ -32,7 +25,7 @@ app-root {
   display: block;
   width: 100%;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: -webkit-fill-available;
 }
 
 .container {
