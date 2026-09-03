@@ -193,7 +193,25 @@
 
     <!-- Map section -->
     <div class="mt-10 max-w-5xl mx-auto">
-        <app-map></app-map>
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-lg sm:text-xl font-bold text-[#1F3D2B]">📍 {{ langService.t('ლოკაციის მონიშვნა რუკაზე', 'Pin Location on Map', 'Отметить место на карте') }}</span>
+                <span class="text-xs px-3 py-1 bg-[#1F3D2B]/10 text-[#1F3D2B] rounded-full font-semibold">
+                    {{ langService.t('დააჭირეთ რუკას მონიშვნისთვის', 'Click map to pin location', 'Нажмите на карту для отметки') }}
+                </span>
+            </div>
+            @if (selectedLat !== null && selectedLng !== null) {
+                <div class="flex items-center gap-2 bg-green-100 border border-green-400 text-green-800 text-xs px-3 py-1.5 rounded-xl font-semibold">
+                    ✅ {{ langService.t('მონიშნულია', 'Pinned', 'Отмечено') }}: {{ selectedLat }}, {{ selectedLng }}
+                </div>
+            } @else {
+                <div class="text-xs text-amber-700 font-medium">
+                    ⚠️ {{ langService.t('ლოკაცია ჯერ არ არის არჩეული (დააჭირეთ რუკას)', 'Location not pinned yet (click on map)', 'Локация не выбрана (нажмите на карту)') }}
+                </div>
+            }
+        </div>
+
+        <app-map [selectMode]="true" [selectedRegion]="region" (locationSelected)="onLocationSelected($event)"></app-map>
     </div>
 
     <div class="flex flex-col gap-2 items-center mt-6 px-2">

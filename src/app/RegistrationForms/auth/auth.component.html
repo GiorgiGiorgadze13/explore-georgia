@@ -17,9 +17,7 @@
           Discover Georgia
         </h2>
         <p class="text-[#FFFFFFE5] text-sm sm:text-base lg:text-lg max-w-lg">
-          {{ langService.isGeo() 
-            ? 'დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.' 
-            : 'Start your journey. Discover unique places, culture, and traditions.' }}
+          {{ langService.t('დაიწყეთ თქვენი მოგზაურობა. აღმოაჩინეთ უნიკალური ადგილები, კულტურა და ტრადიციები.') }}
         </p>
       </div>
     </div>
@@ -30,10 +28,10 @@
         <!-- Header -->
         <div class="text-center mb-6">
           <h3 class="text-[#1B1C1C] text-2xl sm:text-3xl font-bold mb-2">
-            {{ langService.isGeo() ? 'ავტორიზაცია' : 'Sign In' }}
+            {{ langService.t('ავტორიზაცია') }}
           </h3>
           <span class="block text-[#0000005C] text-sm sm:text-base">
-            {{ langService.isGeo() ? 'გთხოვთ შეიყვანოთ თქვენი მონაცემები' : 'Please enter your credentials' }}
+            {{ langService.t('გთხოვთ შეიყვანოთ თქვენი მონაცემები', 'Please enter your credentials', 'Пожалуйста, введите ваши данные') }}
           </span>
         </div>
 
@@ -47,7 +45,7 @@
         <form (ngSubmit)="onSubmit()" class="mt-4 flex flex-col gap-4">
           <div>
             <label class="block text-sm sm:text-base font-medium mb-1">
-              {{ langService.isGeo() ? 'ელფოსტა / მობილური' : 'Email / Mobile' }}
+              {{ langService.t('ელფოსტა / მობილური', 'Email / Mobile', 'Эл. почта / Телефон') }}
             </label>
             <input type="text" [(ngModel)]="emailOrPhone" name="emailOrPhone" placeholder="g@gmail.com"
                 class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
@@ -55,7 +53,7 @@
 
           <div>
             <label class="block text-sm sm:text-base font-medium mb-1">
-              {{ langService.isGeo() ? 'პაროლი' : 'Password' }}
+              {{ langService.t('პაროლი') }}
             </label>
             <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••"
                 class="w-full py-3 px-4 border border-[#00000017] rounded-lg focus:outline-none focus:border-[#1B4332]">
@@ -64,7 +62,7 @@
           <!-- Submit Button -->
           <div class="mt-6 flex justify-center">
             <button type="submit" class="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#1B4332] hover:bg-[#143326] transition-colors py-3.5 px-12 rounded-2xl text-white font-medium cursor-pointer">
-              <span>{{ langService.isGeo() ? 'ავტორიზაცია' : 'Sign In' }}</span> 
+              <span>{{ langService.t('ავტორიზაცია') }}</span> 
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9.13125 6.75H0V5.25H9.13125L4.93125 1.05L6 0L12 6L6 12L4.93125 10.95L9.13125 6.75Z" fill="white"/>
               </svg>
@@ -76,10 +74,10 @@
       <!-- Links -->
       <div class="flex flex-col items-center gap-2 mt-6">
         <button type="button" class="text-[#00000099] hover:underline text-sm sm:text-base cursor-pointer" routerLink="/createAcc">
-          {{ langService.isGeo() ? 'ანგარიშის შექმნა' : 'Create Account' }}
+          {{ langService.t('შექმენი ანგარიში') }}
         </button>
         <button type="button" class="text-[#00000099] hover:underline text-sm sm:text-base cursor-pointer" routerLink="/recover">
-          {{ langService.isGeo() ? 'პაროლის აღდგენა' : 'Forgot Password?' }}
+          {{ langService.t('დაგავიწყდა პაროლი?') }}
         </button>
       </div>
     </div>

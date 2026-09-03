@@ -125,6 +125,15 @@ export class AddPlaceComponent {
     this.imageFileName = '';
   }
 
+  selectedLat: number | null = null;
+  selectedLng: number | null = null;
+
+  onLocationSelected(coords: { lat: number; lng: number }) {
+    this.selectedLat = coords.lat;
+    this.selectedLng = coords.lng;
+    this.errorMessage = '';
+  }
+
   onSubmit() {
     this.errorMessage = '';
     this.successMessage = '';
@@ -149,6 +158,9 @@ export class AddPlaceComponent {
     this.isSubmitting = true;
 
     try {
+      const finalLat = this.selectedLat !== null ? this.selectedLat : (41.7151 + (Math.random() * 0.4 - 0.2));
+      const finalLng = this.selectedLng !== null ? this.selectedLng : (44.8271 + (Math.random() * 0.4 - 0.2));
+
       const createdPlace = this.placesService.addPlace({
         name: this.name.trim(),
         category: this.category,
@@ -159,8 +171,8 @@ export class AddPlaceComponent {
         food: this.food,
         wifi: this.wifi,
         hiddenGem: this.hiddenGem,
-        lat: 41.7151 + (Math.random() * 0.4 - 0.2),
-        lng: 44.8271 + (Math.random() * 0.4 - 0.2)
+        lat: finalLat,
+        lng: finalLng
       });
 
       if (this.imagePreview) {

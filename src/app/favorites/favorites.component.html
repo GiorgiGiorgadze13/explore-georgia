@@ -6,20 +6,20 @@
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-[#0000001F] mb-8">
     <div>
       <h1 class="text-2xl sm:text-3xl font-bold text-[#1F3D2B]">
-        {{ langService.isGeo() ? 'ჩემი ფავორიტები' : 'My Favorites' }}
+        {{ langService.t('ჩემი ფავორიტები') }}
       </h1>
       <p class="text-[#00000099] text-xs sm:text-sm mt-1">
-        {{ langService.isGeo() ? 'თქვენს მიერ შენახული ადგილები და ღონისძიებები' : 'Your saved places and events' }}
+        {{ langService.t('თქვენს მიერ შენახული ადგილები და ღონისძიებები') }}
       </p>
     </div>
 
     @if (favService.count() > 0) {
       <div class="flex items-center gap-4">
         <span class="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-[#1F3D2B1A] text-[#1F3D2B]">
-          {{ langService.isGeo() ? 'სულ: ' + favService.count() : 'Total: ' + favService.count() }}
+          {{ langService.t('სულ: ') + favService.count() }}
         </span>
         <button type="button" (click)="clearAll()" class="text-xs text-red-600 hover:text-red-800 font-semibold underline cursor-pointer">
-          {{ langService.isGeo() ? 'ყველას წაშლა' : 'Clear All' }}
+          {{ langService.t('ყველას წაშლა') }}
         </button>
       </div>
     }
@@ -43,7 +43,7 @@
                 (error)="card.hasError = true">
             } @else {
               <div class="w-full h-48 bg-[#1F3D2B1A] rounded-t-2xl flex items-center justify-center">
-                <span class="text-[#1F3D2B99] text-xs">{{ langService.t('სურათი მიუწვდომელია', 'Image unavailable') }}</span>
+                <span class="text-[#1F3D2B99] text-xs">{{ langService.t('სურათი მიუწვდომელია') }}</span>
               </div>
             }
 
@@ -100,7 +100,7 @@
               <button type="button" routerLink="/book"
                   class="cursor-pointer bg-[#A74826B5] hover:bg-[#A74826] transition-colors rounded-2xl px-10 py-3 text-white text-sm font-semibold shadow-sm"
                   (click)="$event.stopPropagation()">
-                  {{ langService.t('დაჯავშნე', 'Book Now') }}
+                  {{ langService.t('დაჯავშნე') }}
               </button>
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
                   class="cursor-pointer hover:scale-110 transition-transform"
@@ -127,14 +127,14 @@
       </div>
 
       <h3 class="text-xl font-bold text-[#1F3D2B] mb-2">
-        {{ langService.isGeo() ? 'ფავორიტები ცარიელია' : 'No Favorites Yet' }}
+        {{ langService.t('ფავორიტები ცარიელია') }}
       </h3>
       <p class="text-[#00000099] text-sm mb-6 leading-relaxed">
-        {{ langService.isGeo() ? 'თქვენ ჯერ არ გაქვთ დამატებული ფავორიტი ადგილები. დააჭირეთ გულის იკონს ბარათებზე მათ შესანახად.' : 'You haven\'t added any favorite places yet. Click the heart icon on any card to save it here.' }}
+        {{ langService.t('თქვენ ჯერ არ გაქვთ დამატებული ფავორიტი ადგილები. დააჭირეთ გულის იკონს ბარათებზე მათ შესანახად.') }}
       </p>
       
       <a routerLink="/" class="px-8 py-3 bg-[#1F3D2B] text-white text-sm font-semibold rounded-2xl hover:bg-[#162c1f] transition-colors shadow-md">
-        {{ langService.isGeo() ? 'ადგილების დათვალიერება' : 'Explore Places' }}
+        {{ langService.t('ადგილების დათვალიერება') }}
       </a>
     </div>
   }

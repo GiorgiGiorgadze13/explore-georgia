@@ -37,11 +37,22 @@ export class HeaderComponent implements OnInit {
   private eRef = inject(ElementRef);
 
   menuOpen = false;
+  langMenuOpen = false;
   showDropdown = signal<boolean>(false);
   selectedIndex = signal<number>(-1);
   queryInput = signal<string>('');
   allPlaces = signal<SearchResultItem[]>([]);
   private debounceTimer: any;
+
+  toggleLangMenu(event?: MouseEvent) {
+    if (event) event.stopPropagation();
+    this.langMenuOpen = !this.langMenuOpen;
+  }
+
+  selectLanguage(lang: 'geo' | 'eng' | 'rus') {
+    this.langService.setLanguage(lang);
+    this.langMenuOpen = false;
+  }
 
   ngOnInit(): void {
     const existing = this.filterService.searchInput();
@@ -205,6 +216,7 @@ export class HeaderComponent implements OnInit {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.showDropdown.set(false);
       this.selectedIndex.set(-1);
+      this.langMenuOpen = false;
     }
   }
 }

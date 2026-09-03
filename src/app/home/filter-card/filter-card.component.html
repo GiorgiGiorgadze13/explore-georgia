@@ -7,31 +7,31 @@
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'ადგილის ძებნა' : 'Find Place' }}
+                    {{ langService.t('ადგილის ძებნა') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/events"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'ღონისძიებები' : 'Events' }}
+                    {{ langService.t('ღონისძიებები') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/experience"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'გამოცდილებები' : 'Experiences' }}
+                    {{ langService.t('გამოცდილებები') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/recomendation"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'რეკომენდაციები' : 'Recommendations' }}
+                    {{ langService.t('რეკომენდაციები') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/tradition"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'ტრადიცია' : 'Traditions' }}
+                    {{ langService.t('ტრადიცია') }}
                 </button>
             </li>
         </ul>
@@ -45,7 +45,7 @@
                     [class.bg-[#1F3D2B]]="!filter.selectedNature()"
                     [class.text-white]="!filter.selectedNature()"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
-                    {{ langService.t('ყველა', 'All') }}
+                    {{ langService.t('ყველა') }}
                 </button>
             </li>
             <li>
@@ -53,7 +53,7 @@
                     [class.bg-[#1F3D2B]]="filter.selectedNature() === 'nature'"
                     [class.text-white]="filter.selectedNature() === 'nature'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
-                    {{ langService.t('ბუნება', 'Nature') }}
+                    {{ langService.t('ბუნება') }}
                 </button>
             </li>
             <li>
@@ -61,7 +61,7 @@
                     [class.bg-[#1F3D2B]]="filter.selectedNature() === 'leisure'"
                     [class.text-white]="filter.selectedNature() === 'leisure'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
-                    {{ langService.t('დასვენება', 'Leisure') }}
+                    {{ langService.t('დასვენება') }}
                 </button>
             </li>
             <li>
@@ -69,7 +69,7 @@
                     [class.bg-[#1F3D2B]]="filter.selectedNature() === 'culture'"
                     [class.text-white]="filter.selectedNature() === 'culture'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
-                    {{ langService.t('კულტურა', 'Culture') }}
+                    {{ langService.t('კულტურა') }}
                 </button>
             </li>
             <li>
@@ -77,7 +77,7 @@
                     [class.bg-[#1F3D2B]]="filter.selectedNature() === 'food'"
                     [class.text-white]="filter.selectedNature() === 'food'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors">
-                    {{ langService.t('კვება', 'Food') }}
+                    {{ langService.t('კვება') }}
                 </button>
             </li>
         </ul>
@@ -99,7 +99,7 @@
                             d="M4.75284 8.06245C4.642 8.06245 4.53909 8.03245 4.43617 7.97995C4.15909 7.81495 4.072 7.46245 4.24617 7.19995L8.14909 1.27495C8.32325 1.01245 8.68742 0.929953 8.9645 1.09495C9.24159 1.25995 9.32867 1.60495 9.1545 1.86745L5.25159 7.79245C5.14075 7.96495 4.95075 8.06245 4.75284 8.06245Z"
                             fill="#292D32" />
                     </svg>
-                    <span class="font-bold text-sm">{{ langService.t('დამატებითი ფილტრაცია', 'More Filters') }}</span>
+                    <span class="font-bold text-sm">{{ langService.t('დამატებითი ფილტრაცია') }}</span>
                     <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="showFilters" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -111,33 +111,33 @@
                     class="w-full bg-white border border-[#00000020] p-4 rounded-2xl shadow-md mt-2 flex flex-col gap-4">
                     <select #natureRef (change)="selectNature(natureRef.value)"
                         class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
-                        <option value="" selected>{{ langService.t('  ბუნება  ', 'All Nature') }}</option>
-                        <option value="waterfall">{{ langService.t('ჩანჩქერი', 'Waterfall') }}</option>
-                        <option value="canyon">{{ langService.t('კანიონი', 'Canyon') }}</option>
-                        <option value="cave">{{ langService.t('მღვიმე', 'Cave') }}</option>
-                        <option value="lake">{{ langService.t('ტბა', 'Lake') }}</option>
-                        <option value="river">{{ langService.t('მდინარე', 'River') }}</option>
-                        <option value="mountain">{{ langService.t('მთა', 'Mountain') }}</option>
-                        <option value="forest">{{ langService.t('ტყე', 'Forest') }}</option>
-                        <option value="national-park">{{ langService.t('ეროვნული პარკი', 'National Park') }}</option>
-                         <option value="valley">{{ langService.t('ხეობა', 'Valley') }}</option>
-                         <option value="spring">{{ langService.t('ბუნებრივი წყარო', 'Natural Spring') }}</option>
+                        <option value="" selected>{{ langService.t('ყველა ბუნება') }}</option>
+                        <option value="waterfall">{{ langService.t('ჩანჩქერი') }}</option>
+                        <option value="canyon">{{ langService.t('კანიონი') }}</option>
+                        <option value="cave">{{ langService.t('მღვიმე') }}</option>
+                        <option value="lake">{{ langService.t('ტბა') }}</option>
+                        <option value="river">{{ langService.t('მდინარე') }}</option>
+                        <option value="mountain">{{ langService.t('მთა') }}</option>
+                        <option value="forest">{{ langService.t('ტყე') }}</option>
+                        <option value="national-park">{{ langService.t('ეროვნული პარკი') }}</option>
+                         <option value="valley">{{ langService.t('ხეობა') }}</option>
+                         <option value="spring">{{ langService.t('ბუნებრივი წყარო') }}</option>
                     </select>
 
                     <select #regionRef (change)="selectRegion(regionRef.value)"
                         class="w-full rounded-2xl border border-gray-300 bg-[#00000010] px-4 py-3 text-sm focus:outline-none">
-                        <option value="" selected>{{ langService.t(' რეგიონები  ', 'All Regions') }}</option>
-                        <option value="აჭარა">{{ langService.t('აჭარა', 'Adjara') }}</option>
-                        <option value="გურია">{{ langService.t('გურია', 'Guria') }}</option>
-                        <option value="იმერეთი">{{ langService.t('იმერეთი', 'Imereti') }}</option>
-                        <option value="კახეთი">{{ langService.t('კახეთი', 'Kakheti') }}</option>
-                        <option value="მცხეთა-მთიანეთი">{{ langService.t('მცხეთა-მთიანეთი', 'Mtskheta-Mtianeti') }}</option>
-                        <option value="რაჭა-ლეჩხუმი და ქვემო სვანეთი">{{ langService.t('რაჭა-ლეჩხუმი და ქვემო სვანეთი', 'Racha-Lechkhumi & Kvemo Svaneti') }}</option>
-                        <option value="სამეგრელო-ზემო სვანეთი">{{ langService.t('სამეგრელო-ზემო სვანეთი', 'Samegrelo-Zemo Svaneti') }}</option>
-                        <option value="სამცხე-ჯავახეთი">{{ langService.t('სამცხე-ჯავახეთი', 'Samtskhe-Javakheti') }}</option>
-                        <option value="ქვემო ქართლი">{{ langService.t('ქვემო ქართლი', 'Kvemo Kartli') }}</option>
-                        <option value="შიდა ქართლი">{{ langService.t('შიდა ქართლი', 'Shida Kartli') }}</option>
-                        <option value="თბილისი">{{ langService.t('თბილისი', 'Tbilisi') }}</option>
+                        <option value="" selected>{{ langService.t('ყველა რეგიონი') }}</option>
+                        <option value="აჭარა">{{ langService.t('აჭარა') }}</option>
+                        <option value="გურია">{{ langService.t('გურია') }}</option>
+                        <option value="იმერეთი">{{ langService.t('იმერეთი') }}</option>
+                        <option value="კახეთი">{{ langService.t('კახეთი') }}</option>
+                        <option value="მცხეთა-მთიანეთი">{{ langService.t('მცხეთა-მთიანეთი') }}</option>
+                        <option value="რაჭა-ლეჩხუმი და ქვემო სვანეთი">{{ langService.t('რაჭა-ლეჩხუმი და ქვემო სვანეთი') }}</option>
+                        <option value="სამეგრელო-ზემო სვანეთი">{{ langService.t('სამეგრელო-ზემო სვანეთი') }}</option>
+                        <option value="სამცხე-ჯავახეთი">{{ langService.t('სამცხე-ჯავახეთი') }}</option>
+                        <option value="ქვემო ქართლი">{{ langService.t('ქვემო ქართლი') }}</option>
+                        <option value="შიდა ქართლი">{{ langService.t('შიდა ქართლი') }}</option>
+                        <option value="თბილისი">{{ langService.t('თბილისი') }}</option>
                     </select>
 
                     <label class="flex items-center gap-4 cursor-pointer pt-2">
@@ -152,14 +152,14 @@
                                 <circle cx="12" cy="13.5" r="12" fill="white"
                                     class="transition-transform duration-300" />
                             </svg>
-                            <span class="text-black">{{ langService.t('ეტლით მისასვლელი', 'Wheelchair Accessible') }}</span>
+                            <span class="text-black">{{ langService.t('ეტლით მისასვლელი') }}</span>
                         </div>
                     </label>
 
                     <div class="flex justify-center pt-2">
                         <button type="button" (click)="clearFilters()"
                             class="w-full px-6 py-2.5 border border-[#757575A8] rounded-2xl text-xs font-bold hover:bg-[#0000000A] transition-colors">
-                            {{ langService.t('გასუფთავება', 'Clear Filters') }}
+                            {{ langService.t('გასუფთავება') }}
                         </button>
                     </div>
                 </div>
@@ -230,7 +230,7 @@
                         <button type="button" routerLink="/book"
                             class="cursor-pointer bg-[#A74826B5] hover:bg-[#A74826] transition-colors rounded-2xl px-10 py-3 text-white text-sm font-semibold shadow-sm"
                             (click)="$event.stopPropagation()">
-                            {{ langService.t('დაჯავშნე', 'Book Now') }}
+                            {{ langService.t('დაჯავშნე') }}
                         </button>
                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
                             class="cursor-pointer hover:scale-110 transition-transform"
@@ -246,7 +246,7 @@
             </div>
             } @empty {
             <div class="w-full text-center py-12 text-gray-500 font-medium">
-                {{ langService.t('მონაცემები ვერ მოიძებნა', 'No data found') }}
+                {{ langService.t('მონაცემები ვერ მოიძებნა') }}
             </div>
             }
 
@@ -281,6 +281,5 @@
         }
     </div>
     }
-
 
 </div>

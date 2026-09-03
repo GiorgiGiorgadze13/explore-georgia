@@ -5,31 +5,31 @@
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'ადგილის ძებნა' : 'Find Place' }}
+                    {{ langService.t('ადგილის ძებნა') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/events"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'ღონისძიებები' : 'Events' }}
+                    {{ langService.t('ღონისძიებები') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/experience"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'გამოცდილებები' : 'Experiences' }}
+                    {{ langService.t('გამოცდილებები') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/recomendation"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'რეკომენდაციები' : 'Recommendations' }}
+                    {{ langService.t('რეკომენდაციები') }}
                 </button>
             </li>
             <li>
                 <button type="button" class="hover:text-[#1F3D2B] transition-colors py-1" routerLink="/tradition"
                     routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
-                    {{ langService.isGeo() ? 'ტრადიცია' : 'Traditions' }}
+                    {{ langService.t('ტრადიცია') }}
                 </button>
             </li>
         </ul>
@@ -43,7 +43,7 @@
                     [class.bg-[#1F3D2B]]="!filterService.selectedNature()"
                     [class.text-white]="!filterService.selectedNature()"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
-                    {{ langService.t('ყველა', 'All') }}
+                    {{ langService.t('ყველა') }}
                 </button>
             </li>
             <li>
@@ -51,7 +51,7 @@
                     [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'nature'"
                     [class.text-white]="filterService.selectedNature() === 'nature'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
-                    {{ langService.t('ბუნება', 'Nature') }}
+                    {{ langService.t('ბუნება') }}
                 </button>
             </li>
             <li>
@@ -59,7 +59,7 @@
                     [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'leisure'"
                     [class.text-white]="filterService.selectedNature() === 'leisure'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
-                    {{ langService.t('დასვენება', 'Leisure') }}
+                    {{ langService.t('დასვენება') }}
                 </button>
             </li>
             <li>
@@ -67,7 +67,7 @@
                     [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'culture'"
                     [class.text-white]="filterService.selectedNature() === 'culture'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
-                    {{ langService.t('კულტურა', 'Culture') }}
+                    {{ langService.t('კულტურა') }}
                 </button>
             </li>
             <li>
@@ -75,7 +75,7 @@
                     [class.bg-[#1F3D2B]]="filterService.selectedNature() === 'food'"
                     [class.text-white]="filterService.selectedNature() === 'food'"
                     class="border border-[#00000038] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl hover:bg-[#1F3D2B] hover:text-white transition-colors cursor-pointer font-medium">
-                    {{ langService.t('კვება', 'Food') }}
+                    {{ langService.t('კვება') }}
                 </button>
             </li>
         </ul>

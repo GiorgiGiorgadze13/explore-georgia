@@ -5,6 +5,8 @@ import { FooterComponent } from '../home/footer/footer.component';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { PlacesService, CsvPlace } from '../Services/places.service';
 
+import { LanguageService } from '../Services/language.service';
+
 export interface CardDetailData {
   id?: string;
   title: string;
@@ -25,6 +27,7 @@ export interface CardDetailData {
 export class CardDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private placesService = inject(PlacesService);
+  public langService = inject(LanguageService);
 
   cardData = signal<CardDetailData>({
     title: 'ღვინისა და კულტურის ტური კახეთში',

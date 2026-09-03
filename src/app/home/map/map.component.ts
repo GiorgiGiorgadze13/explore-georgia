@@ -8,7 +8,10 @@ import {
   OnInit,
   Signal,
   ViewChild,
-  ElementRef
+  ElementRef,
+  Input,
+  Output,
+  EventEmitter
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
@@ -60,6 +63,11 @@ export class MapComponent implements OnInit, OnDestroy {
   private imageService = inject(CardImageService);
   private router = inject(Router);
 
+  @Input() selectMode: boolean = false;
+  @Input() initialLat?: number;
+  @Input() initialLng?: number;
+  @Output() locationSelected = new EventEmitter<{ lat: number; lng: number }>();
+
   selectedRegionInput = input<string>('', { alias: 'selectedRegion' });
   public landmarks: Landmark[] = [];
   public isDataReady = false;
@@ -69,8 +77,56 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private map?: L.Map;
   private markers = new Map<string | number, L.CircleMarker | L.Marker>();
+  private pickerMarker?: L.Marker;
   private canvasRenderer = L.canvas({ padding: 0.5 });
   private georgiaBounds = L.latLngBounds([40.9, 39.8], [43.65, 46.8]);
+
+  public setPickerMarker(lat: number, lng: number): void {
+    if (!this.map) return;
+
+    if (this.pickerMarker) {
+      this.pickerMarker.setLatLng([lat, lng]);
+    } else {
+      const pinHtml = `
+        <div class="custom-picker-pin" style="
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: #A74826;
+          border: 3px solid #ffffff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+        ">
+          📍
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        html: pinHtml,
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
+      });
+
+      this.pickerMarker = L.marker([lat, lng], { icon, draggable: true }).addTo(this.map);
+
+      this.pickerMarker.on('dragend', (ev: any) => {
+        const pos = ev.target.getLatLng();
+        const newLat = Number(pos.lat.toFixed(5));
+        const newLng = Number(pos.lng.toFixed(5));
+        this.locationSelected.emit({ lat: newLat, lng: newLng });
+        if (this.pickerMarker) {
+          this.pickerMarker.bindPopup(`📍 <b>${this.langService.t('არჩეული ლოკაცია')}</b><br>${newLat}, ${newLng}`).openPopup();
+        }
+      });
+    }
+
+    this.pickerMarker.bindPopup(`📍 <b>${this.langService.t('არჩეული ლოკაცია')}</b><br>${lat}, ${lng}`).openPopup();
+  }
 
   public resetMapView(): void {
     if (this.map) {
@@ -259,6 +315,25 @@ export class MapComponent implements OnInit, OnDestroy {
         updateWhenZooming: false
       }
     ).addTo(this.map);
+
+    if (this.selectMode) {
+      this.map.dragging.enable();
+      this.map.touchZoom.enable();
+      if (!this.isMobile) {
+        this.map.scrollWheelZoom.enable();
+      }
+
+      this.map.on('click', (e: L.LeafletMouseEvent) => {
+        const lat = Number(e.latlng.lat.toFixed(5));
+        const lng = Number(e.latlng.lng.toFixed(5));
+        this.setPickerMarker(lat, lng);
+        this.locationSelected.emit({ lat, lng });
+      });
+
+      if (this.initialLat && this.initialLng) {
+        this.setPickerMarker(this.initialLat, this.initialLng);
+      }
+    }
   }
 
   private mapCsvToLandmark(p: CsvPlace): Landmark {
