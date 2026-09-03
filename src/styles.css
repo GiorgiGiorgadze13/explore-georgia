@@ -10,22 +10,25 @@
   padding: 0;
 }
 
-html, body {
+html {
+  background-color: #FAF7F0;
+}
+
+body {
   width: 100%;
-  max-width: 100%;
-  min-height: 100vh;
-  min-height: -webkit-fill-available; /* Accounts for dynamic iOS Safari toolbars */
-  overflow-x: hidden;
   background-color: #FAF7F0;
   color: #1F3D2B;
-  -webkit-overflow-scrolling: touch;
+  /* overflow-x: hidden and min-height: 100vh on html, body cause major scroll issues on iOS Safari.
+     It's better to apply them to a wrapper like app-root if needed, or use overflow-x: clip. */
+  overflow-x: clip; 
 }
 
 app-root {
   display: block;
   width: 100%;
   min-height: 100vh;
-  min-height: -webkit-fill-available;
+  min-height: 100dvh; /* Modern solution for dynamic iOS Safari toolbars */
+  overflow-x: clip; /* Ensure no horizontal scrolling spills from app-root */
 }
 
 .container {
