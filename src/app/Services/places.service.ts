@@ -17,7 +17,7 @@ export interface CsvPlace {
   hidden?: boolean;
 }
 
-const PLACES_CACHE_KEY = 'explore_georgia_places_cache';
+const PLACES_CACHE_KEY = 'explore_georgia_places_cache_v2';
 const CUSTOM_PLACES_KEY = 'explore_georgia_custom_places';
 
 export interface AddPlaceDto {
@@ -93,36 +93,32 @@ export class PlacesService {
   }
 
   getPlaces(): Observable<CsvPlace[]> {
-    const cached = this.getStoredPlaces();
-
     if (this.places$) {
       return this.places$;
     }
 
-    const fetch$ = this.http.get<CsvPlace[]>(this.apiUrl).pipe(
-      timeout(3000),
+    // Always fetch local CSV to ensure latest local data and tags are available
+    this.places$ = this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
+      timeout(4000),
+      map((csvText: string) => this.parseCsv(csvText)),
       catchError(() => {
-        return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
-          timeout(3000),
-          map((csvText: string) => this.parseCsv(csvText)),
-          catchError((csvErr) => {
-            console.warn('⚠️ [PlacesService] CSV fallback error:', csvErr);
+        return this.http.get<CsvPlace[]>(this.apiUrl).pipe(
+          timeout(4000),
+          catchError(() => {
+            const cached = this.getStoredPlaces();
             return cached ? of(cached) : of([]);
           })
         );
       }),
       map((data) => {
-        const base = (data && data.length > 0) ? data : (cached || []);
-        if (base.length > 0) {
-          this.saveStoredPlaces(base);
+        if (data && data.length > 0) {
+          this.saveStoredPlaces(data);
         }
-        return this.mergeWithCustomPlaces(base);
+        return this.mergeWithCustomPlaces(data || []);
       }),
       shareReplay(1)
     );
 
-    const mergedCached = cached && cached.length > 0 ? this.mergeWithCustomPlaces(cached) : null;
-    this.places$ = mergedCached ? of(mergedCached).pipe(shareReplay(1)) : fetch$;
     return this.places$;
   }
 
@@ -164,7 +160,7 @@ export class PlacesService {
 
   private inferGroupKey(category: string): string {
     const c = category.toLowerCase();
-    if (c.includes('ტბა') || c.includes('ჩანჩქერი') || c.includes('კანიონი') || c.includes('მთა') || c.includes('ტყე') || c.includes('მდინარე')) {
+    if (c.includes('ტბა') || c.includes('ჩანჩქერი') || c.includes('კანიონი') || c.includes('მთა') || c.includes('ტყე') || c.includes('მდინარე') || c.includes('პლაჟი') || c.includes('სანაპირო')) {
       return 'nature';
     }
     if (c.includes('ტაძარი') || c.includes('ეკლესია') || c.includes('ციხე') || c.includes('მონასტერი') || c.includes('მუზეუმი')) {
@@ -196,15 +192,28 @@ export class PlacesService {
       const lng = parseFloat(row['lng']);
       if (isNaN(lat) || isNaN(lng)) continue;
 
+      let tags: string[] = [];
+      const rawTags = row['tags'] || '';
+      if (rawTags) {
+        try {
+          const parsed = JSON.parse(rawTags);
+          if (Array.isArray(parsed)) tags = parsed;
+          else tags = [rawTags];
+        } catch (e) {
+          tags = rawTags.split(',').map(t => t.trim().replace(/^["'\[\]]+|["'\[\]]+$/g, ''));
+        }
+      }
+
       places.push({
         id: row['id'] || `place-${i}`,
         name: row['name'] || 'Unnamed Spot',
         region: row['region'] || 'Georgia',
-        group_key: row['group_key'] || 'other',
+        group_key: row['group_key'] || 'nature',
         category: row['category'] || 'General',
         lat: lat,
         lng: lng,
         description: row['description'] || '',
+        tags: tags,
         rating: parseFloat(row['rating']) || 0
       });
     }

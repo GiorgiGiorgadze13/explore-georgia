@@ -1,0 +1,228 @@
+<!-- Floating Chatbot Button -->
+<button
+  (click)="toggleChat()"
+  class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 group flex items-center gap-2.5 bg-[#1F3D2B] hover:bg-[#162D1F] text-white px-4 py-3.5 rounded-full shadow-2xl hover:shadow-emerald-900/30 transition-all duration-300 transform hover:scale-105 active:scale-95 border border-emerald-400/20"
+  [attr.aria-expanded]="isChatOpen()"
+  aria-label="AI Travel Assistant"
+>
+  <div class="relative flex items-center justify-center">
+    <span class="text-2xl select-none leading-none">🤖</span>
+    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+      <span class="animate-ping absolute inline-flex h-full w-[#A74826] rounded-full opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-[#A74826]"></span>
+    </span>
+  </div>
+  <span class="font-semibold text-sm sm:text-base tracking-wide pr-1">
+    {{ langService.t('AI ასისტენტი', 'AI Assistant', 'ИИ Помощник') }}
+  </span>
+  <span *ngIf="selectedPlaces().length > 0" class="bg-[#A74826] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+    {{ selectedPlaces().length }}
+  </span>
+</button>
+
+<!-- Chat Modal Window -->
+<div
+  *ngIf="isChatOpen()"
+  class="fixed bottom-20 right-3 sm:right-6 z-50 w-[calc(100vw-1.5rem)] sm:w-[410px] h-[580px] max-h-[82vh] bg-white rounded-2xl shadow-2xl border border-emerald-950/15 overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-5 duration-200"
+>
+  <!-- Modal Header -->
+  <div class="bg-[#1F3D2B] text-white px-4 py-3.5 flex items-center justify-between shadow-md relative z-10 border-b border-emerald-800/40">
+    <div class="flex items-center gap-3">
+      <div class="relative w-10 h-10 rounded-full bg-emerald-800/60 border border-emerald-400/30 flex items-center justify-center text-xl shadow-inner">
+        🤖
+        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-[#1F3D2B]"></span>
+      </div>
+      <div>
+        <h3 class="font-bold text-sm sm:text-base leading-tight tracking-wide">
+          {{ langService.t('AI მოგზაურობის ასისტენტი', 'AI Travel Assistant', 'ИИ Помощник по путешествиям') }}
+        </h3>
+        <p class="text-xs text-emerald-200/90 flex items-center gap-1 font-light">
+          <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+          {{ langService.t('ონლაინ', 'Online', 'Онлайн') }} | Explore Georgia
+        </p>
+      </div>
+    </div>
+
+    <!-- Close Button -->
+    <button
+      (click)="toggleChat()"
+      class="text-emerald-200 hover:text-white hover:bg-emerald-800/50 p-1.5 rounded-lg transition-colors"
+      aria-label="Close Chat"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Messages Scroll Container -->
+  <div #messagesContainer (scroll)="onChatScroll()" class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF9F5] scroll-smooth">
+    <div *ngFor="let msg of messages()" [id]="'msg-' + msg.id" class="space-y-2">
+      <!-- USER MESSAGE -->
+      <div *ngIf="msg.sender === 'user'" class="flex justify-end">
+        <div class="bg-gradient-to-r from-[#A74826] to-[#8F3A1D] text-white rounded-2xl rounded-tr-xs px-4 py-2.5 max-w-[85%] text-sm shadow-sm leading-relaxed">
+          {{ msg.text }}
+        </div>
+      </div>
+
+      <!-- BOT MESSAGE -->
+      <div *ngIf="msg.sender === 'bot'" class="flex justify-start items-start gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-[#1F3D2B] text-white flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
+          🤖
+        </div>
+        <div class="bg-white border border-emerald-900/10 text-gray-900 rounded-2xl rounded-tl-xs p-3.5 max-w-[88%] text-sm shadow-xs space-y-3">
+          
+          <!-- Bot Text -->
+          <p *ngIf="msg.text" class="leading-relaxed whitespace-pre-line text-gray-800">
+            {{ msg.text }}
+          </p>
+
+          <!-- Quick Suggestion Chips -->
+          <div *ngIf="msg.quickSuggestions && msg.quickSuggestions.length > 0" class="flex flex-wrap gap-1.5 pt-1">
+            <button
+              *ngFor="let chip of msg.quickSuggestions"
+              (click)="onQuickSuggestionClick(chip)"
+              class="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 text-xs px-2.5 py-1 rounded-full font-medium transition-all transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+            >
+              {{ chip }}
+            </button>
+          </div>
+
+          <!-- Recommendation Place Cards -->
+          <div *ngIf="msg.recommendations && msg.recommendations.length > 0" class="space-y-3 pt-1">
+            <div
+              *ngFor="let place of msg.recommendations"
+              class="group bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-all duration-200"
+            >
+              <!-- Card Image & Badge -->
+              <div class="relative h-28 w-full bg-gray-100 overflow-hidden cursor-pointer" (click)="openPlaceDetails(place, $event)">
+                <img
+                  [src]="getPlaceImage(place)"
+                  [alt]="place.name"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <span class="absolute top-2 left-2 bg-[#1F3D2B]/90 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                  {{ place.category || place.group_key || 'ადგილი' }}
+                </span>
+                <span *ngIf="place.rating" class="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-xs flex items-center gap-0.5">
+                  ⭐ {{ place.rating }}
+                </span>
+              </div>
+
+              <!-- Card Content -->
+              <div class="p-3 space-y-1.5">
+                <h4
+                  (click)="openPlaceDetails(place, $event)"
+                  class="font-bold text-gray-900 text-sm leading-snug hover:text-[#A74826] cursor-pointer transition-colors"
+                >
+                  {{ place.name }}
+                </h4>
+                
+                <p class="text-xs text-gray-500 flex items-center gap-1">
+                  <span>📍 {{ place.region }}</span>
+                </p>
+
+                <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                  {{ place.description || 'ულამაზესი ტურისტული ლოკაცია საქართველოში.' }}
+                </p>
+
+                <!-- Actions Row -->
+                <div class="pt-2 flex items-center gap-2">
+                  <button
+                    (click)="openPlaceDetails(place, $event)"
+                    class="flex-1 bg-[#1F3D2B] hover:bg-[#162D1F] text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors text-center cursor-pointer shadow-2xs"
+                  >
+                    {{ langService.t('ნახვა', 'View place', 'Просмотр') }}
+                  </button>
+
+                  <button
+                    (click)="selectPlace(place, $event)"
+                    [class]="travelPlanService.isPlaceSelected(place.id) 
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold py-1.5 px-2.5 rounded-lg'
+                      : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold py-1.5 px-2.5 rounded-lg transition-colors cursor-pointer'"
+                  >
+                    {{ travelPlanService.isPlaceSelected(place.id) ? '✓ ' + langService.t('არჩეულია', 'Selected', 'Выбрано') : '+ ' + langService.t('არჩევა', 'Select', 'Выбрать') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Another Place Button -->
+          <div *ngIf="msg.showAddAnotherButton" class="pt-2">
+            <button
+              (click)="onAddAnotherPlace()"
+              class="w-full bg-[#1F3D2B] hover:bg-[#162D1F] text-white font-medium text-xs py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+            >
+              <span>✨</span>
+              <span>{{ langService.t('+ ადგილის დამატება', '+ Add another place', '+ Добавить еще место') }}</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div *ngIf="isTyping()" class="flex justify-start items-start gap-2.5">
+      <div class="w-7 h-7 rounded-full bg-[#1F3D2B] text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+        🤖
+      </div>
+      <div class="bg-white border border-emerald-900/10 text-gray-500 rounded-2xl rounded-tl-xs px-4 py-3 text-xs shadow-xs flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 bg-[#A74826] rounded-full animate-bounce"></span>
+        <span class="w-1.5 h-1.5 bg-[#1F3D2B] rounded-full animate-bounce [animation-delay:0.2s]"></span>
+        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating New Message Notification Pill -->
+  <button
+    *ngIf="showNewMessagePill()"
+    (click)="scrollToBottomManual()"
+    class="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 bg-[#A74826] hover:bg-[#8F3A1D] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1.5 transition-all transform hover:scale-105 active:scale-95 cursor-pointer animate-bounce"
+  >
+    <span>↓</span>
+    <span>{{ langService.t('ახალი შეტყობინება', 'New message', 'Новое сообщение') }}</span>
+  </button>
+
+  <!-- Selected Places Summary Bar (if places are added to plan) -->
+  <div *ngIf="selectedPlaces().length > 0" class="bg-emerald-900/5 border-t border-emerald-900/10 px-3.5 py-2 flex items-center justify-between text-xs">
+    <div class="flex items-center gap-1.5 overflow-hidden">
+      <span class="font-bold text-[#1F3D2B] shrink-0">🧳 {{ langService.t('არჩეული', 'Selected', 'Выбрано') }} ({{ selectedPlaces().length }}):</span>
+      <span class="text-gray-700 truncate">
+        {{ selectedPlaces()[selectedPlaces().length - 1].name }}
+      </span>
+    </div>
+    <button
+      (click)="travelPlanService.clearPlaces()"
+      class="text-gray-400 hover:text-red-600 font-medium text-[11px] shrink-0 underline"
+    >
+      {{ langService.t('წაშლა', 'Clear', 'Очистить') }}
+    </button>
+  </div>
+
+  <!-- Input Footer -->
+  <div class="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+    <input
+      type="text"
+      [(ngModel)]="userInput"
+      (keyup.enter)="sendMessage()"
+      [placeholder]="langService.t('დაწერეთ შეტყობინება...', 'Type your message...', 'Введите сообщение...')"
+      class="flex-1 bg-gray-50 border border-gray-300/80 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B] focus:border-transparent transition-all"
+    />
+
+    <button
+      (click)="sendMessage()"
+      [disabled]="!userInput().trim()"
+      class="bg-[#1F3D2B] hover:bg-[#162D1F] disabled:opacity-40 text-white rounded-xl p-2.5 transition-all shadow-xs flex items-center justify-center shrink-0 cursor-pointer"
+      aria-label="Send"
+    >
+      <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+      </svg>
+    </button>
+  </div>
+</div>

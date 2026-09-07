@@ -58,6 +58,18 @@ const TRANSLATION_MAP: Record<string, TranslationItem> = {
   'რეგისტრაცია': { eng: 'Register', rus: 'Регистрация' },
   'გამოსვლა': { eng: 'Log Out', rus: 'Выйти' },
 
+  // AI Chatbot
+  'AI ასისტენტი': { eng: 'AI Assistant', rus: 'ИИ Помощник' },
+  'AI მოგზაურობის ასისტენტი': { eng: 'AI Travel Assistant', rus: 'ИИ Помощник по путешествиям' },
+  'ონლაინ': { eng: 'Online', rus: 'Онлайн' },
+  'ნახვა': { eng: 'View place', rus: 'Просмотр' },
+  'არჩევა': { eng: 'Select', rus: 'Выбрать' },
+  'არჩეულია': { eng: 'Selected', rus: 'Выбрано' },
+  '+ ადგილის დამატება': { eng: '+ Add another place', rus: '+ Добавить еще место' },
+  '+ Add another place': { eng: '+ Add another place', rus: '+ Добавить еще место' },
+  'ჩემი არჩეული ადგილები': { eng: 'My Selected Places', rus: 'Мои выбранные места' },
+  'დაწერეთ შეტყობინება...': { eng: 'Type your message...', rus: 'Введите сообщение...' },
+
   // Favorites & Booking / Payment
   'ჩემი ფავორიტები': { eng: 'My Favorites', rus: 'Мое избранное' },
   'თქვენს მიერ შენახული ადგილები და ღონისძიებები': { eng: 'Your saved places and events', rus: 'Сохраненные вами места и мероприятия' },
