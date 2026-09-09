@@ -113,7 +113,7 @@ export class FilterCardService {
   selectedRegion = signal<string>('');
   selectedNature = signal<string>('');
   wheelchairAccessible = signal<boolean>(false);
-  searchInput = signal<string>('ჩანჩქერები, მთები');
+  searchInput = signal<string>('');
 
   matchesRegion(itemRegion = '', itemName = '', queryRegion = ''): boolean {
     if (!queryRegion || queryRegion.trim() === '' || queryRegion === 'აირჩიეთ რეგიონი') {

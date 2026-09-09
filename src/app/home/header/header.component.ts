@@ -146,7 +146,7 @@ export class HeaderComponent implements OnInit {
   search(val: string) {
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
     this.filterService.searchInput.set(val);
-    this.queryInput.set('');
+    this.queryInput.set(val);
     this.showDropdown.set(false);
     this.selectedIndex.set(-1);
 

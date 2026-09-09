@@ -34,12 +34,12 @@
             (click)="openDetails(card)">
 
           <!-- Image & Badge -->
-          <div class="relative">
+          <div class="relative group/carousel rounded-t-2xl overflow-hidden h-48 bg-gray-100">
             @if (!card.hasError) {
               <img 
-                [src]="card.image || '/Rectangle1.png'" 
+                [src]="getActiveCardImage(card)" 
                 [alt]="langService.translate(card.title)"
-                class="w-full h-48 object-cover rounded-t-2xl"
+                class="w-full h-48 object-cover rounded-t-2xl transition-all duration-300"
                 (error)="card.hasError = true">
             } @else {
               <div class="w-full h-48 bg-[#1F3D2B1A] rounded-t-2xl flex items-center justify-center">
@@ -47,8 +47,35 @@
               </div>
             }
 
+            @if (getCardImages(card).length > 1) {
+              <button type="button" 
+                (click)="prevCardImage(card, $event)"
+                class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer"
+                aria-label="Previous photo">
+                ‹
+              </button>
+
+              <button type="button" 
+                (click)="nextCardImage(card, $event)"
+                class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer"
+                aria-label="Next photo">
+                ›
+              </button>
+
+              <div class="absolute bottom-2 left-0 right-0 flex justify-center items-center gap-1.5 z-20">
+                @for (img of getCardImages(card); track $index) {
+                  <button type="button" 
+                    (click)="setCardImageIndex(card, $index, $event)"
+                    [class]="(card.activeImgIndex || 0) === $index ? 'w-2.5 h-2.5 bg-white shadow-md scale-110' : 'w-2 h-2 bg-white/60 hover:bg-white'"
+                    class="rounded-full transition-all cursor-pointer"
+                    [attr.aria-label]="'Slide ' + ($index + 1)">
+                  </button>
+                }
+              </div>
+            }
+
             @if (card.badge) {
-              <span class="absolute left-4 top-4 px-4 py-2 rounded-2xl text-white bg-[#1F3D2BE6] text-xs font-semibold shadow-sm">
+              <span class="absolute left-4 top-4 px-4 py-2 rounded-2xl text-white bg-[#1F3D2BE6] text-xs font-semibold shadow-sm z-10 pointer-events-none">
                 {{ langService.translate(card.badge) }}
               </span>
             }

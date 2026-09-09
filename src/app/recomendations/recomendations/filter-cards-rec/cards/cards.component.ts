@@ -9,6 +9,8 @@ import { LanguageService } from '../../../../Services/language.service';
 
 export interface RecommendationCard extends CsvPlace {
   image?: string;
+  images?: string[];
+  activeImgIndex?: number;
   hasError?: boolean;
 }
 
@@ -43,6 +45,36 @@ export class CardsComponent implements OnInit {
   onImageError(card: RecommendationCard): void {
     card.hasError = true;
     this.recommendations.update(list => [...list]);
+  }
+
+  getCardImages(card: RecommendationCard): string[] {
+    const list = card.images && card.images.length > 0 ? card.images : [card.image || '/Rectangle1.png'];
+    return list.slice(0, 3);
+  }
+
+  getActiveCardImage(card: RecommendationCard): string {
+    const imgs = this.getCardImages(card);
+    const idx = (card.activeImgIndex || 0) % imgs.length;
+    return imgs[idx] || '/Rectangle1.png';
+  }
+
+  setCardImageIndex(card: RecommendationCard, idx: number, event: Event): void {
+    event.stopPropagation();
+    card.activeImgIndex = idx;
+  }
+
+  prevCardImage(card: RecommendationCard, event: Event): void {
+    event.stopPropagation();
+    const imgs = this.getCardImages(card);
+    const current = card.activeImgIndex || 0;
+    card.activeImgIndex = (current - 1 + imgs.length) % imgs.length;
+  }
+
+  nextCardImage(card: RecommendationCard, event: Event): void {
+    event.stopPropagation();
+    const imgs = this.getCardImages(card);
+    const current = card.activeImgIndex || 0;
+    card.activeImgIndex = (current + 1) % imgs.length;
   }
 
   filteredRecommendations = computed(() => {
@@ -120,10 +152,15 @@ export class CardsComponent implements OnInit {
       next: (places) => {
         const recs = places.filter(p => p.is_local || (p.rating && p.rating >= 4.4));
         const list = recs.length > 0 ? recs : places;
-        this.recommendations.set(list.map(p => ({
-          ...p,
-          image: this.imageService.getImageForItem(p.id, p.name, p.category, p.region)
-        })));
+        this.recommendations.set(list.map(p => {
+          const imgs = this.imageService.getImagesForItem(p.id, p.name, p.category, p.region);
+          return {
+            ...p,
+            image: imgs[0],
+            images: imgs,
+            activeImgIndex: 0
+          };
+        }));
       }
     });
   }
@@ -138,12 +175,13 @@ export class CardsComponent implements OnInit {
       location: card.region,
       rating: card.rating ? `${card.rating}` : undefined,
       image: card.image,
+      images: card.images,
       type: 'place'
     });
   }
 
   openDetails(card: RecommendationCard): void {
-    const img = card.image || this.imageService.getImageForItem(card.id, card.name, card.category, card.region);
+    const img = this.getActiveCardImage(card);
     this.router.navigate(['/details'], {
       queryParams: {
         id: card.id,

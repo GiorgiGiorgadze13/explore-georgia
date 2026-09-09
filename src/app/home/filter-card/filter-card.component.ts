@@ -19,6 +19,8 @@ export interface DisplayCard {
   metaBadge?: string;
   dateOrPrice?: string;
   image?: string;
+  images?: string[];
+  activeImgIndex?: number;
   tags?: string[];
   type: 'place' | 'event' | 'experience';
   hasError?: boolean;
@@ -57,49 +59,64 @@ export class FilterCardComponent implements OnInit {
     if (url.includes('/events')) {
       this.eventsService.getEvents().subscribe({
         next: (events) => {
-          this.cards.set(events.map(e => ({
-            id: e.id,
-            title: e.title,
-            badge: e.type,
-            description: e.description,
-            location: e.place,
-            metaBadge: e.free ? 'უფასო' : 'ფასიანი',
-            dateOrPrice: e.date,
-            image: this.imageService.getImageForItem(e.id, e.title, e.type, e.place),
-            type: 'event'
-          })));
+          this.cards.set(events.map(e => {
+            const imgs = this.imageService.getImagesForItem(e.id, e.title, e.type, e.place);
+            return {
+              id: e.id,
+              title: e.title,
+              badge: e.type,
+              description: e.description,
+              location: e.place,
+              metaBadge: e.free ? 'უფასო' : 'ფასიანი',
+              dateOrPrice: e.date,
+              image: imgs[0],
+              images: imgs,
+              activeImgIndex: 0,
+              type: 'event'
+            };
+          }));
         }
       });
     } else if (url.includes('/experience')) {
       this.experiencesService.getExperiences().subscribe({
         next: (experiences) => {
-          this.cards.set(experiences.map(e => ({
-            id: e.id,
-            title: e.title,
-            badge: e.kind,
-            description: e.description,
-            location: e.region,
-            metaBadge: e.duration,
-            dateOrPrice: e.price,
-            image: this.imageService.getImageForItem(e.id, e.title, e.kind, e.region),
-            type: 'experience'
-          })));
+          this.cards.set(experiences.map(e => {
+            const imgs = this.imageService.getImagesForItem(e.id, e.title, e.kind, e.region);
+            return {
+              id: e.id,
+              title: e.title,
+              badge: e.kind,
+              description: e.description,
+              location: e.region,
+              metaBadge: e.duration,
+              dateOrPrice: e.price,
+              image: imgs[0],
+              images: imgs,
+              activeImgIndex: 0,
+              type: 'experience'
+            };
+          }));
         }
       });
     } else {
       this.placesService.getPlaces().subscribe({
         next: (places) => {
-          this.cards.set(places.map(p => ({
-            id: p.id,
-            title: p.name,
-            badge: p.category || p.group_key || 'ადგილი',
-            description: p.description,
-            location: p.region,
-            metaBadge: p.rating ? `⭐ ${p.rating}` : '',
-            image: this.imageService.getImageForItem(p.id, p.name, p.category, p.region),
-            tags: this.parseTags(p.tags),
-            type: 'place'
-          })));
+          this.cards.set(places.map(p => {
+            const imgs = this.imageService.getImagesForItem(p.id, p.name, p.category, p.region);
+            return {
+              id: p.id,
+              title: p.name,
+              badge: p.category || p.group_key || 'ადგილი',
+              description: p.description,
+              location: p.region,
+              metaBadge: p.rating ? `⭐ ${p.rating}` : '',
+              image: imgs[0],
+              images: imgs,
+              activeImgIndex: 0,
+              tags: this.parseTags(p.tags),
+              type: 'place'
+            };
+          }));
         }
       });
     }
@@ -119,6 +136,36 @@ export class FilterCardComponent implements OnInit {
       return tagsStr.split(',').map(t => t.replace(/["\[\]]/g, '').trim()).filter(Boolean);
     }
     return [];
+  }
+
+  getCardImages(card: DisplayCard): string[] {
+    const list = card.images && card.images.length > 0 ? card.images : [card.image || '/Rectangle1.png'];
+    return list.slice(0, 3);
+  }
+
+  getActiveCardImage(card: DisplayCard): string {
+    const imgs = this.getCardImages(card);
+    const idx = (card.activeImgIndex || 0) % imgs.length;
+    return imgs[idx] || '/Rectangle1.png';
+  }
+
+  setCardImageIndex(card: DisplayCard, idx: number, event: Event): void {
+    event.stopPropagation();
+    card.activeImgIndex = idx;
+  }
+
+  prevCardImage(card: DisplayCard, event: Event): void {
+    event.stopPropagation();
+    const imgs = this.getCardImages(card);
+    const current = card.activeImgIndex || 0;
+    card.activeImgIndex = (current - 1 + imgs.length) % imgs.length;
+  }
+
+  nextCardImage(card: DisplayCard, event: Event): void {
+    event.stopPropagation();
+    const imgs = this.getCardImages(card);
+    const current = card.activeImgIndex || 0;
+    card.activeImgIndex = (current + 1) % imgs.length;
   }
 
   onImageError(card: DisplayCard): void {
@@ -235,6 +282,7 @@ export class FilterCardComponent implements OnInit {
       metaBadge: card.metaBadge,
       dateOrPrice: card.dateOrPrice,
       image: card.image,
+      images: card.images,
       tags: card.tags,
       type: card.type
     });
@@ -247,7 +295,7 @@ export class FilterCardComponent implements OnInit {
         title: card.title,
         location: card.location,
         badge: card.badge,
-        image: card.image || '/Rectangle1.png',
+        image: this.getActiveCardImage(card) || '/Rectangle1.png',
         description: card.description,
         price: card.dateOrPrice
       },

@@ -10,6 +10,8 @@ export interface FavoriteCard {
   metaBadge?: string;
   dateOrPrice?: string;
   image?: string;
+  images?: string[];
+  activeImgIndex?: number;
   tags?: string[];
   type?: 'place' | 'event' | 'experience';
   rating?: string;
