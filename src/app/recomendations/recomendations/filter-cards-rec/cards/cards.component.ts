@@ -31,7 +31,7 @@ export class CardsComponent implements OnInit {
 
   recommendations = signal<RecommendationCard[]>([]);
   currentPage = signal<number>(1);
-  pageSize = 6;
+  pageSize = 10;
 
   constructor() {
     effect(() => {
@@ -39,7 +39,7 @@ export class CardsComponent implements OnInit {
       this.filterService.selectedNature();
       this.filterService.searchInput();
       this.currentPage.set(1);
-    }, { allowSignalWrites: true });
+    });
   }
 
   onImageError(card: RecommendationCard): void {
@@ -107,13 +107,10 @@ export class CardsComponent implements OnInit {
 
   totalPagesArray = computed(() => {
     const total = this.totalPages();
-    const maxVisible = 10;
-    let start = Math.max(1, this.currentPage() - 4);
-    let end = Math.min(total, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
+    const chunkSize = 10;
+    const currentBlock = Math.floor((this.currentPage() - 1) / chunkSize);
+    const start = currentBlock * chunkSize + 1;
+    const end = Math.min(total, start + chunkSize - 1);
 
     const pages: number[] = [];
     for (let i = start; i <= end; i++) {
@@ -183,15 +180,7 @@ export class CardsComponent implements OnInit {
   openDetails(card: RecommendationCard): void {
     const img = this.getActiveCardImage(card);
     this.router.navigate(['/details'], {
-      queryParams: {
-        id: card.id,
-        title: card.name,
-        location: card.region,
-        badge: card.category || 'რეკომენდაცია',
-        image: img,
-        description: card.description,
-        rating: card.rating ? `${card.rating} (50 შეფასება)` : '4.9 (50 შეფასება)'
-      },
+      queryParams: { id: card.id },
       state: { card: { ...card, image: img } }
     });
   }

@@ -185,14 +185,7 @@ export class AddPlaceComponent {
       
       setTimeout(() => {
         this.router.navigate(['/details'], {
-          queryParams: {
-            id: createdPlace.id,
-            title: createdPlace.name,
-            location: createdPlace.region,
-            badge: createdPlace.category,
-            image: finalImage,
-            description: createdPlace.description
-          },
+          queryParams: { id: createdPlace.id },
           state: {
             card: {
               id: createdPlace.id,

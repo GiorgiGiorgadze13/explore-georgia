@@ -76,6 +76,14 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'details/:id',
+    component: CardDetailsComponent,
+    data: {
+      title: 'დეტალები',
+      description: 'დეტალური ინფორმაცია არჩეული ადგილის ან ღონისძიების შესახებ.'
+    }
+  },
+  {
     path: 'details',
     component: CardDetailsComponent,
     data: {

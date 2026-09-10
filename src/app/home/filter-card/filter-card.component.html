@@ -84,13 +84,13 @@
     </div>
 
     <!-- Main Content Layout -->
-    <div class="flex flex-col md:flex-row pt-12 gap-8">
+    <div class="flex flex-col lg:flex-row pt-8 lg:pt-12 gap-6 lg:gap-8">
 
         <!-- Sidebar / Filters Section -->
-        <div class="flex-[1] relative">
-            <div class="flex flex-col items-center md:items-start gap-2">
+        <div class="w-full lg:w-64 lg:shrink-0 relative">
+            <div class="flex flex-col items-center lg:items-start gap-2">
                 <button type="button" (click)="toggleFilters($event)"
-                    class="flex justify-center items-center gap-3 cursor-pointer py-3 px-6 border rounded-2xl border-[#00000038] bg-white hover:bg-gray-50 transition-colors w-full md:w-auto">
+                    class="flex justify-center items-center gap-3 cursor-pointer py-3 px-6 border rounded-2xl border-[#00000038] bg-white hover:bg-gray-50 transition-colors w-full lg:w-auto">
                     <svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M8.66448 16.9877C8.28448 16.9877 7.9124 16.8977 7.56406 16.7177C6.8674 16.3502 6.44781 15.6827 6.44781 14.9327V10.9577C6.44781 10.5827 6.18656 10.0202 5.94115 9.73519L2.98031 6.7652C2.48156 6.2927 2.10156 5.4827 2.10156 4.8752V3.1502C2.10156 1.9502 3.05948 1.0127 4.27865 1.0127H14.7286C15.932 1.0127 16.9057 1.9352 16.9057 3.0752V4.7252C16.9057 5.5127 16.407 6.4052 15.9399 6.8477L12.512 9.7202C12.1795 9.9827 11.9182 10.5602 11.9182 11.0252V14.2502C11.9182 14.9177 11.4749 15.6902 10.9207 16.0052L9.82823 16.6727C9.47198 16.8827 9.06823 16.9877 8.66448 16.9877ZM4.27865 2.1377C3.72448 2.1377 3.28906 2.5802 3.28906 3.1502V4.8752C3.28906 5.1527 3.52656 5.6927 3.8274 5.9777L6.84365 8.98519C7.2474 9.45769 7.64323 10.2452 7.64323 10.9502V14.9252C7.64323 15.4127 7.99948 15.6527 8.1499 15.7277C8.4824 15.9002 8.88615 15.9002 9.1949 15.7202L10.2953 15.0527C10.517 14.9252 10.7386 14.5202 10.7386 14.2502V11.0252C10.7386 10.2227 11.1503 9.33769 11.7441 8.86519L15.1324 6.0227C15.4016 5.7677 15.7261 5.1602 15.7261 4.7177V3.0752C15.7261 2.5577 15.2828 2.1377 14.7366 2.1377H4.27865V2.1377Z"
@@ -168,10 +168,10 @@
         </div>
 
         <!-- Cards Container -->
-        <div class="flex flex-[3] flex-wrap justify-center md:justify-start gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 flex-1 w-full justify-items-center sm:justify-items-start">
 
             @for (card of paginatedCards(); track card.id) {
-            <div class="flex flex-col w-[280px] relative cursor-pointer hover:shadow-xl transition-all duration-300 group rounded-2xl overflow-hidden"
+            <div class="flex flex-col w-full max-w-[320px] sm:max-w-[340px] relative cursor-pointer hover:shadow-xl transition-all duration-300 group rounded-2xl overflow-hidden"
                 (click)="openDetails(card)">
 <div class="relative group/carousel rounded-t-2xl overflow-hidden h-48 bg-gray-100">
   <img 

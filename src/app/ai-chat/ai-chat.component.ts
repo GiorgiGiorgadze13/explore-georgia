@@ -234,16 +234,7 @@ export class AiChatComponent implements OnInit {
     const image = this.imageService.getImageForItem(place.id, place.name, place.category, place.region);
 
     this.router.navigate(['/details'], {
-      queryParams: {
-        id: place.id,
-        title: place.name,
-        location: place.region,
-        badge: place.category || place.group_key || 'ადგილი',
-        image: image,
-        description: place.description,
-        rating: place.rating ? `${place.rating} (50 შეფასება)` : '4.9 (50 შეფასება)',
-        price: 150
-      },
+      queryParams: { id: place.id },
       state: {
         card: {
           id: place.id,

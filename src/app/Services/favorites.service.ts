@@ -53,7 +53,7 @@ export class FavoritesService {
         const guestFavs = this.loadGuestStorage();
         this.favorites.set(guestFavs);
       }
-    }, { allowSignalWrites: true });
+    });
   }
 
   private getKey(userId?: string): string {

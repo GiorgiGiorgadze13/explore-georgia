@@ -1,9 +1,9 @@
 <div class="container font-kadwa flex flex-col gap-8 w-full">
     
     <!-- Cards Grid -->
-    <div class="flex flex-wrap justify-center md:justify-start gap-6 w-full">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full justify-items-center sm:justify-items-start">
         @for (card of paginatedRecommendations(); track card.id) {
-        <div class="flex flex-col w-[280px] bg-[#0000001A] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+        <div class="flex flex-col w-full max-w-[320px] sm:max-w-[340px] bg-[#0000001A] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
             (click)="openDetails(card)">
             <div class="relative group/carousel rounded-t-2xl overflow-hidden h-44 bg-gray-100">
                 <img [src]="getActiveCardImage(card)" [alt]="langService.translate(card.name)" class="w-full h-44 object-cover transition-all duration-300" (error)="onImageError(card)">

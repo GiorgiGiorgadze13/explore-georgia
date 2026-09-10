@@ -178,15 +178,7 @@ export class MapComponent implements OnInit, OnDestroy {
     );
 
     this.router.navigate(['/details'], {
-      queryParams: {
-        id: landmark.id,
-        title: landmark.name,
-        location: landmark.region,
-        badge: landmark.category || 'ადგილი',
-        image: img,
-        description: landmark.description,
-        rating: '4.8 (50 შეფასება)'
-      },
+      queryParams: { id: landmark.id },
       state: {
         card: {
           id: landmark.id,
@@ -288,12 +280,14 @@ export class MapComponent implements OnInit, OnDestroy {
       minZoom: 6,
       maxZoom: 15,
       maxBounds: this.georgiaBounds.pad(0.15),
-      maxBoundsViscosity: 0.8,
+      maxBoundsViscosity: 0.1,
       zoomAnimation: true,
       fadeAnimation: true,
       markerZoomAnimation: true,
-      zoomSnap: 0.5,
-      zoomDelta: 0.5,
+      zoomSnap: 1,
+      zoomDelta: 1,
+      inertia: true,
+      inertiaDeceleration: 3000,
       bounceAtZoomLimits: false,
       scrollWheelZoom: !this.isMobile,
       dragging: !this.isMobile,
@@ -310,9 +304,9 @@ export class MapComponent implements OnInit, OnDestroy {
         maxZoom: 19,
         maxNativeZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        keepBuffer: 1,
-        updateWhenIdle: true,
-        updateWhenZooming: false
+        keepBuffer: 3,
+        updateWhenIdle: false,
+        updateWhenZooming: true
       }
     ).addTo(this.map);
 

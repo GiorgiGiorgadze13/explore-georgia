@@ -186,14 +186,7 @@ export class HeaderComponent implements OnInit {
     this.showDropdown.set(false);
     this.selectedIndex.set(-1);
     this.router.navigate(['/details'], {
-      queryParams: {
-        id: item.id,
-        title: item.name,
-        location: item.region,
-        badge: item.category || 'ადგილი',
-        image: item.image,
-        description: item.description
-      },
+      queryParams: { id: item.id },
       state: { card: item }
     });
   }

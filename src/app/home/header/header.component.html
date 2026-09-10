@@ -3,26 +3,10 @@
 
     <div class="flex justify-between items-center py-4 md:py-5 gap-3">
 
-      <!-- LEFT: Mobile Menu Button, Brand Logo & Search Bar -->
-      <div class="flex items-center gap-2 sm:gap-4 flex-1 md:flex-none">
+      <!-- LEFT: Brand Logo & Search Bar -->
+      <div class="flex items-center gap-2 sm:gap-3 xl:gap-4 flex-1 lg:flex-none">
 
-        <!-- Mobile Toggle Button -->
-        <button type="button" class="md:hidden p-1 focus:outline-none shrink-0" (click)="menuOpen = !menuOpen" aria-label="Toggle menu">
-          @if (!menuOpen) {
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40" fill="none">
-              <path d="M10 12H30" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" />
-              <path d="M10 20H30" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" />
-              <path d="M10 28H30" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" />
-            </svg>
-          } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          }
-        </button>
-
-        <!-- Brand Logo -->
+        <!-- Brand Logo (FAR LEFT EDGE) -->
         <a routerLink="/" class="flex justify-center items-center gap-3 cursor-pointer shrink-0">
           <img src="/HeaderLogo.png" alt="logo" class="w-12 h-12 object-contain">
           <span class="text-[#000000] text-lg hidden sm:block">
@@ -31,7 +15,7 @@
         </a>
 
         <!-- Search Bar -->
-        <div class="relative flex-1 md:w-[435px] md:flex-none">
+        <div class="relative flex-1 lg:w-[240px] xl:w-[340px] 2xl:w-[435px] lg:flex-none">
           <div class="flex justify-center items-center absolute top-1/2 -translate-y-1/2 left-3 gap-1 pointer-events-none z-10">
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2 C12.6 8.5, 14 10, 20.5 10.5 C14 11, 12.6 12.5, 12 19 C11.4 12.5, 10 11, 3.5 10.5 C10 10, 11.4 8.5, 12 2 Z" fill="#FFD84D" />
@@ -112,113 +96,131 @@
       </div>
 
       <!-- MIDDLE-RIGHT: Navigation Links & Add Place Button -->
-      <div class="hidden md:flex justify-center items-center gap-6">
-        <ul class="flex justify-center items-center gap-6">
+      <div class="hidden lg:flex justify-center items-center gap-3 xl:gap-6">
+        <ul class="flex justify-center items-center gap-3 xl:gap-6">
           <li>
-            <a routerLink="/" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="text-[#000000] font-bold text-sm cursor-pointer">
+            <a routerLink="/" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="text-[#000000] font-bold text-xs xl:text-sm cursor-pointer whitespace-nowrap">
               {{ langService.t('მთავარი', 'Home', 'Главная') }}
             </a>
           </li>
           <li>
-            <a routerLink="/recomendation" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="text-[#000000] font-bold text-sm cursor-pointer">
+            <a routerLink="/recomendation" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="text-[#000000] font-bold text-xs xl:text-sm cursor-pointer whitespace-nowrap">
               {{ langService.t('აღმოაჩინე', 'Discover', 'Обзор') }}
             </a>
           </li>
         </ul>
 
-        <button class="bg-[#A74826B5] whitespace-nowrap p-4 border rounded-2xl text-[#FFFFFF] text-xs hover:bg-[#A74826] transition-colors cursor-pointer" routerLink="/addplace" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+        <button class="bg-[#A74826B5] whitespace-nowrap px-3 py-2.5 xl:p-4 border rounded-2xl text-[#FFFFFF] text-xs hover:bg-[#A74826] transition-colors cursor-pointer" routerLink="/addplace" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
           {{ langService.t('ადგილის დამატება +', 'Add Place +', 'Добавить место +') }}
         </button>
       </div>
 
-      <!-- RIGHT: Desktop Icons (Profile/Logout, Favorites, Language) -->
-      <div class="hidden md:block">
-        <ul class="flex justify-center items-center gap-4">
+      <!-- RIGHT: Desktop Icons (Profile/Logout, Favorites, Language) & Mobile Burger Button -->
+      <div class="flex items-center gap-2 xl:gap-3">
+        <div class="hidden lg:block">
+          <ul class="flex justify-center items-center gap-2.5 xl:gap-4">
 
-          <!-- Desktop Profile / Logout -->
-          @if (authService.isAuthenticated()) {
-            <li class="flex items-center gap-2">
-              <span class="text-xs font-bold text-[#1F3D2B]">
-                👤 {{ authService.currentUser()?.firstName }}
-              </span>
-              <button (click)="logout()" type="button" class="text-xs text-red-600 hover:text-red-800 font-semibold underline cursor-pointer">
-                {{ langService.t('გამოსვლა', 'Logout', 'Выйти') }}
-              </button>
-            </li>
-          } @else {
+            <!-- Desktop Profile / Logout -->
+            @if (authService.isAuthenticated()) {
+              <li class="flex items-center gap-2">
+                <span class="text-xs font-bold text-[#1F3D2B]">
+                  👤 {{ authService.currentUser()?.firstName }}
+                </span>
+                <button (click)="logout()" type="button" class="text-xs text-red-600 hover:text-red-800 font-semibold underline cursor-pointer">
+                  {{ langService.t('გამოსვლა', 'Logout', 'Выйти') }}
+                </button>
+              </li>
+            } @else {
+              <li>
+                <a routerLink="/auth" class="cursor-pointer block" aria-label="Profile">
+                  <svg class="pointer-events-none" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16.1606 18.04C16.134 18.04 16.094 18.04 16.0673 18.04C16.0273 18.04 15.974 18.04 15.934 18.04C12.9073 17.9466 10.6406 15.5866 10.6406 12.68C10.6406 9.71997 13.054 7.30664 16.014 7.30664C18.974 7.30664 21.3873 9.71997 21.3873 12.68C21.374 15.6 19.094 17.9466 16.2006 18.04C16.174 18.04 16.174 18.04 16.1606 18.04ZM16.0006 9.29331C14.134 9.29331 12.6273 10.8133 12.6273 12.6666C12.6273 14.4933 14.054 15.9733 15.8673 16.04C15.9073 16.0266 16.0406 16.0266 16.174 16.04C17.9606 15.9466 19.3606 14.48 19.374 12.6666C19.374 10.8133 17.8673 9.29331 16.0006 9.29331Z" fill="#999494" />
+                    <path d="M15.9985 30.3337C12.4118 30.3337 8.98515 29.0004 6.33181 26.5737C6.09181 26.3604 5.98515 26.0404 6.01181 25.7337C6.18515 24.1471 7.17181 22.6671 8.81181 21.5737C12.7851 18.9338 19.2251 18.9338 23.1851 21.5737C24.8251 22.6804 25.8118 24.1471 25.9851 25.7337C26.0251 26.0537 25.9051 26.3604 25.6651 26.5737C23.0118 29.0004 19.5851 30.3337 15.9985 30.3337ZM8.10515 25.4671C10.3185 27.3204 13.1051 28.3337 15.9985 28.3337C18.8918 28.3337 21.6785 27.3204 23.8918 25.4671C23.6518 24.6537 23.0118 23.8671 22.0651 23.2271C18.7851 21.0404 13.2251 21.0404 9.91848 23.2271C8.97181 23.8671 8.34515 24.6537 8.10515 25.4671Z" fill="#999494" />
+                    <path d="M15.9974 30.3337C8.09073 30.3337 1.66406 23.907 1.66406 16.0003C1.66406 8.09366 8.09073 1.66699 15.9974 1.66699C23.9041 1.66699 30.3307 8.09366 30.3307 16.0003C30.3307 23.907 23.9041 30.3337 15.9974 30.3337ZM15.9974 3.66699C9.1974 3.66699 3.66406 9.20033 3.66406 16.0003C3.66406 22.8003 9.1974 28.3337 15.9974 28.3337C22.7974 28.3337 28.3307 22.8003 28.3307 16.0003C28.3307 9.20033 22.7974 3.66699 15.9974 3.66699Z" fill="#999494" />
+                  </svg>
+                </a>
+              </li>
+            }
+
+            <!-- Desktop Favorites Link -->
             <li>
-              <a routerLink="/auth" class="cursor-pointer block" aria-label="Profile">
+              <a routerLink="/favourite" class="cursor-pointer block relative" aria-label="Favorites">
                 <svg class="pointer-events-none" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16.1606 18.04C16.134 18.04 16.094 18.04 16.0673 18.04C16.0273 18.04 15.974 18.04 15.934 18.04C12.9073 17.9466 10.6406 15.5866 10.6406 12.68C10.6406 9.71997 13.054 7.30664 16.014 7.30664C18.974 7.30664 21.3873 9.71997 21.3873 12.68C21.374 15.6 19.094 17.9466 16.2006 18.04C16.174 18.04 16.174 18.04 16.1606 18.04ZM16.0006 9.29331C14.134 9.29331 12.6273 10.8133 12.6273 12.6666C12.6273 14.4933 14.054 15.9733 15.8673 16.04C15.9073 16.0266 16.0406 16.0266 16.174 16.04C17.9606 15.9466 19.3606 14.48 19.374 12.6666C19.374 10.8133 17.8673 9.29331 16.0006 9.29331Z" fill="#999494" />
-                  <path d="M15.9985 30.3337C12.4118 30.3337 8.98515 29.0004 6.33181 26.5737C6.09181 26.3604 5.98515 26.0404 6.01181 25.7337C6.18515 24.1471 7.17181 22.6671 8.81181 21.5737C12.7851 18.9338 19.2251 18.9338 23.1851 21.5737C24.8251 22.6804 25.8118 24.1471 25.9851 25.7337C26.0251 26.0537 25.9051 26.3604 25.6651 26.5737C23.0118 29.0004 19.5851 30.3337 15.9985 30.3337ZM8.10515 25.4671C10.3185 27.3204 13.1051 28.3337 15.9985 28.3337C18.8918 28.3337 21.6785 27.3204 23.8918 25.4671C23.6518 24.6537 23.0118 23.8671 22.0651 23.2271C18.7851 21.0404 13.2251 21.0404 9.91848 23.2271C8.97181 23.8671 8.34515 24.6537 8.10515 25.4671Z" fill="#999494" />
-                  <path d="M15.9974 30.3337C8.09073 30.3337 1.66406 23.907 1.66406 16.0003C1.66406 8.09366 8.09073 1.66699 15.9974 1.66699C23.9041 1.66699 30.3307 8.09366 30.3307 16.0003C30.3307 23.907 23.9041 30.3337 15.9974 30.3337ZM15.9974 3.66699C9.1974 3.66699 3.66406 9.20033 3.66406 16.0003C3.66406 22.8003 9.1974 28.3337 15.9974 28.3337C22.7974 28.3337 28.3307 22.8003 28.3307 16.0003C28.3307 9.20033 22.7974 3.66699 15.9974 3.66699Z" fill="#999494" />
+                  <path d="M27.7842 6.14715C27.1032 5.46582 26.2946 4.92534 25.4047 4.55659C24.5147 4.18784 23.5609 3.99805 22.5976 3.99805C21.6342 3.99805 20.6804 4.18784 19.7904 4.55659C18.9005 4.92534 18.0919 5.46582 17.4109 6.14715L15.9976 7.56048L14.5842 6.14715C13.2086 4.77156 11.3429 3.99876 9.39755 3.99876C7.45218 3.99876 5.58648 4.77156 4.21089 6.14715C2.8353 7.52274 2.0625 9.38844 2.0625 11.3338C2.0625 13.2792 2.8353 15.1449 4.21089 16.5205L15.9976 28.3071L27.7842 16.5205C28.4655 15.8395 29.006 15.0309 29.3748 14.141C29.7435 13.251 29.9333 12.2971 29.9333 11.3338C29.9333 10.3705 29.7435 9.41662 29.3748 8.52667C29.006 7.63673 28.4655 6.82816 27.7842 6.14715Z"
+                    stroke="#A74826" stroke-opacity="0.71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
+                @if (favService.count() > 0) {
+                  <span class="absolute -top-1 -right-1 bg-[#A74826] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-[#FAF7F0]">
+                    {{ favService.count() }}
+                  </span>
+                }
               </a>
             </li>
-          }
 
-          <!-- Desktop Favorites Link -->
-          <li>
-            <a routerLink="/favourite" class="cursor-pointer block relative" aria-label="Favorites">
-              <svg class="pointer-events-none" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M27.7842 6.14715C27.1032 5.46582 26.2946 4.92534 25.4047 4.55659C24.5147 4.18784 23.5609 3.99805 22.5976 3.99805C21.6342 3.99805 20.6804 4.18784 19.7904 4.55659C18.9005 4.92534 18.0919 5.46582 17.4109 6.14715L15.9976 7.56048L14.5842 6.14715C13.2086 4.77156 11.3429 3.99876 9.39755 3.99876C7.45218 3.99876 5.58648 4.77156 4.21089 6.14715C2.8353 7.52274 2.0625 9.38844 2.0625 11.3338C2.0625 13.2792 2.8353 15.1449 4.21089 16.5205L15.9976 28.3071L27.7842 16.5205C28.4655 15.8395 29.006 15.0309 29.3748 14.141C29.7435 13.251 29.9333 12.2971 29.9333 11.3338C29.9333 10.3705 29.7435 9.41662 29.3748 8.52667C29.006 7.63673 28.4655 6.82816 27.7842 6.14715Z"
-                  stroke="#A74826" stroke-opacity="0.71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              @if (favService.count() > 0) {
-                <span class="absolute -top-1 -right-1 bg-[#A74826] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-[#FAF7F0]">
-                  {{ favService.count() }}
-                </span>
+            <li class="relative">
+              <button (click)="toggleLangMenu($event)" type="button" class="bg-[#274C3B1A] border border-[#274C3B33] py-2 px-3.5 rounded-xl flex items-center gap-2 hover:bg-[#274C3B33] transition-colors cursor-pointer text-xs font-bold text-[#1F3D2B]">
+                <span class="text-sm">🌐</span>
+                <span class="uppercase">{{ langService.currentLang() }}</span>
+                <svg class="w-3 h-3 text-[#1F3D2B] transition-transform duration-200" [class.rotate-180]="langMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Language Dropdown Menu -->
+              @if (langMenuOpen) {
+                <div class="absolute right-0 mt-2 w-44 bg-[#FAF7F0] border border-[#274C3B33] rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden">
+                  <button (click)="selectLanguage('geo')" type="button"
+                          [class.bg-[#1F3D2B1A]]="langService.isGeo()"
+                          class="w-full px-4 py-2.5 flex items-center gap-3 text-xs font-bold text-[#1F3D2B] hover:bg-[#1F3D2B0D] transition-colors text-left cursor-pointer">
+                    <span class="text-base">🇬🇪</span>
+                    <span class="flex-1">ქართული</span>
+                    @if (langService.isGeo()) { <span class="text-[#A74826]">✓</span> }
+                  </button>
+
+                  <button (click)="selectLanguage('eng')" type="button"
+                          [class.bg-[#1F3D2B1A]]="langService.isEng()"
+                          class="w-full px-4 py-2.5 flex items-center gap-3 text-xs font-bold text-[#1F3D2B] hover:bg-[#1F3D2B0D] transition-colors text-left cursor-pointer">
+                    <span class="text-base">🇬🇧</span>
+                    <span class="flex-1">English</span>
+                    @if (langService.isEng()) { <span class="text-[#A74826]">✓</span> }
+                  </button>
+
+                  <button (click)="selectLanguage('rus')" type="button"
+                          [class.bg-[#1F3D2B1A]]="langService.isRus()"
+                          class="w-full px-4 py-2.5 flex items-center gap-3 text-xs font-bold text-[#1F3D2B] hover:bg-[#1F3D2B0D] transition-colors text-left cursor-pointer">
+                    <span class="text-base">🇷🇺</span>
+                    <span class="flex-1">Русский</span>
+                    @if (langService.isRus()) { <span class="text-[#A74826]">✓</span> }
+                  </button>
+                </div>
               }
-            </a>
-          </li>
+            </li>
 
-          <li class="relative">
-            <button (click)="toggleLangMenu($event)" type="button" class="bg-[#274C3B1A] border border-[#274C3B33] py-2 px-3.5 rounded-xl flex items-center gap-2 hover:bg-[#274C3B33] transition-colors cursor-pointer text-xs font-bold text-[#1F3D2B]">
-              <span class="text-sm">🌐</span>
-              <span class="uppercase">{{ langService.currentLang() }}</span>
-              <svg class="w-3 h-3 text-[#1F3D2B] transition-transform duration-200" [class.rotate-180]="langMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+          </ul>
+        </div>
 
-            <!-- Language Dropdown Menu -->
-            @if (langMenuOpen) {
-              <div class="absolute right-0 mt-2 w-44 bg-[#FAF7F0] border border-[#274C3B33] rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden">
-                <button (click)="selectLanguage('geo')" type="button"
-                        [class.bg-[#1F3D2B1A]]="langService.isGeo()"
-                        class="w-full px-4 py-2.5 flex items-center gap-3 text-xs font-bold text-[#1F3D2B] hover:bg-[#1F3D2B0D] transition-colors text-left cursor-pointer">
-                  <span class="text-base">🇬🇪</span>
-                  <span class="flex-1">ქართული</span>
-                  @if (langService.isGeo()) { <span class="text-[#A74826]">✓</span> }
-                </button>
-
-                <button (click)="selectLanguage('eng')" type="button"
-                        [class.bg-[#1F3D2B1A]]="langService.isEng()"
-                        class="w-full px-4 py-2.5 flex items-center gap-3 text-xs font-bold text-[#1F3D2B] hover:bg-[#1F3D2B0D] transition-colors text-left cursor-pointer">
-                  <span class="text-base">🇬🇧</span>
-                  <span class="flex-1">English</span>
-                  @if (langService.isEng()) { <span class="text-[#A74826]">✓</span> }
-                </button>
-
-                <button (click)="selectLanguage('rus')" type="button"
-                        [class.bg-[#1F3D2B1A]]="langService.isRus()"
-                        class="w-full px-4 py-2.5 flex items-center gap-3 text-xs font-bold text-[#1F3D2B] hover:bg-[#1F3D2B0D] transition-colors text-left cursor-pointer">
-                  <span class="text-base">🇷🇺</span>
-                  <span class="flex-1">Русский</span>
-                  @if (langService.isRus()) { <span class="text-[#A74826]">✓</span> }
-                </button>
-              </div>
-            }
-          </li>
-
-        </ul>
+        <!-- Mobile Toggle Button (FAR RIGHT EDGE) -->
+        <button type="button" class="lg:hidden p-1 focus:outline-none shrink-0 cursor-pointer" (click)="menuOpen = !menuOpen" aria-label="Toggle menu">
+          @if (!menuOpen) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40" fill="none">
+              <path d="M10 12H30" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M10 20H30" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M10 28H30" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#292D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          }
+        </button>
       </div>
 
     </div>
 
     <!-- MOBILE NAVIGATION MENU -->
     @if (menuOpen) {
-    <div class="md:hidden absolute top-full left-0 w-full bg-[#FAF7F0] z-50 shadow-lg border-t border-[#274C3B33]">
+    <div class="lg:hidden absolute top-full left-0 w-full bg-[#FAF7F0] z-50 shadow-lg border-t border-[#274C3B33]">
       <div class="flex flex-col gap-5 p-6">
 
         <!-- Home -->

@@ -9,6 +9,8 @@ export type SearchIntentType =
   | 'category-location'
   | 'category'
   | 'region'
+  | 'booking'
+  | 'conversational'
   | 'general';
 
 export interface SearchIntent {
@@ -31,17 +33,17 @@ export interface RecommendationResult {
 }
 
 export const USER_CATEGORY_ALIASES: Record<string, string[]> = {
-  sea: ['ზღვა', 'ზღვის', 'ზღვაზე', 'ზღვასთან', 'ზღვი', 'ზღვას', 'ზღვაა', 'ზღვები', 'ზღვებს', 'ზღვისკენ', 'ზღვაში', 'პლაჟი', 'პლაჟები', 'პლაჟზე', 'სანაპირო', 'სანაპიროზე', 'sea', 'beach', 'coast'],
-  mountain: ['მთა', 'მთები', 'მთაში', 'მთაზე', 'მთის', 'მწვერვალი', 'mountain', 'mountains'],
-  river: ['მდინარე', 'მდინარეები', 'მდინარეში', 'მდინარესთან', 'მდინარის', 'river', 'rivers'],
-  canyon: ['კანიონი', 'კანიონები', 'კანიონში', 'canyon', 'canyons'],
-  waterfall: ['ჩანჩქერი', 'ჩანჩქერები', 'ჩანჩქერში', 'waterfall', 'waterfalls'],
-  lake: ['ტბა', 'ტბები', 'ტბაში', 'ტბაზე', 'ტბის', 'lake', 'lakes'],
-  cave: ['მღვიმე', 'გამოქვაბული', 'მღვიმეში', 'cave', 'caves'],
-  forest: ['ტყე', 'ტყეში', 'forest'],
-  nature: ['ბუნება', 'ბუნების', 'ბუნებაში', 'nature'],
-  culture: ['ისტორიული', 'ტაძარი', 'ეკლესია', 'ციხე', 'მუზეუმი', 'culture', 'history', 'historical'],
-  food: ['ღვინო', 'მარანი', 'რესტორანი', 'კაფე', 'food', 'wine']
+  sea: ['ზღვა', 'ზღვის', 'ზღვაზე', 'ზღვასთან', 'ზღვი', 'ზღვას', 'ზღვაა', 'ზღვები', 'ზღვებს', 'ზღვისკენ', 'ზღვაში', 'პლაჟი', 'პლაჟები', 'პლაჟზე', 'სანაპირო', 'სანაპიროზე', 'sea', 'beach', 'coast', 'море', 'пляж'],
+  mountain: ['მთა', 'მთები', 'მთაში', 'მთაზე', 'მთის', 'მწვერვალი', 'mountain', 'mountains', 'горы', 'гора'],
+  river: ['მდინარე', 'მდინარეები', 'მდინარეში', 'მდინარესთან', 'მდინარის', 'river', 'rivers', 'река'],
+  canyon: ['კანიონი', 'კანიონები', 'კანიონში', 'canyon', 'canyons', 'каньон', 'каньоны'],
+  waterfall: ['ჩანჩქერი', 'ჩანჩქერები', 'ჩანჩქერში', 'waterfall', 'waterfalls', 'водопад'],
+  lake: ['ტბა', 'ტბები', 'ტბაში', 'ტბაზე', 'ტბის', 'lake', 'lakes', 'озеро'],
+  cave: ['მღვიმე', 'გამოქვაბული', 'მღვიმეში', 'cave', 'caves', 'пещера'],
+  forest: ['ტყე', 'ტყეში', 'forest', 'лес'],
+  nature: ['ბუნება', 'ბუნების', 'ბუნებაში', 'nature', 'природа'],
+  culture: ['ისტორიული', 'ტაძარი', 'ეკლესია', 'ციხე', 'მუზეუმი', 'culture', 'history', 'historical', 'культура'],
+  food: ['ღვინო', 'მარანი', 'რესტორანი', 'კაფე', 'food', 'wine', 'ресторан', 'вино']
 };
 
 export const USER_LOCATION_ALIASES: Record<string, string[]> = {
@@ -126,7 +128,7 @@ export const DATA_CATEGORY_MAPPINGS: Record<string, {
     descKeywords: ['ტბა']
   },
   cave: {
-    categories: ['მღვიმე', 'გამოქვაბული', 'cave'],
+    categories: ['მღვიამე', 'მღვიმე', 'გამოქვაბული', 'cave'],
     groupKeys: [],
     tags: ['მღვიმე', 'გამოქვაბული', 'cave'],
     nameKeywords: ['მღვიმე', 'გამოქვაბული', 'მღვიმის'],
@@ -172,11 +174,7 @@ export class AiRecommendationService {
       take(1),
       map((allPlaces: CsvPlace[]) => {
         if (!raw) {
-          return this.createVagueResponse();
-        }
-
-        if (this.isGenericOrGreeting(raw)) {
-          return this.createVagueResponse();
+          return this.createConversationalResponse(allPlaces);
         }
 
         // 1. Extract Search Intent
@@ -205,7 +203,7 @@ export class AiRecommendationService {
         return {
           botMessageText,
           recommendations: finalRecommendations,
-          isFallback: false,
+          isFallback: intent.type === 'general' || intent.type === 'conversational' || intent.type === 'booking',
           isVague: matchedPlaces.length === 0,
           quickSuggestions
         };
@@ -213,40 +211,29 @@ export class AiRecommendationService {
     );
   }
 
-  private isGenericOrGreeting(query: string): boolean {
-    const q = query.toLowerCase().trim();
-    const simple = toSimpleLatin(q);
-
-    const greetings = [
-      'გამარჯობა', 'სალამი', 'გამარჯობათ', 'hello', 'hi', 'hey', 'привет', 'Здравствуйте',
-      'რამე კარგი', 'სად წავიდე', 'რას მირჩევ', 'something nice', 'where to go', 'recommendation'
-    ];
-
-    if (q.length <= 3 && !['mta', 'tba', 'sea', 'geo'].includes(simple)) return true;
-    return greetings.some(g => q === g || simple === toSimpleLatin(g));
-  }
-
-  private createVagueResponse(): RecommendationResult {
+  private createConversationalResponse(allPlaces: CsvPlace[]): RecommendationResult {
     const isGeo = this.langService.isGeo();
     const isRus = this.langService.isRus();
 
-    let text = 'სიამოვნებით დაგეხმარებით! 🌿 რისი ნახვა გსურთ? შეგიძლიათ მიუთითოთ კატეგორია (მაგ. "ზღვა", "კანიონი", "მთა") ან კონკრეტული ადგილი.';
+    let text = 'გამარჯობა! 🤖 במה დაგეხმაროთ? შეგიძლიათ მითხრათ სასურველი კატეგორია (მაგ. "ზღვა", "კანიონი", "მთა"), რეგიონი (მაგ. "აჭარა", "ყაზბეგი"), ან მოგზაურობის დაჯავშნა.';
     if (isRus) {
-      text = 'С удовольствием помогу! 🌿 Что бы вы хотели посетить? Вы можете указать категорию (напр. "море", "каньон", "горы") или конкретное место.';
+      text = 'Здравствуйте! 🤖 Чем могу помочь? Вы можете указать категорию (напр. "море", "горы"), регион (напр. "Казбеги") или забронировать поездку.';
     } else if (!isGeo) {
-      text = 'I\'d love to help! 🌿 What would you like to see? You can specify a category (e.g. "sea", "canyon", "mountain") or specific place.';
+      text = 'Hello! 🤖 How can I help you? You can specify a category (e.g. "sea", "mountain"), region (e.g. "Kazbegi"), or book a trip.';
     }
+
+    const topPlaces = this.getTopRatedPlaces(allPlaces, 5);
 
     return {
       botMessageText: text,
-      recommendations: [],
-      isFallback: false,
-      isVague: true,
+      recommendations: topPlaces,
+      isFallback: true,
+      isVague: false,
       quickSuggestions: [
         '🌊 ზღვა / Sea',
         '🌊 კანიონები / Canyons',
         '🏔️ მთები / Mountains',
-        '🌲 ბუნება / Nature'
+        '✈️ დაჯავშნა / Booking'
       ]
     };
   }
@@ -293,7 +280,39 @@ export class AiRecommendationService {
     const simpleQuery = toSimpleLatin(normQuery);
     const words = normQuery.split(' ').filter(Boolean);
 
-    // 1. Detect Category from USER_CATEGORY_ALIASES
+    // 1. Detect Booking Intent
+    const bookingKeywords = [
+      'დაჯავშნ', 'დავჯავშნ', 'ჯავშან', 'ჯავშნებ', 'ბუქინგ', 'მოგზაურობ', 'ტურ', 'ტურებ', 'ბილეთ',
+      'book', 'booking', 'reserve', 'reservation', 'trip', 'tour', 'забронировать', 'бронь', 'бронирование', 'поездка'
+    ];
+    const isBookingIntent = bookingKeywords.some(kw =>
+      words.some(w => w.includes(kw)) || normQuery.includes(kw) || simpleQuery.includes(toSimpleLatin(kw))
+    );
+    if (isBookingIntent) {
+      return {
+        type: 'booking',
+        rawQuery: query
+      };
+    }
+
+    // 2. Detect Greetings / Conversational Intent
+    const conversationalKeywords = [
+      'გამარჯობა', 'სალამი', 'გამარჯობათ', 'გაუმარჯოს', 'მოგესალმებით',
+      'hello', 'hi', 'hey', 'привет', 'здравствуйте', 'добрый',
+      'ვინ ხარ', 'რისი გაკეთება', 'როგორ მუშაობ', 'დახმარება', 'help', 'помощь',
+      'რას მირჩევ', 'სად წავიდე', 'რამე კარგი', 'მირჩიე', 'როგორ', 'რა შეგიძლია'
+    ];
+    const isConversationalIntent = conversationalKeywords.some(kw =>
+      normQuery.includes(kw) || simpleQuery.includes(toSimpleLatin(kw))
+    );
+    if (isConversationalIntent) {
+      return {
+        type: 'conversational',
+        rawQuery: query
+      };
+    }
+
+    // 3. Detect Category from USER_CATEGORY_ALIASES
     let detectedCategory: string | undefined;
     for (const [catKey, aliases] of Object.entries(USER_CATEGORY_ALIASES)) {
       const matched = aliases.some(alias => {
@@ -309,7 +328,7 @@ export class AiRecommendationService {
       }
     }
 
-    // 2. Detect Location from USER_LOCATION_ALIASES
+    // 4. Detect Location from USER_LOCATION_ALIASES
     let detectedLocation: string | undefined;
     let isRegion = false;
     for (const [locName, aliases] of Object.entries(USER_LOCATION_ALIASES)) {
@@ -327,7 +346,7 @@ export class AiRecommendationService {
       }
     }
 
-    // 3. Category + Location
+    // 5. Category + Location
     if (detectedCategory && detectedLocation) {
       return {
         type: 'category-location',
@@ -338,7 +357,7 @@ export class AiRecommendationService {
       };
     }
 
-    // 4. Category only
+    // 6. Category only
     if (detectedCategory) {
       return {
         type: 'category',
@@ -347,7 +366,7 @@ export class AiRecommendationService {
       };
     }
 
-    // 5. Region / Location only
+    // 7. Region / Location only
     if (detectedLocation) {
       return {
         type: 'region',
@@ -357,7 +376,7 @@ export class AiRecommendationService {
       };
     }
 
-    // 6. Check Specific Place Name ONLY if not Category or Location
+    // 8. Check Specific Place Name
     const stopWords = [
       'მინდა', 'ვნახო', 'მინახე', 'მაჩვენე', 'გთხოვ', 'არის', 'სად', 'რომელი', 'რომელია',
       'ადგილი', 'ადგილები', 'როგორი', 'როგორ', 'წასვლა', 'მოგზაურობა', 'დავალიერო',
@@ -411,7 +430,17 @@ export class AiRecommendationService {
   public filterPlacesByIntent(allPlaces: CsvPlace[], intent: SearchIntent): CsvPlace[] {
     if (!allPlaces || allPlaces.length === 0) return [];
 
-    // 1. Specific Place Search
+    // 1. Booking Intent: return top rated places
+    if (intent.type === 'booking') {
+      return this.getTopRatedPlaces(allPlaces, 5);
+    }
+
+    // 2. Conversational Intent: return top rated places
+    if (intent.type === 'conversational') {
+      return this.getTopRatedPlaces(allPlaces, 5);
+    }
+
+    // 3. Specific Place Search
     if (intent.type === 'specific-place') {
       const targetName = intent.placeName || '';
       const normTarget = this.normalizeGeorgianText(targetName);
@@ -437,7 +466,7 @@ export class AiRecommendationService {
       });
     }
 
-    // 2. Category + Location Search (STRICT AND LOGIC)
+    // 4. Category + Location Search (STRICT AND LOGIC)
     if (intent.type === 'category-location') {
       const matched = allPlaces.filter(place => {
         const locOk = intent.location ? this.matchesLocationStrict(place, intent.location, !!intent.isRegion) : true;
@@ -448,7 +477,7 @@ export class AiRecommendationService {
       return matched;
     }
 
-    // 3. Category Search
+    // 5. Category Search
     if (intent.type === 'category') {
       const matched = allPlaces.filter(place => {
         return intent.category ? this.matchesCategoryWithMapping(place, intent.category) : true;
@@ -457,7 +486,7 @@ export class AiRecommendationService {
       return matched;
     }
 
-    // 4. Region / Location Search
+    // 6. Region / Location Search
     if (intent.type === 'region') {
       const matched = allPlaces.filter(place => {
         return intent.location ? this.matchesLocationStrict(place, intent.location, !!intent.isRegion) : true;
@@ -466,8 +495,14 @@ export class AiRecommendationService {
       return matched;
     }
 
-    // 5. General / Unmatched
-    return [];
+    // 7. General / Unmatched Fallback: Return top rated places
+    return this.getTopRatedPlaces(allPlaces, 5);
+  }
+
+  private getTopRatedPlaces(allPlaces: CsvPlace[], count = 5): CsvPlace[] {
+    const list = [...allPlaces];
+    list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    return list.slice(0, count);
   }
 
   private matchesCategoryWithMapping(place: CsvPlace, catKey: string): boolean {
@@ -550,6 +585,24 @@ export class AiRecommendationService {
   }
 
   private generateQuickSuggestions(intent: SearchIntent, results: CsvPlace[]): string[] {
+    if (intent.type === 'booking') {
+      return [
+        '📍 მარტვილის კანიონი',
+        '📍 ყაზბეგი',
+        '📍 ბათუმი',
+        '🌊 ზღვა / Sea'
+      ];
+    }
+
+    if (intent.type === 'conversational') {
+      return [
+        '🌊 ზღვა / Sea',
+        '🌊 კანიონები / Canyons',
+        '🏔️ მთები / Mountains',
+        '✈️ დაჯავშნა / Booking'
+      ];
+    }
+
     if (results.length === 0) {
       return [
         '🌊 ზღვა / Sea',
@@ -569,7 +622,7 @@ export class AiRecommendationService {
     if (intent.location) {
       suggestions.push(`📍 ${intent.location}`);
     } else {
-      suggestions.push('🌲 ბუნება / Nature');
+      suggestions.push('✈️ დაჯავშნა / Booking');
     }
 
     return suggestions;
@@ -578,6 +631,39 @@ export class AiRecommendationService {
   private buildBotResponseText(intent: SearchIntent, matchCount: number): string {
     const isGeo = this.langService.isGeo();
     const isRus = this.langService.isRus();
+
+    // 1. Booking Intent Response
+    if (intent.type === 'booking') {
+      if (isGeo) {
+        return '✈️ მოგზაურობის დასაჯავშნად აირჩიეთ სასურველი ადგილი სიიდან, გადადით დეტალებში და დააჭირეთ ღილაკს "დაჯავშნა"! აი ულამაზესი ადგილები მოგზაურობისთვის:';
+      }
+      if (isRus) {
+        return '✈️ Чтобы забронировать поездку, выберите место из списка, перейдите в детали и нажмите кнопку "Забронировать"! Вот популярные места для путешествий:';
+      }
+      return '✈️ To book a trip, choose your desired destination from the list, open its details and click "Book Now"! Here are top destinations:';
+    }
+
+    // 2. Conversational Intent Response
+    if (intent.type === 'conversational') {
+      if (isGeo) {
+        return 'გამარჯობა! 🤖 მე ვარ Explore Georgia-ს AI ასისტენტი. შემიძლია დაგეხმაროთ ადგილების მოძებნაში (მაგ. "ზღვა", "კანიონები", "ყაზბეგი") ან მოგზაურობის დაჯავშნაში. აი რამდენიმე პოპულარული ადგილი:';
+      }
+      if (isRus) {
+        return 'Здравствуйте! 🤖 Я ИИ помощник Explore Georgia. Я могу помочь вам найти интересные места (напр. "море", "каньоны", "Казбеги") или забронировать поездку. Вот популярные места:';
+      }
+      return 'Hello! 🤖 I am Explore Georgia\'s AI Assistant. I can help you discover places (e.g. "sea", "canyons", "Kazbegi") or book a trip. Here are top recommended spots:';
+    }
+
+    // 3. Fallback / General Response
+    if (intent.type === 'general') {
+      if (isGeo) {
+        return '🤖 სიამოვნებით დაგეხმარებით! შეგიძლიათ მითხრათ სასურველი კატეგორია (მაგ. "ზღვა", "კანიონი", "მთა"), რეგიონი (მაგ. "აჭარა", "ყაზბეგი"), ან მოგზაურობის დაჯავშნა. აი ულამაზესი ადგილები:';
+      }
+      if (isRus) {
+        return '🤖 С удовольствием помогу! Вы можете указать категорию (напр. "море", "горы"), регион (напр. "Казбеги") или забронировать поездку. Вот популярные места:';
+      }
+      return '🤖 I\'d love to help! You can specify a category (e.g. "sea", "mountain"), region (e.g. "Kazbegi"), or booking a trip. Here are top recommended places:';
+    }
 
     if (matchCount === 0) {
       if (intent.type === 'specific-place') {

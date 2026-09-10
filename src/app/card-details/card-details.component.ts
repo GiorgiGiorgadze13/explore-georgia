@@ -94,11 +94,35 @@ export class CardDetailsComponent implements OnInit {
     const state = history.state;
     if (state && state.card) {
       this.updateCardData(state.card);
-      return;
     }
 
+    const loadById = (id: string) => {
+      if (!id) return;
+      this.placesService.getPlaces().subscribe((places) => {
+        const found = places.find((p) => String(p.id) === String(id));
+        if (found) {
+          this.updateFromPlace(found);
+        }
+      });
+    };
+
+    const paramId = this.route.snapshot.paramMap.get('id');
+    const queryId = this.route.snapshot.queryParams['id'];
+    const initialId = paramId || queryId;
+
+    if (initialId) {
+      loadById(initialId);
+    }
+
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) loadById(id);
+    });
+
     this.route.queryParams.subscribe((params) => {
-      if (params['title']) {
+      if (params['id']) {
+        loadById(params['id']);
+      } else if (params['title']) {
         const id = params['id'] || '';
         const title = params['title'];
         const badge = params['badge'] || 'ლოკაცია';
@@ -116,13 +140,6 @@ export class CardDetailsComponent implements OnInit {
           description: params['description'] || 'დეტალური ინფორმაცია ლოკაციის შესახებ.',
           rating: params['rating'] || '4.9 (50 შეფასება)',
           price: params['price'] || 150
-        });
-      } else if (params['id']) {
-        this.placesService.getPlaces().subscribe((places) => {
-          const found = places.find((p) => p.id === params['id']);
-          if (found) {
-            this.updateFromPlace(found);
-          }
         });
       }
     });

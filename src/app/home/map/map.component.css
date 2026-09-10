@@ -41,13 +41,14 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   contain: layout style paint;
-  transition: transform 0.15s ease-out;
+  will-change: transform;
 }
 
 .custom-map-marker-pin:hover {
   transform: scale(1.15) translate3d(0, 0, 0) !important;
   -webkit-transform: scale(1.15) translate3d(0, 0, 0) !important;
   z-index: 1000 !important;
+  transition: transform 0.15s ease-out;
 }
 
 /* Leaflet Popup Styling */

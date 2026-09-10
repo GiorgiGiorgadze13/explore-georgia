@@ -67,16 +67,7 @@ export class FavoritesComponent {
   openDetails(card: FavoriteCard): void {
     const activeImg = this.getActiveCardImage(card);
     this.router.navigate(['/details'], {
-      queryParams: {
-        id: card.id,
-        title: card.title,
-        location: card.location,
-        badge: card.badge,
-        image: activeImg,
-        description: card.description,
-        price: card.dateOrPrice,
-        rating: card.rating
-      },
+      queryParams: { id: card.id },
       state: { card: { ...card, image: activeImg } }
     });
   }

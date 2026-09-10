@@ -52,7 +52,7 @@ export class FilterCardComponent implements OnInit {
   showFilters = false;
   cards = signal<DisplayCard[]>([]);
   currentPage = signal<number>(1);
-  pageSize = 6;
+  pageSize = 10;
    ngOnInit(): void {
     const url = this.router.url;
 
@@ -203,13 +203,10 @@ export class FilterCardComponent implements OnInit {
 
   totalPagesArray = computed(() => {
     const total = this.totalPages();
-    const maxVisible = 10;
-    let start = Math.max(1, this.currentPage() - 4);
-    let end = Math.min(total, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
+    const chunkSize = 10;
+    const currentBlock = Math.floor((this.currentPage() - 1) / chunkSize);
+    const start = currentBlock * chunkSize + 1;
+    const end = Math.min(total, start + chunkSize - 1);
 
     const pages: number[] = [];
     for (let i = start; i <= end; i++) {
@@ -290,15 +287,7 @@ export class FilterCardComponent implements OnInit {
 
   openDetails(card: DisplayCard): void {
     this.router.navigate(['/details'], {
-      queryParams: {
-        id: card.id,
-        title: card.title,
-        location: card.location,
-        badge: card.badge,
-        image: this.getActiveCardImage(card) || '/Rectangle1.png',
-        description: card.description,
-        price: card.dateOrPrice
-      },
+      queryParams: { id: card.id },
       state: { card }
     });
   }
