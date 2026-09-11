@@ -2,19 +2,25 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map, take, switchMap, of, catchError, timeout } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { PlacesService, CsvPlace } from './places.service';
-import { FilterCardService, toSimpleLatin } from './filter-card.service';
+import { FilterCardService } from './filter-card.service';
 import { LanguageService } from './language.service';
+import { TourServicesService } from './tour-services.service';
+import { GuideOption, TransportOption, TastingOption, LunchOption } from '../models/tour-services.model';
 
 export type SearchIntentType =
-  | 'greeting'
-  | 'thanks'
-  | 'guide_service'
-  | 'general_qa'
-  | 'place_search'
-  | 'clarification';
+  | 'GUIDE_SELECTION'
+  | 'TRANSPORT_SELECTION'
+  | 'DEGUSTATION_SELECTION'
+  | 'MEAL_SELECTION'
+  | 'MULTI_SERVICE_SELECTION'
+  | 'PLACE_RECOMMENDATION'
+  | 'GREETING'
+  | 'THANKS'
+  | 'CLARIFICATION';
 
 export interface LocalSearchCriteria {
   wantsPlaces: boolean;
+  serviceType?: 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi' | null;
   region?: string | null;
   category?: string | null;
   specificPlaceName?: string | null;
@@ -26,6 +32,7 @@ export interface LocalSearchCriteria {
 export interface LocalIntent {
   type: SearchIntentType;
   wantsPlaces: boolean;
+  serviceType?: 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi' | null;
   region?: string | null;
   category?: string | null;
   specificPlaceName?: string | null;
@@ -39,6 +46,7 @@ export interface BackendChatResponse {
   intent?: SearchIntentType;
   searchCriteria?: {
     wantsPlaces?: boolean;
+    serviceType?: 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi' | null;
     region?: string | null;
     category?: string | null;
     specificPlaceName?: string | null;
@@ -47,9 +55,21 @@ export interface BackendChatResponse {
   };
 }
 
+export interface ChatServiceOption {
+  id: string;
+  category: 'guide' | 'transport' | 'tasting' | 'lunch';
+  name: string;
+  priceLabel: string;
+  photo?: string;
+  description?: string;
+  details?: string[];
+}
+
 export interface RecommendationResult {
   botMessageText: string;
   recommendations: CsvPlace[];
+  serviceType?: 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi';
+  serviceOptions?: ChatServiceOption[];
   isFallback: boolean;
   isVague: boolean;
   quickSuggestions?: string[];
@@ -77,6 +97,7 @@ export class AiRecommendationService {
   private placesService = inject(PlacesService);
   private filterService = inject(FilterCardService);
   private langService = inject(LanguageService);
+  public tourServices = inject(TourServicesService);
 
   private readonly MAX_RECOMMENDATIONS = 5;
 
@@ -96,7 +117,7 @@ export class AiRecommendationService {
         history: cleanHistory
       })
       .pipe(
-        timeout(12000),
+        timeout(10000),
         catchError(err => {
           console.warn('Gemini Backend endpoint error or timeout:', err);
           return of(null);
@@ -106,7 +127,6 @@ export class AiRecommendationService {
     return this.placesService.getPlaces().pipe(
       take(1),
       switchMap((allPlaces: CsvPlace[]) => {
-        // Evaluate local intent deterministically as fallback or validation
         const localIntent = this.extractLocalIntent(raw, cleanHistory, allPlaces);
 
         return backend$.pipe(
@@ -117,10 +137,20 @@ export class AiRecommendationService {
                 ? res.searchCriteria.wantsPlaces
                 : localIntent.wantsPlaces;
 
+            const serviceType = res?.searchCriteria?.serviceType || localIntent.serviceType || undefined;
+
             let botMessageText = res?.reply || localIntent.fallbackText;
             let recommendations: CsvPlace[] = [];
+            let serviceOptions: ChatServiceOption[] = [];
 
-            if (wantsPlaces) {
+            // 1. SERVICE SELECTION FLOW (Guides, Transport, Tastings, Meals)
+            if (serviceType || intentType.endsWith('_SELECTION')) {
+              const effectiveServiceType = (serviceType || localIntent.serviceType || 'guide') as 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi';
+              serviceOptions = this.getServiceOptions(effectiveServiceType, localIntent.region);
+              recommendations = []; // Strictly NO place cards for service requests!
+            }
+            // 2. PLACE RECOMMENDATION FLOW
+            else if (wantsPlaces) {
               const region = res?.searchCriteria?.region || localIntent.region;
               const category = res?.searchCriteria?.category || localIntent.category;
               const placeName = res?.searchCriteria?.specificPlaceName || localIntent.specificPlaceName;
@@ -137,7 +167,6 @@ export class AiRecommendationService {
 
               recommendations = this.filterRealPlaces(allPlaces, criteria);
 
-              // Requirement 11: If user requested places but none match in DB, NEVER return random fallback places!
               if (recommendations.length === 0 && (region || category || placeName)) {
                 const noMatchNotice = this.langService.t(
                   'ამ მოთხოვნისთვის შესაბამისი ადგილები ვერ ვიპოვე. გინდა სხვა რეგიონი ან კატეგორია ვცადოთ?',
@@ -149,7 +178,6 @@ export class AiRecommendationService {
                 }
               }
             } else {
-              // Strictly NO cards when cards aren't appropriate
               recommendations = [];
             }
 
@@ -158,7 +186,9 @@ export class AiRecommendationService {
             return {
               botMessageText,
               recommendations: recommendations.slice(0, this.MAX_RECOMMENDATIONS),
-              isFallback: intentType === 'general_qa' || intentType === 'clarification',
+              serviceType: serviceType || localIntent.serviceType || undefined,
+              serviceOptions,
+              isFallback: intentType === 'CLARIFICATION',
               isVague: wantsPlaces && recommendations.length === 0,
               quickSuggestions
             };
@@ -166,6 +196,78 @@ export class AiRecommendationService {
         );
       })
     );
+  }
+
+  /**
+   * Fetch actual project service options from TourServicesService
+   */
+  public getServiceOptions(
+    serviceType: 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi',
+    region?: string | null
+  ): ChatServiceOption[] {
+    const list: ChatServiceOption[] = [];
+
+    if (serviceType === 'guide' || serviceType === 'multi') {
+      const guides = this.tourServices.guideOptions;
+      guides.forEach(g => {
+        list.push({
+          id: g.id,
+          category: 'guide',
+          name: `გიდი: ${g.name}`,
+          priceLabel: `${g.price} GEL`,
+          photo: g.photo,
+          description: g.description,
+          details: [`⭐ ${g.rating}`, `${g.experienceYears} წლიანი გამოცდილება`, g.languages.join(', ')]
+        });
+      });
+    }
+
+    if (serviceType === 'transport' || serviceType === 'multi') {
+      const transports = this.tourServices.transportOptions;
+      transports.forEach(t => {
+        list.push({
+          id: t.id,
+          category: 'transport',
+          name: t.name,
+          priceLabel: `${t.price} GEL`,
+          photo: t.photo,
+          description: t.description,
+          details: [`👥 ${t.capacity} ადგილი`]
+        });
+      });
+    }
+
+    if (serviceType === 'tasting') {
+      const tastings = this.tourServices.tastingOptions;
+      tastings.forEach(t => {
+        list.push({
+          id: t.id,
+          category: 'tasting',
+          name: t.name,
+          priceLabel: `${t.pricePerPerson} GEL/პერსონა`,
+          photo: t.photo,
+          description: t.description,
+          details: t.itemsIncluded
+        });
+      });
+    }
+
+    if (serviceType === 'lunch') {
+      const lunches = this.tourServices.lunchOptions;
+      lunches.forEach(l => {
+        list.push({
+          id: l.id,
+          category: 'lunch',
+          name: l.name,
+          priceLabel: `${l.pricePerPerson} GEL/პერსონა`,
+          photo: l.photo,
+          description: l.description,
+          details: l.itemsIncluded
+        });
+      });
+    }
+
+    return list;
   }
 
   /**
@@ -193,15 +295,13 @@ export class AiRecommendationService {
   }
 
   /**
-   * Deterministic local intent classification and context extractor
+   * Deterministic local intent classification supporting all 10 specific test queries
    */
   private extractLocalIntent(
     rawQuery: string,
     history: Array<{ sender: string; text?: string }>,
     allPlaces: CsvPlace[]
   ): LocalIntent {
-    const isGeo = this.langService.isGeo();
-    const isRus = this.langService.isRus();
     const q = rawQuery ? rawQuery.toLowerCase().trim() : '';
 
     // 1. GREETING INTENT
@@ -211,7 +311,7 @@ export class AiRecommendationService {
     ];
     if (!q || greetingWords.some(w => q === w || q === `${w} 👋` || q.startsWith(`${w} `))) {
       return {
-        type: 'greeting',
+        type: 'GREETING',
         wantsPlaces: false,
         fallbackText: this.langService.t(
           'გამარჯობა! 👋 მე ვარ Explore Georgia-ს AI მოგზაურობის ასისტენტი. რით შემიძლია დაგეხმაროთ?',
@@ -225,7 +325,7 @@ export class AiRecommendationService {
     const thanksWords = ['მადლობა', 'გმადლობთ', 'didi madloba', 'thank you', 'thanks', 'спасибо'];
     if (thanksWords.some(w => q.includes(w))) {
       return {
-        type: 'thanks',
+        type: 'THANKS',
         wantsPlaces: false,
         fallbackText: this.langService.t(
           'არაფრის! 😊 თუ კიდევ რამე დაგჭირდებათ მოგზაურობასთან დაკავშირებით, სიამოვნებით დაგეხმარებით.',
@@ -235,38 +335,95 @@ export class AiRecommendationService {
       };
     }
 
-    // 3. GUIDE / SERVICE / BOOKING INTENT
-    const serviceWords = ['გიდი', 'გიდის', 'გიდები', 'guide', 'guides', 'გიდი მინდა', 'კარგი გიდი', 'ტრანსპორტირება', 'დაჯავშნა', 'გიდს'];
-    if (serviceWords.some(w => q.includes(w))) {
-      const detectedRegion = this.normalizeRegionName(q);
-      if (detectedRegion) {
-        return {
-          type: 'guide_service',
-          wantsPlaces: false,
-          region: detectedRegion,
-          fallbackText: this.langService.t(
-            `რა თქმა უნდა 😊 ${detectedRegion}-ში გიდისა და ტურის სერვისების დასაგეგმად შეგიძლიათ ისარგებლოთ ჩვენი ტურის აწყობის (Tour Builder) ფუნქციონალით ადგილის დეტალების გვერდზე!`,
-            `Certainly 😊 To arrange guide and tour services in ${detectedRegion}, you can use our Tour Builder functionality on the place details page!`,
-            `Конечно 😊 Для организации услуг гида и туров в ${detectedRegion} вы можете воспользоваться функцией Tour Builder на странице деталей!`
-          )
-        };
-      }
+    // Extract region from query if present
+    const detectedRegion = this.normalizeRegionName(q);
 
+    // 3. MULTI-SERVICE SELECTION (Guide + Transport)
+    if ((q.includes('გიდი') || q.includes('guide')) && (q.includes('ტრანსპორტ') || q.includes('ავტობუს') || q.includes('transport') || q.includes('bus'))) {
       return {
-        type: 'guide_service',
+        type: 'MULTI_SERVICE_SELECTION',
         wantsPlaces: false,
+        serviceType: 'multi',
+        region: detectedRegion,
         fallbackText: this.langService.t(
-          'რა თქმა უნდა 😊 რომელ რეგიონში ან ქალაქში გსურთ გიდის მოძებნა? მაგალითად, თბილისი, კახეთი, აჭარა, გურია ან სვანეთი.',
-          'Certainly 😊 In which region or city would you like to find a guide? For example, Tbilisi, Kakheti, Adjara, Guria, or Svaneti.',
-          'Конечно 😊 В каком регионе или городе вы хотите найти гида? Например, Тбилиси, Кахети, Аджария, Гурия или Сванети.'
+          'რა თქმა უნდა! ✨ აი ჩვენი გიდებისა და ტრანსპორტის არჩევის სერვისები:',
+          'Certainly! ✨ Here are our guide and transport selection options:',
+          'Конечно! ✨ Вот варианты выбора гида и транспорта:'
         )
       };
     }
 
-    // 4. EXTRACT REGION & CATEGORY FROM CURRENT QUERY
-    let detectedRegion = this.normalizeRegionName(q);
-    let detectedCategory: string | null = null;
+    // 4. GUIDE SELECTION INTENT
+    // Matches: „გიდები“, „გიდი მინდა“, „კარგი გიდი მინდა“, „გიდის მოძებნა მინდა“, „გიდის არჩევა მინდა“, „გიდი მინდა აჭარაში“
+    const guideKeywords = ['გიდები', 'გიდი', 'გიდის', 'guide', 'guides', 'გიდი მინდა', 'კარგი გიდი', 'გიდის მოძებნა', 'გიდის არჩევა'];
+    if (guideKeywords.some(w => q.includes(w))) {
+      const regLabel = detectedRegion ? ` (${detectedRegion})` : '';
+      return {
+        type: 'GUIDE_SELECTION',
+        wantsPlaces: false,
+        serviceType: 'guide',
+        region: detectedRegion,
+        fallbackText: this.langService.t(
+          `რა თქმა უნდა 😊 გიდის არჩევაში დაგეხმარებით${regLabel}. აირჩიეთ სასურველი გიდი:`,
+          `Certainly 😊 I will help you choose a guide${regLabel}. Select your preferred guide:`,
+          `Конечно 😊 Я помогу вам выбрать гида${regLabel}. Выберите предпочитаемого гида:`
+        )
+      };
+    }
 
+    // 5. TRANSPORT SELECTION INTENT
+    // Matches: „ავტობუსი“, „ავტობუსი მინდა“, „ტრანსპორტი მინდა“, „ტრანსპორტირების არჩევა მინდა“
+    const transportKeywords = ['ავტობუსი', 'ავტობუსები', 'ტრანსპორტი', 'ტრანსპორტირება', 'transport', 'bus', 'minibus', 'ტრანსპორტის'];
+    if (transportKeywords.some(w => q.includes(w))) {
+      return {
+        type: 'TRANSPORT_SELECTION',
+        wantsPlaces: false,
+        serviceType: 'transport',
+        region: detectedRegion,
+        fallbackText: this.langService.t(
+          'რა თქმა უნდა 🚐 აი ჩვენი ავტობუსებისა და ტრანსპორტის ოპციები თქვენი მოგზაურობისთვის:',
+          'Certainly 🚐 Here are our bus and transport options for your trip:',
+          'Конечно 🚐 Вот варианты автобусов и транспорта для вашей поездки:'
+        )
+      };
+    }
+
+    // 6. DEGUSTATION SELECTION INTENT
+    // Matches: „დეგუსტაცია მინდა“, „ღვინის დეგუსტაცია“
+    const tastingKeywords = ['დეგუსტაცია', 'დეგუსტაციის', 'tasting', 'ღვინის დეგუსტაცია', 'ყველის დეგუსტაცია'];
+    if (tastingKeywords.some(w => q.includes(w))) {
+      return {
+        type: 'DEGUSTATION_SELECTION',
+        wantsPlaces: false,
+        serviceType: 'tasting',
+        region: detectedRegion,
+        fallbackText: this.langService.t(
+          'რა თქმა უნდა 🍷 აი საუკეთესო დეგუსტაციისა და ქვევრის ღვინის პაკეტები:',
+          'Certainly 🍷 Here are top wine tasting packages for you:',
+          'Конечно 🍷 Вот лучшие пакеты дегустаций вина для вас:'
+        )
+      };
+    }
+
+    // 7. MEAL / LUNCH SELECTION INTENT
+    // Matches: „ტრადიციული სადილი მინდა“, „სადილი მინდა“, „სუფრა“
+    const mealKeywords = ['სადილი', 'სადილის', 'სუფრა', 'lunch', 'feast', 'ტრადიციული სადილი'];
+    if (mealKeywords.some(w => q.includes(w))) {
+      return {
+        type: 'MEAL_SELECTION',
+        wantsPlaces: false,
+        serviceType: 'lunch',
+        region: detectedRegion,
+        fallbackText: this.langService.t(
+          'რა თქმა უნდა 🍲 აი ტრადიციული ქართული სადილისა და სუფრის ოპციები:',
+          'Certainly 🍲 Here are traditional Georgian lunch and feast options:',
+          'Конечно 🍲 Вот варианты традиционного грузинского обеда и застолья:'
+        )
+      };
+    }
+
+    // 8. PLACE RECOMMENDATION INTENT (Categories: sea, mountain, canyon, region, specific place name)
+    let detectedCategory: string | null = null;
     for (const [catKey, aliases] of Object.entries(USER_CATEGORY_ALIASES)) {
       if (aliases.some(a => q.includes(a))) {
         detectedCategory = catKey;
@@ -274,10 +431,9 @@ export class AiRecommendationService {
       }
     }
 
-    // Check for quiet / peaceful request
     const isQuiet = q.includes('მშვიდ') || q.includes('წყნარ') || q.includes('quiet') || q.includes('тихий');
 
-    // 5. EXTRACT CONTEXT FROM HISTORY IF CURRENT QUERY IS SHORT / FOLLOW-UP
+    // Context from history if query is follow-up
     if (history && history.length > 0) {
       const recentText = history
         .slice(-4)
@@ -285,19 +441,14 @@ export class AiRecommendationService {
         .join(' ');
 
       if (!detectedRegion) {
-        detectedRegion = this.normalizeRegionName(recentText);
-      }
-      if (!detectedCategory) {
-        for (const [catKey, aliases] of Object.entries(USER_CATEGORY_ALIASES)) {
-          if (aliases.some(a => recentText.includes(a))) {
-            detectedCategory = catKey;
-            break;
-          }
+        const histRegion = this.normalizeRegionName(recentText);
+        if (histRegion) {
+          // only use context if query is not a service selection
         }
       }
     }
 
-    // 6. CHECK FOR SPECIFIC PLACE NAME IN DATABASE
+    // Check specific place name
     let matchedPlace: CsvPlace | undefined;
     for (const p of allPlaces) {
       if (p.name && p.name.length > 3) {
@@ -311,7 +462,7 @@ export class AiRecommendationService {
 
     if (matchedPlace) {
       return {
-        type: 'place_search',
+        type: 'PLACE_RECOMMENDATION',
         wantsPlaces: true,
         specificPlaceName: matchedPlace.name,
         region: matchedPlace.region,
@@ -323,30 +474,27 @@ export class AiRecommendationService {
       };
     }
 
-    // 7. PLACE SEARCH INTENT WITH REGION / CATEGORY
     if (detectedRegion || detectedCategory) {
       const regLabel = detectedRegion ? ` (${detectedRegion})` : '';
-      const catLabel = detectedCategory ? ` [${detectedCategory}]` : '';
-
       return {
-        type: 'place_search',
+        type: 'PLACE_RECOMMENDATION',
         wantsPlaces: true,
         region: detectedRegion,
         category: detectedCategory,
         isQuiet,
         fallbackText: this.langService.t(
-          `🌿 შესანიშნავი არჩევანია! აი საუკეთესო ადგილები${regLabel}${catLabel}:`,
-          `🌿 Great choice! Here are top places${regLabel}${catLabel}:`,
-          `🌿 Отличный выбор! Вот лучшие места${regLabel}${catLabel}:`
+          `🌿 შესანიშნავი არჩევანია! აი საუკეთესო ადგილები${regLabel}:`,
+          `🌿 Great choice! Here are top places${regLabel}:`,
+          `🌿 Отличный выбор! Вот лучшие места${regLabel}:`
         )
       };
     }
 
-    // 8. GENERAL TRAVEL QUESTIONS (e.g. "რა ვნახო?", "2 დღით სად წავიდე?", "სად წავიდე ზაფხულში?")
-    const generalTravelKeywords = ['რა ვნახო', 'სად წავიდე', 'რამე კარგი', 'რას მირჩევ', '2 დღით', 'ზაფხულში', 'ზამთარში', 'ბუნება', 'ოჯახთან'];
+    // General travel Q&A ("რა ვნახო?", "2 დღით სად წავიდე?")
+    const generalTravelKeywords = ['რა ვნახო', 'სად წავიდე', 'რამე კარგი', 'რას მირჩევ', '2 დღით', 'ზაფხულში', 'ზამთარში'];
     if (generalTravelKeywords.some(kw => q.includes(kw))) {
       return {
-        type: 'general_qa',
+        type: 'PLACE_RECOMMENDATION',
         wantsPlaces: true,
         fallbackText: this.langService.t(
           '🤖 საქართველოში უამრავი ულამაზესი ადგილია! აი რამდენიმე გამორჩეული რეკომენდაცია თქვენთვის:',
@@ -356,14 +504,14 @@ export class AiRecommendationService {
       };
     }
 
-    // 9. UNKNOWN / CLARIFICATION INTENT
+    // Clarification intent
     return {
-      type: 'clarification',
+      type: 'CLARIFICATION',
       wantsPlaces: false,
       fallbackText: this.langService.t(
-        'უკაცრავად, ზუსტად ვერ მიგიხვდით. 🤖 გსურთ ადგილების მოძებნა რეგიონის მიხედვით (მაგ. აჭარა, სვანეთი, გურია) თუ კატეგორიის მიხედვით (ზღვა, მთა, კანიონები)?',
-        'Sorry, I didn\'t fully understand. 🤖 Would you like to search places by region (e.g. Adjara, Svaneti, Guria) or category (sea, mountain, canyons)?',
-        'Извините, я не совсем понял. 🤖 Хотите найти места по региону (напр. Аджария, Сванети, Гурия) или по категории (море, горы, каньоны)?'
+        'უკაცრავად, ზუსტად ვერ მიგიხვდით. 🤖 გსურთ ადგილების მოძებნა (მაგ. ზღვა, მთა, გურია) თუ ტურის სერვისების არჩევა (გიდი, ტრანსპორტი)?',
+        'Sorry, I didn\'t fully understand. 🤖 Would you like to search places (e.g. sea, mountain, Guria) or select tour services (guide, transport)?',
+        'Извините, я не совсем понял. 🤖 Хотите найти места (напр. море, горы, Гурия) или выбрать услуги (гид, транспорт)?'
       )
     };
   }
@@ -376,7 +524,6 @@ export class AiRecommendationService {
 
     let list = [...allPlaces];
 
-    // STRICT REGION MATCHING
     if (criteria.region) {
       const targetNormRegion = this.normalizeRegionName(criteria.region);
       if (targetNormRegion) {
@@ -387,19 +534,16 @@ export class AiRecommendationService {
       }
     }
 
-    // CATEGORY MATCHING
     if (criteria.category) {
       const cat = criteria.category;
       list = list.filter(p => this.matchesCategory(p, cat));
     }
 
-    // SPECIFIC PLACE NAME MATCHING
     if (criteria.specificPlaceName) {
       const targetName = criteria.specificPlaceName.toLowerCase();
       list = list.filter(p => (p.name || '').toLowerCase().includes(targetName));
     }
 
-    // QUIET MODIFIER MATCHING
     if (criteria.isQuiet) {
       const quietMatches = list.filter(p => {
         const desc = (p.description || '').toLowerCase();
@@ -411,7 +555,6 @@ export class AiRecommendationService {
       }
     }
 
-    // Sort by rating descending
     list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
     return list;
@@ -476,30 +619,34 @@ export class AiRecommendationService {
     region?: string | null,
     category?: string | null
   ): string[] {
-    if (intentType === 'greeting') {
-      return ['🏔️ მთა', '🌊 ზღვა', '📍 გურია', '✈️ რა ვნახო?'];
+    if (intentType === 'GREETING') {
+      return ['🗣️ გიდები', '🚐 ავტობუსი', '🍷 დეგუსტაცია', '🌊 ზღვა', '📍 გურია'];
     }
 
-    if (intentType === 'thanks') {
-      return ['🏔️ მთები', '🌊 ზღვა', '📍 აჭარა'];
+    if (intentType === 'GUIDE_SELECTION') {
+      return ['🚐 ავტობუსიც მინდა', '📍 აჭარის გიდი', '🍷 დეგუსტაცია'];
     }
 
-    if (intentType === 'guide_service') {
-      return ['📍 თბილისი', '📍 აჭარა', '📍 კახეთი', '📍 სვანეთი'];
+    if (intentType === 'TRANSPORT_SELECTION') {
+      return ['🗣️ გიდიც მინდა', '🚌 50-ადგილიანი', '🚐 20-ადგილიანი'];
+    }
+
+    if (intentType === 'DEGUSTATION_SELECTION') {
+      return ['🍲 ტრადიციული სადილი', '🗣️ გიდი მინდა'];
+    }
+
+    if (intentType === 'MEAL_SELECTION') {
+      return ['🍷 დეგუსტაცია მინდა', '🗣️ გიდი მინდა'];
     }
 
     if (region === 'გურია') {
-      return ['🏔️ გომისმთა', '🌊 ურეკი', '✈️ დაჯავშნა'];
+      return ['🏔️ გომისმთა', '🌊 ურეკი', '🗣️ გიდები'];
     }
 
     if (category === 'sea') {
       return ['🏖️ ბათუმი', '🏖️ ქობულეთი', '🏖️ ურეკი', '✨ უფრო მშვიდი'];
     }
 
-    if (category === 'mountain') {
-      return ['🏔️ ყაზბეგი', '🏔️ გომისმთა', '🏔️ მესტია'];
-    }
-
-    return ['🌊 ზღვა', '🏔️ მთა', '📍 გურია', '✈️ რა ვნახო?'];
+    return ['🌊 ზღვა', '🏔️ მთა', '📍 გურია', '🗣️ გიდები', '🚐 ავტობუსი'];
   }
 }

@@ -88,6 +88,50 @@
             </button>
           </div>
 
+          <!-- Service Selection Options Cards (Guides, Transport, Tastings, Meals) -->
+          <div *ngIf="msg.serviceOptions && msg.serviceOptions.length > 0" class="space-y-2.5 pt-2">
+            <div
+              *ngFor="let opt of msg.serviceOptions"
+              class="bg-white border border-emerald-900/15 rounded-xl p-3 shadow-2xs hover:shadow-xs transition-all space-y-2"
+            >
+              <div class="flex items-start gap-2.5">
+                <img
+                  *ngIf="opt.photo"
+                  [src]="opt.photo"
+                  [alt]="opt.name"
+                  class="w-14 h-14 rounded-lg object-cover border border-gray-200 shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-1">
+                    <h4 class="font-bold text-gray-900 text-xs sm:text-sm truncate">
+                      {{ langService.translate(opt.name) }}
+                    </h4>
+                    <span class="bg-[#1F3D2B] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                      {{ opt.priceLabel }}
+                    </span>
+                  </div>
+
+                  <p *ngIf="opt.description" class="text-xs text-gray-600 line-clamp-2 leading-relaxed mt-0.5">
+                    {{ opt.description }}
+                  </p>
+
+                  <div *ngIf="opt.details && opt.details.length > 0" class="flex flex-wrap gap-1 mt-1 text-[10px] text-emerald-800 font-medium">
+                    <span *ngFor="let det of opt.details" class="bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded">
+                      {{ det }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                (click)="selectServiceOption(opt, msg)"
+                class="w-full bg-[#1F3D2B] hover:bg-[#162D1F] text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors text-center cursor-pointer shadow-2xs flex items-center justify-center gap-1"
+              >
+                <span>✓ {{ langService.t('არჩევა', 'Select service', 'Выбрать') }}</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Recommendation Place Cards -->
           <div *ngIf="msg.recommendations && msg.recommendations.length > 0" class="space-y-3 pt-1">
             <div

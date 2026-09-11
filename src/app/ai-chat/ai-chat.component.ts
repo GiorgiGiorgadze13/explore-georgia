@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { AiRecommendationService } from '../Services/ai-recommendation.service';
+import { AiRecommendationService, ChatServiceOption } from '../Services/ai-recommendation.service';
 import { TravelPlanService } from '../Services/travel-plan.service';
 import { LanguageService } from '../Services/language.service';
 import { CardImageService } from '../Services/card-image.service';
@@ -14,6 +14,8 @@ export interface ChatMessage {
   sender: 'user' | 'bot';
   text?: string;
   recommendations?: CsvPlace[];
+  serviceType?: 'guide' | 'transport' | 'tasting' | 'lunch' | 'multi';
+  serviceOptions?: ChatServiceOption[];
   quickSuggestions?: string[];
   showAddAnotherButton?: boolean;
   selectedPlaceName?: string;
@@ -69,10 +71,11 @@ export class AiChatComponent implements OnInit {
     );
 
     const initialSuggestions = [
-      '🏔️ მთა',
+      '🗣️ გიდები',
+      '🚐 ავტობუსი',
+      '🍷 დეგუსტაცია',
       '🌊 ზღვა',
-      '📍 გურია',
-      '✈️ რა ვნახო?'
+      '📍 გურია'
     ];
 
     this.messages.set([
@@ -129,6 +132,8 @@ export class AiChatComponent implements OnInit {
           sender: 'bot',
           text: res.botMessageText,
           recommendations: res.recommendations,
+          serviceType: res.serviceType,
+          serviceOptions: res.serviceOptions,
           quickSuggestions: res.quickSuggestions,
           timestamp: new Date()
         };
@@ -273,6 +278,25 @@ export class AiChatComponent implements OnInit {
       text: confirmText,
       showAddAnotherButton: true,
       selectedPlaceName: place.name,
+      timestamp: new Date()
+    };
+
+    this.messages.update(prev => [...prev, botConfirmMsg]);
+    this.handleBotReplyScroll();
+  }
+
+  selectServiceOption(opt: ChatServiceOption, msg: ChatMessage): void {
+    const confirmText = this.langService.t(
+      `✅ არჩეულია სერვისი: ${this.langService.translate(opt.name)} (${opt.priceLabel}).`,
+      `✅ Service selected: ${this.langService.translate(opt.name)} (${opt.priceLabel}).`,
+      `✅ Услуга выбрана: ${this.langService.translate(opt.name)} (${opt.priceLabel}).`
+    );
+
+    const botConfirmMsg: ChatMessage = {
+      id: Date.now(),
+      sender: 'bot',
+      text: confirmText,
+      quickSuggestions: ['🗣️ გიდები', '🚐 ავტობუსი', '🌊 ზღვა', '📍 გურია'],
       timestamp: new Date()
     };
 
