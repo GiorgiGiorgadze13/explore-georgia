@@ -210,13 +210,14 @@
       type="text"
       [(ngModel)]="userInput"
       (keyup.enter)="sendMessage()"
+      [disabled]="isTyping()"
       [placeholder]="langService.t('დაწერეთ შეტყობინება...', 'Type your message...', 'Введите сообщение...')"
-      class="flex-1 bg-gray-50 border border-gray-300/80 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B] focus:border-transparent transition-all"
+      class="flex-1 bg-gray-50 border border-gray-300/80 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B] focus:border-transparent transition-all disabled:opacity-50"
     />
 
     <button
       (click)="sendMessage()"
-      [disabled]="!userInput().trim()"
+      [disabled]="isTyping() || !userInput().trim()"
       class="bg-[#1F3D2B] hover:bg-[#162D1F] disabled:opacity-40 text-white rounded-xl p-2.5 transition-all shadow-xs flex items-center justify-center shrink-0 cursor-pointer"
       aria-label="Send"
     >

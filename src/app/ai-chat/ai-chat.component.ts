@@ -63,18 +63,16 @@ export class AiChatComponent implements OnInit {
 
   private addInitialBotGreeting(): void {
     const greetingText = this.langService.t(
-      'გამარჯობა! 🤖 მე ვარ Explore Georgia-ს AI მოგზაურობის ასისტენტი. რა ადგილის აღმოჩენა გსურთ საქართველოში?',
-      'Hello! 🤖 I am Explore Georgia\'s AI Travel Assistant. What places in Georgia would you like to discover?',
-      'Здравствуйте! 🤖 Я ИИ Помощник Explore Georgia. Какие места в Грузии вы хотите открыть для себя?'
+      'გამარჯობა! 🤖 მე ვარ Explore Georgia-ს AI მოგზაურობის ასისტენტი. რით შემიძლია დაგეხმაროთ?',
+      'Hello! 🤖 I am Explore Georgia\'s AI Travel Assistant. How can I help you today?',
+      'Здравствуйте! 🤖 Я ИИ Помощник Explore Georgia. Чем я могу вам помочь?'
     );
 
     const initialSuggestions = [
-      '🏔️ მთები',
-      '🌊 მდინარეები',
-      '🌲 ბუნება',
-      '🏛️ ისტორიული',
-      '📍 მარტვილი',
-      '💰 50-100 GEL'
+      '🏔️ მთა',
+      '🌊 ზღვა',
+      '📍 გურია',
+      '✈️ რა ვნახო?'
     ];
 
     this.messages.set([
@@ -99,6 +97,7 @@ export class AiChatComponent implements OnInit {
   }
 
   sendMessage(overrideQuery?: string): void {
+    if (this.isTyping()) return;
     const query = (overrideQuery !== undefined ? overrideQuery : this.userInput()).trim();
     if (!query) return;
 
@@ -110,6 +109,8 @@ export class AiChatComponent implements OnInit {
       timestamp: new Date()
     };
 
+    const currentHistory = this.messages();
+
     this.lastUserMessageId = userMsg.id;
     this.messages.update(prev => [...prev, userMsg]);
     this.userInput.set('');
@@ -119,8 +120,8 @@ export class AiChatComponent implements OnInit {
     this.userJustSentMessage = true;
     this.scrollToUserMessage(userMsg.id);
 
-    // 2. Query AI Recommendation Service
-    this.aiService.getRecommendations(query).subscribe({
+    // 2. Query AI Recommendation Service with chat history context
+    this.aiService.getRecommendations(query, currentHistory).subscribe({
       next: (res) => {
         this.isTyping.set(false);
         const botMsg: ChatMessage = {
