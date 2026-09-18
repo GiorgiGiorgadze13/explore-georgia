@@ -1,0 +1,781 @@
+<app-header></app-header>
+
+<div class="min-h-screen bg-stone-50 font-kadwa py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Admin Header Banner -->
+    <div class="bg-gradient-to-r from-[#1F3D2B] to-[#14261b] text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs font-bold border border-amber-400/30 flex items-center gap-1.5">
+            🔒 {{ langService.t('ადმინ პანელი') }}
+          </span>
+          <span class="text-xs text-stone-300">
+            {{ authService.currentUser()?.email }}
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">
+          {{ langService.t('მართვის პანელი') }}
+        </h1>
+        <p class="text-stone-300 text-xs sm:text-sm mt-2 max-w-xl">
+          {{ langService.t('ახალი ლოკაციების დადასტურება, გადახდების მონიტორინგი, მომხმარებლების მართვა და ბლოკირება.') }}
+        </p>
+      </div>
+
+      <!-- Quick Actions / Logged Admin Info -->
+      <div class="flex items-center gap-3">
+        <button type="button" (click)="authService.logout()" routerLink="/"
+                class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-semibold shadow-md transition-all flex items-center gap-2 cursor-pointer">
+          <span>🚪</span>
+          <span>{{ langService.t('გამოსვლა') }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 border-b border-gray-200 scrollbar-none">
+      <button type="button" (click)="activeTab.set('dashboard')"
+              [class]="activeTab() === 'dashboard' ? 'bg-[#1F3D2B] text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 flex-none">
+        <span>📊</span>
+        <span>{{ langService.t('სტატისტიკა') }}</span>
+      </button>
+
+      <!-- PAYMENTS & BOOKINGS TAB -->
+      <button type="button" (click)="activeTab.set('payments')"
+              [class]="activeTab() === 'payments' ? 'bg-[#1F3D2B] text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 flex-none">
+        <span>💳</span>
+        <span>{{ langService.t('გადახდები & ჯავშნები') }}</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">
+          {{ stats().totalBookings }}
+        </span>
+      </button>
+
+      <!-- PENDING APPROVALS TAB -->
+      <button type="button" (click)="activeTab.set('pending')"
+              [class]="activeTab() === 'pending' ? 'bg-[#1F3D2B] text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 flex-none relative">
+        <span>⏳</span>
+        <span>{{ langService.t('დასადასტურებელი') }}</span>
+        <span [class]="stats().totalPending > 0 ? 'bg-amber-500 text-black animate-pulse' : 'bg-gray-300 text-gray-700'"
+              class="px-2 py-0.5 rounded-full text-[10px] font-bold">
+          {{ stats().totalPending }}
+        </span>
+      </button>
+
+      <button type="button" (click)="activeTab.set('places')"
+              [class]="activeTab() === 'places' ? 'bg-[#1F3D2B] text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 flex-none">
+        <span>📍</span>
+        <span>{{ langService.t('ლოკაციების მართვა') }}</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">
+          {{ stats().totalPlaces }}
+        </span>
+      </button>
+
+      <button type="button" (click)="activeTab.set('users')"
+              [class]="activeTab() === 'users' ? 'bg-[#1F3D2B] text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 flex-none">
+        <span>👥</span>
+        <span>{{ langService.t('მომხმარებლები') }}</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500 text-white">
+          {{ stats().totalUsers }}
+        </span>
+      </button>
+
+      <button type="button" (click)="activeTab.set('security')"
+              [class]="activeTab() === 'security' ? 'bg-[#1F3D2B] text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 flex-none">
+        <span>🔐</span>
+        <span>{{ langService.t('უსაფრთხოება & პაროლები') }}</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: DASHBOARD STATS -->
+    @if (activeTab() === 'dashboard') {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        
+        <!-- Total Revenue Card -->
+        <div (click)="activeTab.set('payments')" class="bg-gradient-to-br from-emerald-800 to-[#1F3D2B] text-white rounded-3xl p-6 shadow-md cursor-pointer hover:shadow-lg transition-all">
+          <p class="text-xs text-emerald-200 font-bold uppercase tracking-wider mb-1">{{ langService.t('სულ შემოსავალი (Revenue)') }}</p>
+          <h3 class="text-3xl font-extrabold text-white">{{ stats().totalRevenue }} ₾</h3>
+          <p class="text-xs text-emerald-300 mt-2">💳 {{ stats().totalBookings }} {{ langService.t('ტრანზაქცია') }}</p>
+        </div>
+
+        <!-- Pending Approval Stat Card -->
+        <div (click)="activeTab.set('pending')" class="bg-amber-50 rounded-3xl p-6 border border-amber-200 shadow-sm flex items-center justify-between cursor-pointer hover:bg-amber-100/80 transition-colors">
+          <div>
+            <p class="text-xs text-amber-800 font-bold uppercase tracking-wider mb-1">{{ langService.t('დასადასტურებელი') }}</p>
+            <h3 class="text-3xl font-extrabold text-amber-900">{{ stats().totalPending }}</h3>
+          </div>
+          <div class="w-14 h-14 rounded-2xl bg-amber-200 text-amber-900 flex items-center justify-center text-2xl">
+            ⏳
+          </div>
+        </div>
+
+        <!-- Stat Card 1 -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{{ langService.t('სულ ლოკაციები') }}</p>
+            <h3 class="text-3xl font-extrabold text-[#1F3D2B]">{{ stats().totalPlaces }}</h3>
+          </div>
+          <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-2xl">
+            🗺️
+          </div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">{{ langService.t('მომხმარებელი') }}</p>
+            <h3 class="text-3xl font-extrabold text-blue-900">{{ stats().totalUsers }}</h3>
+          </div>
+          <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center text-2xl">
+            👤
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Overview Info Panel -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+        <h3 class="text-xl font-bold text-[#1F3D2B] mb-3 flex items-center gap-2">
+          <span>⚙️</span>
+          <span>{{ langService.t('ადმინისტრირების შესაძლებლობები') }}</span>
+        </h3>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-gray-700">
+          <li class="flex items-start gap-2 bg-stone-50 p-4 rounded-2xl border border-stone-200">
+            <span class="text-emerald-700 font-bold">✓</span>
+            <div>
+              <strong class="text-gray-900 block font-semibold mb-0.5">გადახდების & ჯავშნების მონიტორინგი:</strong>
+              მომხმარებლების მიერ საკრედიტო ბარათით განხორციელებული გადახდების, ბარათის ნიღბის (Masked Card), თანხისა და ჯავშნების სრული აღრიცხვა.
+            </div>
+          </li>
+          <li class="flex items-start gap-2 bg-stone-50 p-4 rounded-2xl border border-stone-200">
+            <span class="text-amber-600 font-bold">✓</span>
+            <div>
+              <strong class="text-gray-900 block font-semibold mb-0.5">ახალი ლოკაციების დადასტურება:</strong>
+              მომხმარებლების მიერ დამატებული ახალი ლოკაციები ხვდება "დასადასტურებელი" ჩანართში. ადმინისტრატორის დადასტურებამდე ის საიტზე არ გამოჩნდება.
+            </div>
+          </li>
+          <li class="flex items-start gap-2 bg-stone-50 p-4 rounded-2xl border border-stone-200">
+            <span class="text-red-600 font-bold">✓</span>
+            <div>
+              <strong class="text-gray-900 block font-semibold mb-0.5">ლოკაციების წაშლა:</strong>
+              შეგიძლიათ ნებისმიერი ლოკაციისა და ბარათის წაშლა, რომელიც მომენტალურად წაიშლება მთავარი გვერდიდან.
+            </div>
+          </li>
+          <li class="flex items-start gap-2 bg-stone-50 p-4 rounded-2xl border border-stone-200">
+            <span class="text-blue-600 font-bold">✓</span>
+            <div>
+              <strong class="text-gray-900 block font-semibold mb-0.5">მომხმარებლების დაბლოკვა (Ban):</strong>
+              შეგიძლიათ დაბლოკოთ არასასურველი მომხმარებლები, რათა აღარ ჰქონდეთ სისტემაში შესვლის უფლება.
+            </div>
+          </li>
+        </ul>
+      </div>
+    }
+
+    <!-- TAB: PAYMENTS & BOOKINGS MODERATION -->
+    @if (activeTab() === 'payments') {
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+        
+        <!-- Header & Summary Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl">
+            <p class="text-xs text-emerald-800 font-bold uppercase tracking-wider">{{ langService.t('სულ შემოსავალი') }}</p>
+            <p class="text-2xl font-extrabold text-[#012D1D] mt-1">{{ stats().totalRevenue }} ₾</p>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+            <p class="text-xs text-blue-800 font-bold uppercase tracking-wider">{{ langService.t('სულ ტრანზაქციები') }}</p>
+            <p class="text-2xl font-extrabold text-blue-900 mt-1">{{ stats().totalBookings }}</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
+            <p class="text-xs text-amber-800 font-bold uppercase tracking-wider">{{ langService.t('მოლოდინის რეჟიმში (Pending)') }}</p>
+            <p class="text-2xl font-extrabold text-amber-900 mt-1">{{ stats().pendingBookings }}</p>
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-[#1F3D2B] flex items-center gap-2">
+              <span>💳</span>
+              <span>{{ langService.t('საკრედიტო ბარათების გადახდები & ჯავშნები') }}</span>
+            </h3>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ langService.t('დააჭირეთ ტრანზაქციას სრული შეკვეთის დეტალების სანახავად') }}
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Status Filter -->
+            <select 
+              [value]="bookingsStatusFilter()" 
+              (change)="bookingsStatusFilter.set($any($event.target).value)"
+              class="px-3 py-2.5 rounded-2xl bg-gray-100 text-xs font-bold text-gray-800 border border-gray-200 outline-none focus:ring-2 focus:ring-[#1F3D2B]">
+              <option value="ALL">ყველა სტატუსი</option>
+              <option value="Completed">Completed (შესრულებული)</option>
+              <option value="Pending">Pending (მოლოდინში)</option>
+              <option value="Refunded">Refunded (დაბრუნებული)</option>
+              <option value="Cancelled">Cancelled (გაუქმებული)</option>
+            </select>
+
+            <!-- Search Bar -->
+            <div class="relative w-full sm:w-64">
+              <input type="text" 
+                     [placeholder]="langService.t('ძებნა (ID, სახელი, ბარათი)...')" 
+                     [value]="bookingsSearch()"
+                     (input)="bookingsSearch.set($any($event.target).value)"
+                     class="w-full px-4 py-2.5 rounded-2xl bg-gray-100 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B]">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings Data Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-gray-700 border-collapse">
+            <thead>
+              <tr class="border-b border-gray-200 bg-stone-100 text-gray-800 font-bold uppercase text-[11px]">
+                <th class="p-3.5 rounded-l-xl">ID / თარიღი</th>
+                <th class="p-3.5">მომხმარებელი & კონტაქტი</th>
+                <th class="p-3.5">არჩეული ტური</th>
+                <th class="p-3.5">საბანკო ბარათი</th>
+                <th class="p-3.5">თანხა (₾)</th>
+                <th class="p-3.5">სტატუსი</th>
+                <th class="p-3.5 rounded-r-xl text-right">მოქმედება</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (b of filteredBookings(); track b.id) {
+                <tr (click)="openBookingDetails(b, $event)" class="hover:bg-emerald-50/50 transition-colors cursor-pointer group">
+                  
+                  <!-- ID & Date -->
+                  <td class="p-3.5">
+                    <span class="font-mono font-extrabold text-[#012D1D] text-sm block group-hover:underline">{{ b.id }}</span>
+                    <span class="text-[11px] text-gray-500">{{ b.createdAt }}</span>
+                  </td>
+
+                  <!-- Customer Info -->
+                  <td class="p-3.5">
+                    <div class="font-bold text-gray-900 text-sm">{{ b.customerName }}</div>
+                    <div class="text-[11px] text-gray-600">{{ b.customerEmail }}</div>
+                    <div class="text-[11px] text-gray-400">{{ b.customerPhone || '-' }}</div>
+                  </td>
+
+                  <!-- Tour Info -->
+                  <td class="p-3.5">
+                    <div class="font-bold text-[#012D1D] max-w-[200px] truncate leading-tight">
+                      {{ langService.translate(b.tourName) }}
+                    </div>
+                    <div class="text-[11px] text-gray-600 mt-0.5">
+                      📅 {{ b.bookingDate }} (👥 {{ b.travelerCount }} {{ langService.t('სტუმარი') }})
+                    </div>
+                  </td>
+
+                  <!-- Card Info -->
+                  <td class="p-3.5 font-mono">
+                    <div class="font-bold text-gray-900 text-xs flex items-center gap-1">
+                      <span>💳 {{ b.cardBrand }}</span>
+                    </div>
+                    <div class="text-xs text-gray-700 tracking-wider font-semibold">{{ b.cardNumberMasked }}</div>
+                    <div class="text-[10px] text-gray-400 uppercase truncate max-w-[140px]">{{ b.cardHolder }}</div>
+                  </td>
+
+                  <!-- Total Amount -->
+                  <td class="p-3.5">
+                    <span class="text-base font-extrabold text-[#012D1D]">{{ b.totalAmount }} ₾</span>
+                  </td>
+
+                  <!-- Status Selector Dropdown -->
+                  <td class="p-3.5">
+                    <select 
+                      [value]="b.status"
+                      (change)="onUpdateBookingStatus(b, $any($event.target).value, $event)"
+                      [class]="b.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (b.status === 'Pending' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-red-100 text-red-800 border-red-300')"
+                      class="px-2.5 py-1 rounded-full text-xs font-bold border outline-none cursor-pointer">
+                      <option value="Completed">✓ Completed</option>
+                      <option value="Pending">⏳ Pending</option>
+                      <option value="Refunded">↩️ Refunded</option>
+                      <option value="Cancelled">❌ Cancelled</option>
+                    </select>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="p-3.5 text-right space-x-1">
+                    <button type="button" 
+                            (click)="openBookingDetails(b, $event)"
+                            class="px-3 py-1.5 bg-[#012D1D] hover:bg-[#1B4332] text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer inline-flex items-center gap-1">
+                      <span>👁️</span>
+                      <span>{{ langService.t('დეტალები') }}</span>
+                    </button>
+
+                    <button type="button" 
+                            (click)="onDeleteBooking(b, $event)"
+                            class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer inline-flex items-center gap-1">
+                      <span>🗑️</span>
+                    </button>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    }
+
+    <!-- TAB: PENDING APPROVALS -->
+    @if (activeTab() === 'pending') {
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+        
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-[#1F3D2B] flex items-center gap-2">
+            <span>⏳</span>
+            <span>{{ langService.t('დასადასტურებელი ლოკაციები') }}</span>
+          </h3>
+          <p class="text-xs text-gray-500 mt-1">
+            მომხმარებლების მიერ დამატებული ლოკაციები, რომლებიც ელოდებიან ადმინისტრატორის დადასტურებას.
+          </p>
+        </div>
+
+        @if (pendingPlaces().length === 0) {
+          <div class="text-center py-12 bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+            <div class="text-4xl mb-2">🎉</div>
+            <h4 class="font-bold text-gray-800 text-base mb-1">ახალი დასადასტურებელი ლოკაცია არ არის!</h4>
+            <p class="text-xs text-gray-500">ყველა მომხმარებლის მიერ დამატებული ადგილი განხილულია.</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (place of pendingPlaces(); track place.id) {
+              <div class="flex flex-col bg-amber-50/60 border-2 border-amber-300 rounded-2xl overflow-hidden shadow-md">
+                
+                <!-- Image & Status -->
+                <div class="relative h-44 bg-gray-200">
+                  <img [src]="getPlaceImage(place)" [alt]="place.name" class="w-full h-44 object-cover">
+                  <span class="absolute top-3 left-3 bg-amber-500 text-black text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-sm">
+                    ⏳ დასადასტურებელი
+                  </span>
+                  <span class="absolute top-3 right-3 bg-[#1F3D2B] text-white text-[11px] font-semibold px-2 py-0.5 rounded-lg">
+                    {{ place.category || 'ადგილი' }}
+                  </span>
+                </div>
+
+                <!-- Info Body -->
+                <div class="p-4 flex flex-col flex-1 justify-between">
+                  <div>
+                    <h4 class="font-bold text-[#1F3D2B] text-lg mb-1">
+                      {{ langService.translate(place.name) }}
+                    </h4>
+                    <p class="text-xs text-stone-600 font-semibold mb-2">
+                      📍 {{ langService.translate(place.region) }}
+                    </p>
+                    <p class="text-xs text-gray-700 line-clamp-3 leading-relaxed mb-4">
+                      {{ langService.translate(place.description) }}
+                    </p>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="pt-3 border-t border-amber-200/80 flex items-center gap-2">
+                    <button type="button" 
+                            (click)="onApprovePlace(place, $event)"
+                            class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1">
+                      <span>✅</span>
+                      <span>დადასტურება</span>
+                    </button>
+
+                    <button type="button" 
+                            (click)="onRejectPlace(place, $event)"
+                            class="px-3 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1">
+                      <span>❌</span>
+                      <span>უარყოფა</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    }
+
+    <!-- TAB 2: PLACES MODERATION -->
+    @if (activeTab() === 'places') {
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+        
+        <!-- Header & Search -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-[#1F3D2B]">
+              {{ langService.t('ლოკაციების მართვა & წაშლა') }}
+            </h3>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ langService.t('დადასტურებული ლოკაციები:') }} {{ filteredPlaces().length }}
+            </p>
+          </div>
+
+          <div class="relative w-full sm:w-72">
+            <input type="text" 
+                   [placeholder]="langService.t('ძებნა...')" 
+                   [value]="placesSearch()"
+                   (input)="placesSearch.set($any($event.target).value)"
+                   class="w-full px-4 py-2.5 rounded-2xl bg-gray-100 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B]">
+          </div>
+        </div>
+
+        <!-- Places Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (place of filteredPlaces(); track place.id) {
+            <div class="flex flex-col bg-stone-50 border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+              
+              <!-- Image & Badge -->
+              <div class="relative h-40 bg-gray-200">
+                <img [src]="getPlaceImage(place)" [alt]="place.name" class="w-full h-40 object-cover">
+                <span class="absolute top-3 left-3 bg-[#1F3D2B] text-white text-[11px] font-semibold px-2.5 py-1 rounded-xl">
+                  {{ place.category || 'ადგილი' }}
+                </span>
+                <span class="absolute top-3 right-3 bg-amber-500 text-black text-[11px] font-bold px-2 py-0.5 rounded-lg shadow-sm">
+                  ⭐ {{ place.rating || 4.9 }}
+                </span>
+              </div>
+
+              <!-- Body Info -->
+              <div class="p-4 flex flex-col flex-1 justify-between">
+                <div>
+                  <h4 class="font-bold text-[#1F3D2B] text-base line-clamp-1 mb-1">
+                    {{ langService.translate(place.name) }}
+                  </h4>
+                  <p class="text-xs text-gray-500 mb-2 font-medium">
+                    📍 {{ langService.translate(place.region) }}
+                  </p>
+                  <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                    {{ langService.translate(place.description) }}
+                  </p>
+                </div>
+
+                <!-- Delete Action -->
+                <div class="pt-3 border-t border-stone-200 flex items-center justify-between">
+                  <span class="text-[11px] text-gray-400 font-mono">ID: {{ place.id }}</span>
+                  <button type="button" 
+                          (click)="onDeletePlace(place, $event)"
+                          class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer flex items-center gap-1">
+                    <span>🗑️</span>
+                    <span>{{ langService.t('წაშლა') }}</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+
+      </div>
+    }
+
+    <!-- TAB 3: USER MANAGEMENT -->
+    @if (activeTab() === 'users') {
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+        
+        <!-- Header & Search -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-[#1F3D2B]">
+              {{ langService.t('მომხმარებლების მართვა & როლები') }}
+            </h3>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ langService.t('რეგისტრირებული მომხმარებლები:') }} {{ filteredUsers().length }}
+            </p>
+          </div>
+
+          <div class="relative w-full sm:w-72">
+            <input type="text" 
+                   [placeholder]="langService.t('ძებნა...')" 
+                   [value]="usersSearch()"
+                   (input)="usersSearch.set($any($event.target).value)"
+                   class="w-full px-4 py-2.5 rounded-2xl bg-gray-100 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B]">
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-gray-700 border-collapse">
+            <thead>
+              <tr class="border-b border-gray-200 bg-stone-100 text-gray-800 font-bold uppercase text-[11px]">
+                <th class="p-3.5 rounded-l-xl">მომხმარებელი</th>
+                <th class="p-3.5">ელფოსტა / ტელეფონი</th>
+                <th class="p-3.5">როლი</th>
+                <th class="p-3.5">სტატუსი</th>
+                <th class="p-3.5 rounded-r-xl text-right">მოქმედება</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (user of filteredUsers(); track user.id) {
+                <tr class="hover:bg-stone-50 transition-colors">
+                  <!-- User Info -->
+                  <td class="p-3.5">
+                    <div class="font-bold text-[#1F3D2B] text-sm">
+                      {{ user.firstName }} {{ user.lastName }}
+                    </div>
+                    <div class="text-[11px] text-gray-400 font-mono">ID: {{ user.id }}</div>
+                  </td>
+
+                  <!-- Contact -->
+                  <td class="p-3.5">
+                    <div class="font-medium text-gray-900">{{ user.email }}</div>
+                    <div class="text-[11px] text-gray-500">{{ user.phone || '-' }}</div>
+                  </td>
+
+                  <!-- Role Badge -->
+                  <td class="p-3.5">
+                    @if (user.isAdmin) {
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1">
+                        👑 {{ langService.t('ადმინისტრატორი') }}
+                      </span>
+                    } @else {
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700">
+                        👤 {{ langService.t('მომხმარებელი') }}
+                      </span>
+                    }
+                  </td>
+
+                  <!-- Status Badge -->
+                  <td class="p-3.5">
+                    @if (user.isBanned) {
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
+                        🚫 {{ langService.t('დაბლოკილი (Banned)') }}
+                      </span>
+                    } @else {
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        ✅ აქტიური
+                      </span>
+                    }
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="p-3.5 text-right space-x-2">
+                    <!-- Admin Toggle -->
+                    <button type="button" 
+                            (click)="onToggleAdmin(user, $event)"
+                            [class]="user.isAdmin ? 'bg-amber-100 text-amber-900 hover:bg-amber-200' : 'bg-gray-200 text-gray-800 hover:bg-amber-500 hover:text-white'"
+                            class="px-3 py-1.5 rounded-xl font-semibold transition-all text-xs cursor-pointer">
+                      {{ user.isAdmin ? 'ჩამოართვი ადმინი' : 'მიენიჭე ადმინი 👑' }}
+                    </button>
+
+                    <!-- Ban Toggle -->
+                    <button type="button" 
+                            (click)="onToggleBan(user, $event)"
+                            [class]="user.isBanned ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-600 text-white hover:bg-red-700'"
+                            class="px-3 py-1.5 rounded-xl font-semibold transition-all text-xs cursor-pointer">
+                      {{ user.isBanned ? 'განბლოკვა' : 'დაბლოკვა 🚫' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    }
+
+    <!-- TAB 4: SECURITY & CREDENTIALS -->
+    @if (activeTab() === 'security') {
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm max-w-2xl mx-auto">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-2xl mb-3">
+            🔐
+          </div>
+          <h3 class="text-2xl font-bold text-[#1F3D2B]">
+            {{ langService.t('ადმინ პანელის მონაცემები') }}
+          </h3>
+          <p class="text-xs text-gray-500 mt-1">
+            Explore Georgia ადმინისტრატორის ავტორიზაციის პარამეტრები
+          </p>
+        </div>
+
+        <div class="bg-stone-50 border border-stone-200 rounded-2xl p-5 space-y-4 text-xs sm:text-sm">
+          <div class="flex items-center justify-between border-b border-stone-200 pb-3">
+            <span class="text-gray-500 font-medium">ადმინისტრატორის ელფოსტა:</span>
+            <span class="font-bold text-[#1F3D2B] font-mono bg-white px-3 py-1 rounded-lg border border-stone-300">
+              admin&#64;exploregeorgia.ge
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between border-b border-stone-200 pb-3">
+            <span class="text-gray-500 font-medium">ადმინისტრატორის პაროლი:</span>
+            <span class="font-bold text-red-700 font-mono bg-white px-3 py-1 rounded-lg border border-stone-300">
+              admin123
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-gray-500 font-medium">მიმდინარე სესია:</span>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+              აქტიური (Admin Root)
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <button type="button" (click)="authService.logout()" routerLink="/"
+                  class="px-6 py-3 bg-[#1F3D2B] text-white rounded-2xl text-xs font-bold hover:bg-[#162c1f] transition-all shadow-md">
+            {{ langService.t('გამოსვლა') }}
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- ORDER DETAILS FULL MODAL -->
+@if (selectedBooking(); as sb) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" (click)="closeBookingDetails()">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200 p-6 sm:p-8 space-y-6 relative font-kadwa animate-in fade-in zoom-in-95 duration-200" (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+        <div>
+          <span class="text-xs text-emerald-800 font-bold uppercase tracking-wider bg-emerald-100 px-2.5 py-1 rounded-full">
+            📋 {{ langService.t('შეკვეთის სრული დეტალები') }}
+          </span>
+          <h2 class="text-xl sm:text-2xl font-extrabold font-mono text-[#012D1D] mt-1">
+            {{ sb.id }}
+          </h2>
+        </div>
+        
+        <button type="button" (click)="closeBookingDetails()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-lg transition-colors cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Section 1: Customer Info -->
+      <div class="bg-stone-50 border border-stone-200 rounded-2xl p-4">
+        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <span>👤</span> {{ langService.t('მომხმარებლის ინფორმაცია') }}
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+          <div>
+            <span class="text-gray-500 text-[11px] block">{{ langService.t('სახელი და გვარი') }}</span>
+            <span class="font-extrabold text-gray-900">{{ sb.customerName }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500 text-[11px] block">{{ langService.t('ელ-ფოსტა') }}</span>
+            <span class="font-bold text-[#012D1D]">{{ sb.customerEmail }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500 text-[11px] block">{{ langService.t('ტელეფონის ნომერი') }}</span>
+            <span class="font-bold text-gray-800">{{ sb.customerPhone || '-' }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500 text-[11px] block">{{ langService.t('შეკვეთის დრო') }}</span>
+            <span class="font-medium text-gray-700">{{ sb.createdAt }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Tour & Order Particulars -->
+      <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-4">
+        <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <span>📍</span> {{ langService.t('არჩეული ტური და თარიღი') }}
+        </h4>
+        <div class="space-y-2 text-xs sm:text-sm">
+          <div>
+            <span class="text-gray-500 text-[11px] block">{{ langService.t('ტურის დასახელება') }}</span>
+            <span class="font-extrabold text-[#012D1D] text-base leading-snug">
+              {{ langService.translate(sb.tourName) }}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <div>
+              <span class="text-gray-500 text-[11px] block">{{ langService.t('დაჯავშნილი თარიღი') }}</span>
+              <span class="font-bold text-emerald-800">📅 {{ sb.bookingDate }}</span>
+            </div>
+            <div>
+              <span class="text-gray-500 text-[11px] block">{{ langService.t('მოგზაურთა რაოდენობა') }}</span>
+              <span class="font-bold text-emerald-800">👥 {{ sb.travelerCount }} {{ langService.t('სტუმარი') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Included Services Breakdown -->
+      @if (sb.servicesIncluded && sb.servicesIncluded.length > 0) {
+        <div class="bg-white border border-gray-200 rounded-2xl p-4">
+          <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <span>🎒</span> {{ langService.t('შეკვეთილი სერვისები და პაკეტები') }}
+          </h4>
+          <ul class="space-y-2">
+            @for (srv of sb.servicesIncluded; track $index) {
+              <li class="flex items-center gap-2 text-xs font-semibold bg-stone-50 p-2.5 rounded-xl border border-stone-200 text-gray-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span>{{ langService.translate(srv) }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- Section 4: Credit Card & Transaction Summary -->
+      <div class="bg-stone-900 text-white rounded-2xl p-5 relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div>
+            <span class="text-xs text-emerald-300 font-bold uppercase tracking-wider block mb-1">
+              {{ langService.t('გადახდის ბარათის მონაცემები') }}
+            </span>
+            <div class="text-lg font-mono font-bold tracking-wider">
+              💳 {{ sb.cardBrand }} • {{ sb.cardNumberMasked }}
+            </div>
+            <div class="text-xs text-gray-300 uppercase mt-1">
+              {{ sb.cardHolder }}
+            </div>
+          </div>
+
+          <div class="text-right sm:border-l sm:border-stone-700 sm:pl-6">
+            <span class="text-xs text-gray-300 uppercase block font-semibold">{{ langService.t('სულ გადახდილი') }}</span>
+            <span class="text-3xl font-extrabold text-white">{{ sb.totalAmount }} ₾</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Admin Controls (Status Change) -->
+      <div class="flex items-center justify-between bg-stone-100 p-4 rounded-2xl border border-stone-200 text-xs sm:text-sm">
+        <span class="font-bold text-gray-700">{{ langService.t('სტატუსის შეცვლა') }}:</span>
+        <select 
+          [value]="sb.status"
+          (change)="onUpdateBookingStatus(sb, $any($event.target).value, $event)"
+          [class]="sb.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (sb.status === 'Pending' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-red-100 text-red-800 border-red-300')"
+          class="px-4 py-2 rounded-xl font-bold border outline-none cursor-pointer">
+          <option value="Completed">✓ Completed (შესრულებული)</option>
+          <option value="Pending">⏳ Pending (მოლოდინში)</option>
+          <option value="Refunded">↩️ Refunded (დაბრუნებული)</option>
+          <option value="Cancelled">❌ Cancelled (გაუქმებული)</option>
+        </select>
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-gray-200">
+        <button type="button" (click)="printReceipt()" class="w-full sm:w-auto px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🖨️</span>
+          <span>{{ langService.t('ქვითრის დაბეჭდვა') }}</span>
+        </button>
+
+        <button type="button" (click)="onDeleteBooking(sb, $event)" class="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🗑️</span>
+          <span>{{ langService.t('წაშლა') }}</span>
+        </button>
+
+        <button type="button" (click)="closeBookingDetails()" class="w-full sm:w-auto px-6 py-2.5 bg-[#012D1D] hover:bg-[#1B4332] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer">
+          {{ langService.t('დახურვა') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<app-footer></app-footer>

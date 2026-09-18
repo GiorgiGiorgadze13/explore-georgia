@@ -1,7 +1,7 @@
-<header class="font-kadwa bg-[#FAF7F0]">
-  <div class="container mx-auto relative px-4 md:px-0">
+<header class="font-kadwa bg-[#FAF7F0] w-full">
+  <div class="container mx-auto relative px-4 sm:px-6 lg:px-8">
 
-    <div class="flex justify-between items-center py-4 md:py-5 gap-3">
+    <div class="flex justify-between items-center py-4 md:py-5 gap-3 lg:gap-4">
 
       <!-- LEFT: Brand Logo & Search Bar -->
       <div class="flex items-center gap-2 sm:gap-3 xl:gap-4 flex-1 lg:flex-none">
@@ -15,7 +15,7 @@
         </a>
 
         <!-- Search Bar -->
-        <div class="relative flex-1 lg:w-[240px] xl:w-[340px] 2xl:w-[435px] lg:flex-none">
+        <div class="relative flex-1 lg:w-[180px] xl:w-[260px] 2xl:w-[340px] lg:flex-none">
           <div class="flex justify-center items-center absolute top-1/2 -translate-y-1/2 left-3 gap-1 pointer-events-none z-10">
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2 C12.6 8.5, 14 10, 20.5 10.5 C14 11, 12.6 12.5, 12 19 C11.4 12.5, 10 11, 3.5 10.5 C10 10, 11.4 8.5, 12 2 Z" fill="#FFD84D" />
@@ -30,15 +30,15 @@
             (focus)="showDropdown.set(searchInput.value.trim().length > 0)"
             (keydown)="onKeyDown($event, searchInput.value)"
             [placeholder]="langService.t('მოძებნე ადგილი (მაგ. Birtvisi, ყაზბეგი)...', 'Search place (e.g. Birtvisi, Kazbegi)...', 'Поиск мест (напр. Birtvisi, Казбеги)...')"
-            class="text-xs sm:text-sm py-2.5 sm:py-3.5 pl-9 sm:pl-14 pr-16 sm:pr-20 w-full border rounded-2xl border-[#274C3B33] focus:outline-none focus:border-[#274C3B]">
+            class="text-xs sm:text-sm py-2 sm:py-3 pl-8 sm:pl-12 pr-14 sm:pr-16 w-full border rounded-2xl border-[#274C3B33] focus:outline-none focus:border-[#274C3B]">
 
           @if (queryInput().length > 0) {
-            <button type="button" (click)="clearSearch()" class="absolute right-16 sm:right-24 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xs font-bold px-1 py-0.5 rounded-full transition-colors z-10" aria-label="Clear search">
+            <button type="button" (click)="clearSearch()" class="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xs font-bold px-1 py-0.5 rounded-full transition-colors z-10" aria-label="Clear search">
               ✕
             </button>
           }
 
-          <button (click)="search(searchInput.value)" class="absolute right-1.5 sm:right-2.5 top-1/2 -translate-y-1/2 px-2.5 sm:px-4 py-1.5 bg-[#D8C7A84D] border rounded-xl text-[11px] sm:text-xs hover:bg-[#D8C7A880] transition-colors whitespace-nowrap">
+          <button (click)="search(searchInput.value)" class="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 px-2 sm:px-3 py-1 bg-[#D8C7A84D] border rounded-xl text-[10px] sm:text-xs hover:bg-[#D8C7A880] transition-colors whitespace-nowrap">
             {{ langService.t('ძიება', 'Search', 'Поиск') }}
           </button>
 
@@ -96,8 +96,8 @@
       </div>
 
       <!-- MIDDLE-RIGHT: Navigation Links & Add Place Button -->
-      <div class="hidden lg:flex justify-center items-center gap-3 xl:gap-6">
-        <ul class="flex justify-center items-center gap-3 xl:gap-6">
+      <div class="hidden lg:flex justify-center items-center gap-2 xl:gap-4 shrink-0">
+        <ul class="flex justify-center items-center gap-2 xl:gap-4">
           <li>
             <a routerLink="/" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }" class="text-[#000000] font-bold text-xs xl:text-sm cursor-pointer whitespace-nowrap">
               {{ langService.t('მთავარი', 'Home', 'Главная') }}
@@ -108,25 +108,33 @@
               {{ langService.t('აღმოაჩინე', 'Discover', 'Обзор') }}
             </a>
           </li>
+          @if (authService.isAdmin()) {
+            <li>
+              <a routerLink="/admin" routerLinkActive="!bg-amber-600 !text-white" class="bg-amber-500/20 text-amber-900 border border-amber-400/60 px-2.5 py-1.5 rounded-xl text-xs font-bold hover:bg-amber-500 hover:text-white transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                <span>⚙️</span>
+                <span>{{ langService.t('ადმინი', 'Admin', 'Админ') }}</span>
+              </a>
+            </li>
+          }
         </ul>
 
-        <button class="bg-[#A74826B5] whitespace-nowrap px-3 py-2.5 xl:p-4 border rounded-2xl text-[#FFFFFF] text-xs hover:bg-[#A74826] transition-colors cursor-pointer" routerLink="/addplace" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
+        <button class="bg-[#A74826B5] whitespace-nowrap px-2.5 py-2 xl:px-4 xl:py-3 border rounded-2xl text-[#FFFFFF] text-xs hover:bg-[#A74826] transition-colors cursor-pointer" routerLink="/addplace" routerLinkActive="!text-[#A74826] font-bold" [routerLinkActiveOptions]="{ exact: true }">
           {{ langService.t('ადგილის დამატება +', 'Add Place +', 'Добавить место +') }}
         </button>
       </div>
 
       <!-- RIGHT: Desktop Icons (Profile/Logout, Favorites, Language) & Mobile Burger Button -->
-      <div class="flex items-center gap-2 xl:gap-3">
+      <div class="flex items-center gap-2 xl:gap-3 flex-none shrink-0">
         <div class="hidden lg:block">
-          <ul class="flex justify-center items-center gap-2.5 xl:gap-4">
+          <ul class="flex justify-center items-center gap-2 xl:gap-3">
 
             <!-- Desktop Profile / Logout -->
             @if (authService.isAuthenticated()) {
-              <li class="flex items-center gap-2">
-                <span class="text-xs font-bold text-[#1F3D2B]">
+              <li class="flex items-center gap-1.5 bg-[#274C3B0F] px-2.5 py-1 rounded-xl border border-[#274C3B20]">
+                <span class="text-xs font-bold text-[#1F3D2B] max-w-[80px] xl:max-w-[110px] truncate" [title]="authService.currentUser()?.firstName">
                   👤 {{ authService.currentUser()?.firstName }}
                 </span>
-                <button (click)="logout()" type="button" class="text-xs text-red-600 hover:text-red-800 font-semibold underline cursor-pointer">
+                <button (click)="logout()" type="button" class="text-[11px] text-red-600 hover:text-red-800 font-bold underline cursor-pointer">
                   {{ langService.t('გამოსვლა', 'Logout', 'Выйти') }}
                 </button>
               </li>
@@ -232,6 +240,13 @@
         <a routerLink="/recomendation" (click)="menuOpen = false" class="text-[#000000] font-bold text-sm cursor-pointer">
           {{ langService.t('აღმოაჩინე', 'Discover', 'Обзор') }}
         </a>
+
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" (click)="menuOpen = false" class="bg-amber-500 text-black px-4 py-3 rounded-2xl font-extrabold text-sm flex items-center gap-2">
+            <span>⚙️</span>
+            <span>{{ langService.t('ადმინ პანელი', 'Admin Panel', 'Админ панель') }}</span>
+          </a>
+        }
 
         <!-- Mobile Add Place Button -->
         <button routerLink="/addplace" (click)="menuOpen = false" class="w-full bg-[#A74826B5] p-4 rounded-2xl text-white text-xs font-bold hover:bg-[#A74826] transition-colors">

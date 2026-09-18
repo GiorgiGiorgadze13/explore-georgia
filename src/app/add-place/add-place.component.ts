@@ -181,24 +181,11 @@ export class AddPlaceComponent {
 
       const finalImage = this.imagePreview || this.imageService.getImageForItem(createdPlace.id, createdPlace.name, createdPlace.category, createdPlace.region);
 
-      this.successMessage = 'ადგილი წარმატებით დაემატა!';
+      this.successMessage = 'თქვენი ლოკაცია წარმატებით გაიგზავნა! ადმინისტრატორის დადასტურების შემდეგ გამოჩნდება საიტზე.';
       
       setTimeout(() => {
-        this.router.navigate(['/details'], {
-          queryParams: { id: createdPlace.id },
-          state: {
-            card: {
-              id: createdPlace.id,
-              title: createdPlace.name,
-              badge: createdPlace.category,
-              description: createdPlace.description,
-              location: createdPlace.region,
-              image: finalImage,
-              type: 'place'
-            }
-          }
-        });
-      }, 1000);
+        this.router.navigate(['/']);
+      }, 2000);
 
     } catch (e) {
       this.errorMessage = 'ადგილის დამატებისას დაფიქსირდა შეცდომა';

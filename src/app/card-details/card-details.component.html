@@ -3,11 +3,14 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 font-kadwa pb-16">
 
   <!-- Hero Carousel Container -->
-  <div class="mt-4 relative group/hero w-full h-[320px] sm:h-[400px] md:h-[450px] lg:h-[520px] rounded-2xl overflow-hidden shadow-xl bg-gray-900">
+  <div 
+    class="mt-4 relative group/hero w-full h-[320px] sm:h-[400px] md:h-[450px] lg:h-[520px] rounded-2xl overflow-hidden shadow-xl bg-gray-900"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)">
     <img 
       [src]="getActiveImage()" 
       [alt]="langService.translate(cardData().title)" 
-      class="w-full h-full object-cover block transition-all duration-500 ease-in-out">
+      class="w-full h-full object-cover block transition-all duration-500 ease-in-out pointer-events-none select-none">
     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
 
     <!-- Navigation Arrows -->
@@ -15,14 +18,14 @@
       <button 
         type="button" 
         (click)="prevImage()"
-        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/80 text-white flex items-center justify-center text-xl sm:text-2xl transition-all z-20 shadow-lg cursor-pointer backdrop-blur-xs"
+        class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-xl sm:text-2xl transition-all z-20 shadow-lg cursor-pointer backdrop-blur-xs opacity-90 sm:opacity-70 hover:opacity-100"
         aria-label="Previous photo">
         ‹
       </button>
       <button 
         type="button" 
         (click)="nextImage()"
-        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/80 text-white flex items-center justify-center text-xl sm:text-2xl transition-all z-20 shadow-lg cursor-pointer backdrop-blur-xs"
+        class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-xl sm:text-2xl transition-all z-20 shadow-lg cursor-pointer backdrop-blur-xs opacity-90 sm:opacity-70 hover:opacity-100"
         aria-label="Next photo">
         ›
       </button>

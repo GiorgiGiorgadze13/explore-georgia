@@ -162,6 +162,47 @@ export class CardsComponent implements OnInit {
     });
   }
 
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private isSwiping = false;
+
+  onTouchStart(event: TouchEvent): void {
+    if (event.touches && event.touches.length > 0) {
+      this.touchStartX = event.touches[0].clientX;
+      this.touchStartY = event.touches[0].clientY;
+    }
+  }
+
+  onTouchEnd(event: TouchEvent, card: RecommendationCard): void {
+    if (!event.changedTouches || event.changedTouches.length === 0 || this.touchStartX === 0) return;
+
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+
+    const deltaX = touchEndX - this.touchStartX;
+    const deltaY = touchEndY - this.touchStartY;
+
+    this.touchStartX = 0;
+    this.touchStartY = 0;
+
+    const minSwipeDistance = 25;
+    if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > Math.abs(deltaY)) {
+      this.isSwiping = true;
+      const dummyEvent = new Event('touchswipe');
+      dummyEvent.stopPropagation();
+
+      if (deltaX < 0) {
+        this.nextCardImage(card, dummyEvent);
+      } else {
+        this.prevCardImage(card, dummyEvent);
+      }
+
+      setTimeout(() => {
+        this.isSwiping = false;
+      }, 300);
+    }
+  }
+
   toggleFavorite(card: RecommendationCard, event: Event): void {
     event.stopPropagation();
     this.favService.toggleFavorite({
@@ -178,6 +219,10 @@ export class CardsComponent implements OnInit {
   }
 
   openDetails(card: RecommendationCard): void {
+    if (this.isSwiping) {
+      this.isSwiping = false;
+      return;
+    }
     const img = this.getActiveCardImage(card);
     this.router.navigate(['/details'], {
       queryParams: { id: card.id },

@@ -173,24 +173,26 @@
             @for (card of paginatedCards(); track card.id) {
             <div class="flex flex-col w-full max-w-[320px] sm:max-w-[340px] relative cursor-pointer hover:shadow-xl transition-all duration-300 group rounded-2xl overflow-hidden"
                 (click)="openDetails(card)">
-<div class="relative group/carousel rounded-t-2xl overflow-hidden h-48 bg-gray-100">
+<div class="relative group/carousel rounded-t-2xl overflow-hidden h-48 bg-gray-100"
+     (touchstart)="onTouchStart($event)"
+     (touchend)="onTouchEnd($event, card)">
   <img 
     [src]="getActiveCardImage(card)" 
     [alt]="langService.translate(card.title)"
-    class="w-full h-48 object-cover rounded-t-2xl transition-all duration-300"
+    class="w-full h-48 object-cover rounded-t-2xl transition-all duration-300 pointer-events-none select-none"
     (error)="onImageError(card)">
 
   @if (getCardImages(card).length > 1) {
     <button type="button" 
       (click)="prevCardImage(card, $event)"
-      class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer"
+      class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer text-sm sm:text-xs font-bold"
       aria-label="Previous photo">
       ‹
     </button>
 
     <button type="button" 
       (click)="nextCardImage(card, $event)"
-      class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer"
+      class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer text-sm sm:text-xs font-bold"
       aria-label="Next photo">
       ›
     </button>
@@ -200,7 +202,7 @@
         <button type="button" 
           (click)="setCardImageIndex(card, $index, $event)"
           [class]="(card.activeImgIndex || 0) === $index ? 'w-2.5 h-2.5 bg-white shadow-md scale-110' : 'w-2 h-2 bg-white/60 hover:bg-white'"
-          class="rounded-full transition-all cursor-pointer"
+          class="rounded-full transition-all cursor-pointer p-1"
           [attr.aria-label]="'Slide ' + ($index + 1)">
         </button>
       }

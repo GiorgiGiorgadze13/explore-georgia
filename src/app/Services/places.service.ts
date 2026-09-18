@@ -15,6 +15,7 @@ export interface CsvPlace {
   rating?: number;
   is_local?: boolean;
   hidden?: boolean;
+  isApproved?: boolean;
 }
 
 const PLACES_CACHE_KEY = 'explore_georgia_places_cache_v2';
@@ -85,20 +86,17 @@ export class PlacesService {
 
   private mergeWithCustomPlaces(basePlaces: CsvPlace[]): CsvPlace[] {
     const custom = this.getCustomPlaces();
-    if (!custom.length) return basePlaces;
+    if (!custom.length) {
+      return basePlaces.map(p => ({ ...p, isApproved: p.isApproved ?? true }));
+    }
 
     const customIds = new Set(custom.map(c => c.id));
-    const filteredBase = basePlaces.filter(p => !customIds.has(p.id));
+    const filteredBase = basePlaces.filter(p => !customIds.has(p.id)).map(p => ({ ...p, isApproved: p.isApproved ?? true }));
     return [...custom, ...filteredBase];
   }
 
-  getPlaces(): Observable<CsvPlace[]> {
-    if (this.places$) {
-      return this.places$;
-    }
-
-    // Always fetch local CSV to ensure latest local data and tags are available
-    this.places$ = this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
+  getPlaces(includePending: boolean = false): Observable<CsvPlace[]> {
+    const raw$ = this.http.get(this.csvUrl, { responseType: 'text' }).pipe(
       timeout(4000),
       map((csvText: string) => this.parseCsv(csvText)),
       catchError(() => {
@@ -119,7 +117,13 @@ export class PlacesService {
       shareReplay(1)
     );
 
-    return this.places$;
+    if (includePending) {
+      return raw$;
+    }
+
+    return raw$.pipe(
+      map(places => places.filter(p => p.isApproved !== false))
+    );
   }
 
   addPlace(dto: AddPlaceDto): CsvPlace {
@@ -144,7 +148,8 @@ export class PlacesService {
         dto.wifi ? 'Wi-Fi' : ''
       ].filter(Boolean),
       is_local: true,
-      hidden: dto.hiddenGem
+      hidden: dto.hiddenGem,
+      isApproved: false // Newly submitted places require admin approval!
     };
 
     const updatedCustom = [newPlace, ...customPlaces.filter(p => p.id !== newPlace.id)];
@@ -154,8 +159,43 @@ export class PlacesService {
     const updatedAll = [newPlace, ...cached.filter(p => p.id !== newPlace.id)];
     this.saveStoredPlaces(updatedAll);
 
-    this.places$ = of(this.mergeWithCustomPlaces(updatedAll)).pipe(shareReplay(1));
+    this.places$ = undefined;
     return newPlace;
+  }
+
+  approvePlace(id: string): void {
+    if (!id) return;
+
+    // Update in custom places
+    const custom = this.getCustomPlaces().map(p => {
+      if (p.id === id) return { ...p, isApproved: true };
+      return p;
+    });
+    localStorage.setItem(CUSTOM_PLACES_KEY, JSON.stringify(custom));
+
+    // Update in cached places
+    const cached = (this.getStoredPlaces() || []).map(p => {
+      if (p.id === id) return { ...p, isApproved: true };
+      return p;
+    });
+    this.saveStoredPlaces(cached);
+
+    this.places$ = undefined;
+  }
+
+  deletePlace(id: string): void {
+    if (!id) return;
+    
+    // Remove from custom places
+    const custom = this.getCustomPlaces().filter(p => p.id !== id);
+    localStorage.setItem(CUSTOM_PLACES_KEY, JSON.stringify(custom));
+
+    // Remove from cached places
+    const cached = (this.getStoredPlaces() || []).filter(p => p.id !== id);
+    this.saveStoredPlaces(cached);
+
+    // Refresh active places stream
+    this.places$ = of(this.mergeWithCustomPlaces(cached)).pipe(shareReplay(1));
   }
 
   private inferGroupKey(category: string): string {

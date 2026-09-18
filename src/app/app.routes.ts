@@ -14,10 +14,20 @@ import { RecoverCodeComponent } from './RegistrationForms/recover-code/recover-c
 import { RetypePasswordComponent } from './RegistrationForms/retype-password/retype-password.component';
 import { CreditCardDetailsComponent } from './card-detailscomp/credit-card-details/credit-card-details.component';
 import { CardDetailsConfirmationComponent } from './card-detailscomp/card-details-confirmation/card-details-confirmation.component';
+import { AdminComponent } from './admin/admin.component';
 
-import { authGuard, guestGuard } from './guards/auth.guard';
+import { authGuard, guestGuard, adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [adminGuard],
+    data: {
+      title: 'ადმინ პანელი',
+      description: 'Explore Georgia ადმინისტრატორის მართვის პანელი.'
+    }
+  },
   {
     path: '',
     loadComponent: () => import('./home/home.component').then((m) => m.HomeComponent),

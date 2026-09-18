@@ -10,6 +10,8 @@ export interface User {
   country?: string;
   address?: string;
   createdAt: string;
+  isAdmin?: boolean;
+  isBanned?: boolean;
 }
 
 export interface StoredUser extends User {
@@ -26,15 +28,39 @@ const RECOVERY_KEY = 'explore_georgia_recovery_email';
 export class AuthService {
   currentUser = signal<User | null>(this.loadSession());
   isAuthenticated = computed(() => !!this.currentUser());
+  isAdmin = computed(() => !!this.currentUser()?.isAdmin);
 
   constructor() {
     // Seed default admin/demo user if no users exist
-    this.seedDefaultUser();
+    this.seedDefaultUsers();
   }
 
-  private seedDefaultUser(): void {
+  private seedDefaultUsers(): void {
     const users = this.getStoredUsers();
-    if (users.length === 0) {
+    
+    // Check if main admin exists
+    const hasAdmin = users.some(u => u.email.toLowerCase() === 'admin@exploregeorgia.ge');
+    
+    let updated = [...users];
+
+    if (!hasAdmin) {
+      const adminUser: StoredUser = {
+        id: 'admin_root_1',
+        firstName: 'ადმინისტრატორი',
+        lastName: 'Explore Georgia',
+        email: 'admin@exploregeorgia.ge',
+        phone: '+995599000000',
+        country: 'საქართველო',
+        address: 'თბილისი',
+        createdAt: new Date().toISOString(),
+        passwordHash: 'admin123',
+        isAdmin: true,
+        isBanned: false
+      };
+      updated.push(adminUser);
+    }
+
+    if (updated.length === 1 && !users.some(u => u.id === 'user_demo_123')) {
       const demoUser: StoredUser = {
         id: 'user_demo_123',
         firstName: 'გიორგი',
@@ -44,13 +70,17 @@ export class AuthService {
         country: 'საქართველო',
         address: 'თბილისი',
         createdAt: new Date().toISOString(),
-        passwordHash: '123456'
+        passwordHash: '123456',
+        isAdmin: false,
+        isBanned: false
       };
-      localStorage.setItem(USERS_KEY, JSON.stringify([demoUser]));
+      updated.push(demoUser);
     }
+
+    this.saveUsers(updated);
   }
 
-  private getStoredUsers(): StoredUser[] {
+  public getStoredUsers(): StoredUser[] {
     try {
       const raw = localStorage.getItem(USERS_KEY);
       return raw ? JSON.parse(raw) : [];
@@ -93,6 +123,10 @@ export class AuthService {
       return { success: false, message: 'მომხმარებელი ამ მონაცემებით ვერ მოიძებნა' };
     }
 
+    if (user.isBanned) {
+      return { success: false, message: 'თქვენი ანგარიში დაბლოკილია ადმინისტრაციის მიერ' };
+    }
+
     if (user.passwordHash !== password) {
       return { success: false, message: 'პაროლი არასწორია' };
     }
@@ -129,7 +163,9 @@ export class AuthService {
       country: data.country,
       address: data.address,
       createdAt: new Date().toISOString(),
-      passwordHash: data.password
+      passwordHash: data.password,
+      isAdmin: false,
+      isBanned: false
     };
 
     users.push(newUser);
@@ -144,6 +180,43 @@ export class AuthService {
     this.saveSession(null);
   }
 
+  toggleUserAdmin(userId: string): void {
+    const users = this.getStoredUsers();
+    const target = users.find(u => u.id === userId);
+    if (target) {
+      target.isAdmin = !target.isAdmin;
+      this.saveUsers(users);
+
+      // If current user modified themselves
+      if (this.currentUser()?.id === userId) {
+        const { passwordHash, ...safe } = target;
+        this.saveSession(safe);
+      }
+    }
+  }
+
+  toggleBanUser(userId: string): void {
+    const users = this.getStoredUsers();
+    const target = users.find(u => u.id === userId);
+    if (target) {
+      target.isBanned = !target.isBanned;
+      this.saveUsers(users);
+
+      // If current user gets banned, log them out
+      if (target.isBanned && this.currentUser()?.id === userId) {
+        this.logout();
+      }
+    }
+  }
+
+  deleteUser(userId: string): void {
+    const users = this.getStoredUsers().filter(u => u.id !== userId);
+    this.saveUsers(users);
+    if (this.currentUser()?.id === userId) {
+      this.logout();
+    }
+  }
+
   setRecoveryEmail(email: string): void {
     localStorage.setItem(RECOVERY_KEY, email.trim().toLowerCase());
   }
@@ -153,7 +226,6 @@ export class AuthService {
   }
 
   verifyCode(code: string): boolean {
-    // For demo purposes, accepting any 4-digit code (e.g. 1234) or non-empty string
     return code.trim().length >= 4;
   }
 

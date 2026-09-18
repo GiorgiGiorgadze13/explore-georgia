@@ -1,0 +1,214 @@
+<section class="w-full py-12 bg-gradient-to-b from-emerald-950/5 via-stone-50 to-white font-kadwa border-b border-[#00000010]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Section Header & Navigation -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#1F3D2B1A] text-[#1F3D2B]">
+            🔥 {{ langService.t('ტოპ რჩეული') }}
+          </span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#1F3D2B] tracking-tight">
+          {{ langService.t('რჩეული და პოპულარული ლოკაციები') }}
+        </h2>
+        <p class="text-[#00000099] text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+          {{ langService.t('საქართველოს ყველაზე მოთხოვნადი და რჩეული ლოკაციები') }}
+        </p>
+      </div>
+
+      <!-- Controls & Tabs -->
+      <div class="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
+        <!-- Filter Tabs -->
+        <div class="inline-flex p-1 bg-gray-200/80 rounded-2xl text-xs sm:text-sm font-medium">
+          <button type="button" 
+                  (click)="activeTab.set('popular')"
+                  [class]="activeTab() === 'popular' ? 'bg-[#1F3D2B] text-white shadow-md' : 'text-gray-700 hover:text-black'"
+                  class="px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer">
+            {{ langService.t('ყველაზე მოთხოვნადი') }}
+          </button>
+          <button type="button" 
+                  (click)="activeTab.set('myFavs')"
+                  [class]="activeTab() === 'myFavs' ? 'bg-[#1F3D2B] text-white shadow-md' : 'text-gray-700 hover:text-black'"
+                  class="px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 cursor-pointer">
+            <span>❤️</span>
+            <span>{{ langService.t('ჩემი ფავორიტები') }}</span>
+            @if (favService.count() > 0) {
+              <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#CA4C1F] text-white">
+                {{ favService.count() }}
+              </span>
+            }
+          </button>
+        </div>
+
+        <!-- Scroll Arrows -->
+        <div class="hidden sm:flex items-center gap-2">
+          <button type="button" (click)="scrollLeft()"
+                  class="w-10 h-10 rounded-2xl bg-white border border-gray-200 hover:bg-[#1F3D2B] hover:text-white transition-all shadow-sm flex items-center justify-center text-lg font-bold text-[#1F3D2B] cursor-pointer">
+            ‹
+          </button>
+          <button type="button" (click)="scrollRight()"
+                  class="w-10 h-10 rounded-2xl bg-white border border-gray-200 hover:bg-[#1F3D2B] hover:text-white transition-all shadow-sm flex items-center justify-center text-lg font-bold text-[#1F3D2B] cursor-pointer">
+            ›
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards Container / Carousel Track -->
+    @if (displayCards().length > 0) {
+      <div #carouselTrack class="flex gap-6 overflow-x-auto scrollbar-none pb-4 pt-2 snap-x snap-mandatory transition-all">
+        
+        @for (card of displayCards(); track card.id) {
+          <div class="snap-start flex-none w-[290px] sm:w-[310px] flex flex-col relative cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group rounded-2xl overflow-hidden bg-white border border-[#00000010]"
+               (click)="openDetails(card)">
+            
+            <!-- Image & Carousel & Favorite Heart Badge -->
+            <div class="relative group/carousel rounded-t-2xl overflow-hidden h-52 bg-gray-100"
+                 (touchstart)="onTouchStart($event)"
+                 (touchend)="onTouchEnd($event, card)">
+              
+              @if (!card.hasError) {
+                <img 
+                  [src]="getActiveCardImage(card)" 
+                  [alt]="langService.translate(card.title)"
+                  class="w-full h-52 object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-105 pointer-events-none select-none"
+                  (error)="card.hasError = true">
+              } @else {
+                <div class="w-full h-52 bg-[#1F3D2B1A] rounded-t-2xl flex items-center justify-center">
+                  <span class="text-[#1F3D2B99] text-xs">{{ langService.t('სურათი მიუწვდომელია') }}</span>
+                </div>
+              }
+
+              <!-- Image Pagination Arrows -->
+              @if (getCardImages(card).length > 1) {
+                <button type="button" 
+                  (click)="prevCardImage(card, $event)"
+                  class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer text-sm font-bold"
+                  aria-label="Previous photo">
+                  ‹
+                </button>
+
+                <button type="button" 
+                  (click)="nextCardImage(card, $event)"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 transition-opacity z-20 shadow-md cursor-pointer text-sm font-bold"
+                  aria-label="Next photo">
+                  ›
+                </button>
+
+                <!-- Dots -->
+                <div class="absolute bottom-2 left-0 right-0 flex justify-center items-center gap-1.5 z-20">
+                  @for (img of getCardImages(card); track $index) {
+                    <button type="button" 
+                      (click)="setCardImageIndex(card, $index, $event)"
+                      [class]="(card.activeImgIndex || 0) === $index ? 'w-2.5 h-2.5 bg-white shadow-md scale-110' : 'w-2 h-2 bg-white/60 hover:bg-white'"
+                      class="rounded-full transition-all cursor-pointer p-0.5">
+                    </button>
+                  }
+                </div>
+              }
+
+              <!-- Badge (Category) -->
+              @if (card.badge) {
+                <span class="absolute left-3 top-3 px-3 py-1.5 rounded-xl text-white bg-[#1F3D2BE6] text-xs font-semibold shadow-md backdrop-blur-md z-10 pointer-events-none">
+                  {{ langService.translate(card.badge) }}
+                </span>
+              }
+
+              <!-- Heart Favorite Toggle Top-Right -->
+              <button type="button" 
+                      (click)="toggleFavorite(card, $event)"
+                      class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center shadow-md transition-transform hover:scale-110 z-20 cursor-pointer"
+                      [attr.aria-label]="isFavorite(card.id) ? 'Remove from favorites' : 'Add to favorites'">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M27.7842 6.14666C27.1032 5.46533 26.2946 4.92485 25.4047 4.5561C24.5147 4.18735 23.5609 3.99756 22.5976 3.99756C21.6342 3.99756 20.6804 4.18735 19.7904 4.5561C18.9005 4.92485 18.0919 5.46533 17.4109 6.14666L15.9976 7.55999L14.5842 6.14666C13.2086 4.77107 11.3429 3.99827 9.39755 3.99827C7.45218 3.99827 5.58648 4.77107 4.21089 6.14666C2.8353 7.52225 2.0625 9.38844 2.0625 11.3333C2.0625 13.2787 2.8353 15.1444 4.21089 16.52L15.9976 28.3067L27.7842 16.52C28.4655 15.839 29.006 15.0304 29.3748 14.1405C29.7435 13.2505 29.9333 12.2966 29.9333 11.3333C29.9333 10.37 29.7435 9.41613 29.3748 8.52619C29.006 7.63624 28.4655 6.82767 27.7842 6.14666Z"
+                    [attr.fill]="isFavorite(card.id) ? '#CA4C1F' : 'none'"
+                    [attr.stroke]="isFavorite(card.id) ? '#CA4C1F' : '#1F3D2B'" 
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Body Details -->
+            <div class="bg-[#00000008] rounded-b-2xl p-4 flex flex-col flex-1 justify-between">
+              <div>
+                <!-- Tags or Meta info -->
+                @if (card.tags && card.tags.length > 0) {
+                  <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                    @for (tag of card.tags.slice(0, 2); track tag) {
+                      <span class="bg-[#CA4C1F15] px-2.5 py-0.5 rounded-lg text-[#CA4C1FE5] text-[11px] font-semibold">
+                        {{ langService.translate(tag) }}
+                      </span>
+                    }
+                  </div>
+                }
+
+                <!-- Title & Rating -->
+                <div class="flex items-start justify-between gap-2 mb-1">
+                  <h3 class="text-[#1F3D2B] font-bold text-base line-clamp-1 group-hover:text-[#CA4C1F] transition-colors">
+                    {{ langService.translate(card.title) }}
+                  </h3>
+                  @if (card.metaBadge) {
+                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 flex-none">
+                      {{ card.metaBadge }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Location -->
+                @if (card.location) {
+                  <div class="flex items-center gap-1 text-[#00000080] text-xs font-medium mb-2">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8.00187 9.44679C6.58187 9.44679 5.42188 8.29346 5.42188 6.86679C5.42188 5.44012 6.58187 4.29346 8.00187 4.29346C9.42188 4.29346 10.5819 5.44679 10.5819 6.87346C10.5819 8.30012 9.42188 9.44679 8.00187 9.44679Z" fill="currentColor"/>
+                      <path d="M8.00109 15.1735C7.01443 15.1735 6.02109 14.8002 5.24776 14.0602C3.28109 12.1668 1.10776 9.14683 1.92776 5.5535C2.66776 2.2935 5.51443 0.833496 8.00109 0.833496C8.00109 0.833496 8.00109 0.833496 8.00776 0.833496C10.4944 0.833496 13.3411 2.2935 14.0811 5.56016C14.8944 9.1535 12.7211 12.1668 10.7544 14.0602C9.98109 14.8002 8.98776 15.1735 8.00109 15.1735Z" fill="currentColor"/>
+                    </svg>
+                    <span>{{ langService.translate(card.location) }}</span>
+                  </div>
+                }
+
+                <!-- Description -->
+                @if (card.description) {
+                  <p class="text-[#00000099] text-xs leading-relaxed line-clamp-2 mb-3">
+                    {{ langService.translate(card.description) }}
+                  </p>
+                }
+              </div>
+
+              <!-- Footer Actions -->
+              <div class="flex items-center justify-between gap-3 pt-3 border-t border-[#00000010] mt-1">
+                <button type="button" routerLink="/book"
+                        class="flex-1 cursor-pointer bg-[#1F3D2B] hover:bg-[#162c1f] transition-colors rounded-xl py-2 px-4 text-white text-xs font-semibold text-center shadow-sm"
+                        (click)="$event.stopPropagation()">
+                  {{ langService.t('დაჯავშნე') }}
+                </button>
+                <button type="button" (click)="openDetails(card)"
+                        class="px-3 py-2 text-xs font-semibold text-[#1F3D2B] hover:text-[#CA4C1F] hover:bg-gray-100 rounded-xl transition-colors">
+                  {{ langService.t('ნახვა') }}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    } @else {
+      <!-- Empty State for Favorites tab -->
+      <div class="bg-white rounded-3xl p-8 text-center max-w-lg mx-auto border border-gray-100 shadow-sm">
+        <div class="text-4xl mb-3">💚</div>
+        <h3 class="text-lg font-bold text-[#1F3D2B] mb-1">
+          {{ langService.t('ფავორიტები ცარიელია') }}
+        </h3>
+        <p class="text-xs text-[#00000099] mb-4">
+          {{ langService.t('თქვენ ჯერ არ გაქვთ დამატებული ფავორიტი ადგილები. დააჭირეთ გულის იკონს ბარათებზე მათ შესანახად.') }}
+        </p>
+        <button type="button" (click)="activeTab.set('popular')"
+                class="px-5 py-2.5 bg-[#1F3D2B] text-white text-xs font-semibold rounded-xl hover:bg-[#162c1f] transition-colors">
+          {{ langService.t('ყველაზე მოთხოვნადი') }}
+        </button>
+      </div>
+    }
+
+  </div>
+</section>

@@ -214,6 +214,38 @@ export class CardDetailsComponent implements OnInit {
     this.cardData.update(d => ({ ...d, activeImgIndex: nextIdx }));
   }
 
+  private touchStartX = 0;
+  private touchStartY = 0;
+
+  onTouchStart(event: TouchEvent): void {
+    if (event.touches && event.touches.length > 0) {
+      this.touchStartX = event.touches[0].clientX;
+      this.touchStartY = event.touches[0].clientY;
+    }
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    if (!event.changedTouches || event.changedTouches.length === 0 || this.touchStartX === 0) return;
+
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+
+    const deltaX = touchEndX - this.touchStartX;
+    const deltaY = touchEndY - this.touchStartY;
+
+    this.touchStartX = 0;
+    this.touchStartY = 0;
+
+    const minSwipeDistance = 25;
+    if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        this.nextImage();
+      } else {
+        this.prevImage();
+      }
+    }
+  }
+
   onDateChange(value: string) {
     if (value) {
       this.rawDate.set(value);
